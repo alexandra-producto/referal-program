@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { generateRecommendationToken } from "../../../../src/utils/recommendationTokens";
-import { createRecommendationLink } from "../../../../src/domain/recommendationLinks";
+import { generateRecommendationToken } from "@/src/utils/recommendationTokens";
+import { createRecommendationLink } from "@/src/domain/recommendationLinks";
 
 /**
  * POST /api/hyperconnector/generate-token

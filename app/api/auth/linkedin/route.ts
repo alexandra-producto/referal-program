@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { SignJWT } from "jose";
 import { cookies } from "next/headers";
-import { getLinkedInAuthUrl } from "../../../../src/utils/linkedinAuth";
+import { getLinkedInAuthUrl } from "@/src/utils/linkedinAuth";
 
 // Next.js carga .env.local automáticamente en rutas API
 // Las variables deberían estar disponibles en process.env

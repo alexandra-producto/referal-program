@@ -1,4 +1,5 @@
 import { supabase } from "../db/supabaseClient";
+import { getAppUrl } from "../utils/appUrl";
 
 export async function getJobById(id: string) {
   const { data, error } = await supabase
@@ -54,8 +55,9 @@ export async function createJob(
             console.log(`🔄 [JOBS] Iniciando notificación de hyperconnectors...`);
             import("../agents/notifyHyperconnectorsForJob")
               .then(({ notifyHyperconnectorsForJob }) => {
-                const baseUrl = process.env.APP_URL || "http://localhost:3000";
+                const baseUrl = getAppUrl();
                 console.log(`🔄 [JOBS] Módulo de notificación cargado, ejecutando notifyHyperconnectorsForJob...`);
+                console.log(`🔄 [JOBS] Usando baseUrl: ${baseUrl}`);
                 notifyHyperconnectorsForJob(data.id, baseUrl)
                   .then((result) => {
                     console.log(`\n✅ [JOBS] Notificación completada: ${result.notified} notificados, ${result.errors} errores`);

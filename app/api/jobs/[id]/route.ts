@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getJobById } from '../../../../../src/domain/jobs';
+import { getJobById } from '@/src/domain/jobs';
 
 /**
  * GET /api/jobs/[id]

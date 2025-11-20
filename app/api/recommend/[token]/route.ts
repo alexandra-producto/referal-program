@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { resolve } from "path";
 import dotenv from "dotenv";
-import { validateRecommendationLink } from "../../../../src/domain/recommendationLinks";
-import { getJobById } from "../../../../src/domain/jobs";
-import { getHyperconnectorById } from "../../../../src/domain/hyperconnectors";
-import { getRecommendableCandidatesForHyperconnector } from "../../../../src/domain/hyperconnectorCandidates";
+import { validateRecommendationLink } from "@/src/domain/recommendationLinks";
+import { getJobById } from "@/src/domain/jobs";
+import { getHyperconnectorById } from "@/src/domain/hyperconnectors";
+import { getRecommendableCandidatesForHyperconnector } from "@/src/domain/hyperconnectorCandidates";
 
 // Asegurar que las variables de entorno estén cargadas en Next.js
 if (!process.env.RECOMMENDATION_SECRET) {

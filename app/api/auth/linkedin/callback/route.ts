@@ -9,12 +9,12 @@ import {
   getProfile,
   parseHeadline,
   buildLinkedInUrl,
-} from "../../../../../src/utils/linkedinAuth";
-import { upsertUser, updateLastLogin } from "../../../../../src/domain/users";
-import { upsertCandidate } from "../../../../../src/domain/candidates";
-import { upsertHyperconnector } from "../../../../../src/domain/hyperconnectors";
-import { createSession } from "../../../../../src/utils/session";
-import { isAdminAuthorized } from "../../../../../src/utils/adminWhitelist";
+} from "@/src/utils/linkedinAuth";
+import { upsertUser, updateLastLogin } from "@/src/domain/users";
+import { upsertCandidate } from "@/src/domain/candidates";
+import { upsertHyperconnector } from "@/src/domain/hyperconnectors";
+import { createSession } from "@/src/utils/session";
+import { isAdminAuthorized } from "@/src/utils/adminWhitelist";
 
 // Cargar variables de entorno
 if (!process.env.SESSION_SECRET) {

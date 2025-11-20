@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getRecommendationsForJob } from '../../../../../../src/domain/recommendations';
-import { supabase } from '../../../../../../src/db/supabaseClient';
+import { getRecommendationsForJob } from '@/src/domain/recommendations';
+import { supabase } from '@/src/db/supabaseClient';
 
 /**
  * GET /api/jobs/[id]/recommendations

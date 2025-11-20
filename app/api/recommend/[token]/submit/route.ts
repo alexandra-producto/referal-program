@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { validateRecommendationLink, markRecommendationLinkAsUsed } from "../../../../../src/domain/recommendationLinks";
-import { createRecommendation } from "../../../../../src/domain/recommendations";
+import { validateRecommendationLink, markRecommendationLinkAsUsed } from "@/src/domain/recommendationLinks";
+import { createRecommendation } from "@/src/domain/recommendations";
 
 /**
  * POST /api/recommend/[token]/submit

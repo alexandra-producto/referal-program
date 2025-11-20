@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import { resolve } from "path";
 import dotenv from "dotenv";
+import { getAppUrl, normalizeBaseUrl } from "./appUrl";
 
 // Cargar variables de entorno si no están ya cargadas
 if (!process.env.RECOMMENDATION_SECRET) {
@@ -88,33 +89,16 @@ export function validateRecommendationToken(
 }
 
 /**
- * Normaliza la URL base para asegurar que localhost use http://
- */
-function normalizeBaseUrl(url: string): string {
-  if (!url) return "http://localhost:3000";
-  
-  // Si es localhost, forzar http://
-  if (url.includes("localhost") || url.includes("127.0.0.1")) {
-    return url.replace(/^https?:\/\//, "http://");
-  }
-  
-  // Para otras URLs, mantener el protocolo original o usar https:// por defecto
-  if (!url.match(/^https?:\/\//)) {
-    return `https://${url}`;
-  }
-  
-  return url;
-}
-
-/**
  * Genera la URL completa de recomendación
  */
 export function generateRecommendationUrl(
   hyperconnectorId: string,
   jobId: string,
-  baseUrl: string = process.env.APP_URL || "http://localhost:3000"
+  baseUrl?: string
 ): string {
-  const normalizedUrl = normalizeBaseUrl(baseUrl);
+  // Si no se proporciona baseUrl, usar getAppUrl() que detecta VERCEL_URL automáticamente
+  const url = baseUrl || getAppUrl();
+  const normalizedUrl = normalizeBaseUrl(url);
   const token = generateRecommendationToken(hyperconnectorId, jobId);
   // Asegurar que no haya doble slash
   const cleanUrl = normalizedUrl.replace(/\/$/, "");

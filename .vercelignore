@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+
+# Development files
+src/test*.ts
+src/check*.ts
+src/generate*.ts
+src/debug*.ts
+src/config/env.ts
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Environment files
+.env.local
+.env.*
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+logs/
+
+# Test files
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
+

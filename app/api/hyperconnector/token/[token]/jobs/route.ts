@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { resolve } from "path";
 import dotenv from "dotenv";
-import { validateRecommendationLink } from "../../../../../../src/domain/recommendationLinks";
-import { supabase } from "../../../../../../src/db/supabaseClient";
+import { validateRecommendationLink } from "@/src/domain/recommendationLinks";
+import { supabase } from "@/src/db/supabaseClient";
 
 // Asegurar que las variables de entorno estén cargadas
 if (!process.env.RECOMMENDATION_SECRET) {

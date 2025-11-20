@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "../../../../../../src/db/supabaseClient";
+import { supabase } from "@/src/db/supabaseClient";
 
 /**
  * GET /api/hyperconnector/id/[id]/jobs

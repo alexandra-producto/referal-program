@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { deleteSession } from "../../../../src/utils/session";
+import { deleteSession } from "@/src/utils/session";
 
 /**
  * POST /api/auth/logout

@@ -13,6 +13,7 @@ import { getJobById } from "../domain/jobs";
 import { getRecommendableCandidatesForHyperconnector } from "../domain/hyperconnectorCandidates";
 import { sendHciWhatsappNotification } from "./sendHciWhatsappNotification";
 import { getHyperconnectorById } from "../domain/hyperconnectors";
+import { getAppUrl } from "../utils/appUrl";
 
 /**
  * Notifica a todos los hyperconnectors que tienen candidatos matcheados con un job
@@ -22,6 +23,10 @@ export async function notifyHyperconnectorsForJob(
   baseUrl?: string
 ): Promise<{ notified: number; errors: number }> {
   console.log(`\n🔔 [NOTIFY] Iniciando notificación de hyperconnectors para job: ${jobId}`);
+  
+  // Si no se proporciona baseUrl, usar getAppUrl() que detecta VERCEL_URL automáticamente
+  const appUrl = baseUrl || getAppUrl();
+  console.log(`🔔 [NOTIFY] Usando baseUrl: ${appUrl}`);
 
   try {
     // 1. Obtener el job para validar que existe
@@ -219,7 +224,7 @@ export async function notifyHyperconnectorsForJob(
           hciData,
           jobData,
           candidatesData,
-          baseUrl,
+          appUrl,
           ownerCandidate
         );
 

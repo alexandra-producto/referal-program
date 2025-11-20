@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { validateCreateJobRequest } from '../../../src/types/jobCreation';
-import { createJobFromCandidate } from '../../../src/services/jobCreationService';
+import { validateCreateJobRequest } from '@/src/types/jobCreation';
+import { createJobFromCandidate } from '@/src/services/jobCreationService';
 
 /**
  * GET /api/jobs
@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const ownerCandidateId = searchParams.get('owner_candidate_id');
 
-    const { supabase } = await import('../../../src/db/supabaseClient');
+    const { supabase } = await import('@/src/db/supabaseClient');
 
     let query = supabase.from('jobs').select('*');
 

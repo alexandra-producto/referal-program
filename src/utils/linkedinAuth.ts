@@ -1,3 +1,5 @@
+import { getAppUrl } from "./appUrl";
+
 // Funciones helper para obtener variables de entorno (lazy loading)
 // Next.js carga .env.local automáticamente, pero verificamos que estén disponibles
 function getLinkedInClientId(): string {
@@ -20,12 +22,17 @@ function getLinkedInClientSecret(): string {
 }
 
 function getLinkedInRedirectUri(): string {
-  const value = process.env.LINKEDIN_REDIRECT_URI;
-  if (!value) {
-    console.error("❌ LINKEDIN_REDIRECT_URI no encontrado en process.env");
-    throw new Error("LINKEDIN_REDIRECT_URI no está configurado. Verifica que esté en .env.local");
+  // Si está configurado explícitamente, usarlo
+  if (process.env.LINKEDIN_REDIRECT_URI) {
+    return process.env.LINKEDIN_REDIRECT_URI;
   }
-  return value;
+  
+  // Si estamos en Vercel, construir la URL automáticamente
+  const appUrl = getAppUrl();
+  const redirectUri = `${appUrl}/api/auth/linkedin/callback`;
+  
+  console.log(`🔗 LinkedIn Redirect URI: ${redirectUri}`);
+  return redirectUri;
 }
 
 export interface LinkedInUserInfo {

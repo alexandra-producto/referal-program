@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSession } from "../../../../src/utils/session";
+import { getSession } from "@/src/utils/session";
 
 /**
  * GET /api/auth/session

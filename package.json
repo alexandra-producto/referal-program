@@ -17,6 +17,7 @@
     "test:sync-relationships": "tsx src/testSyncRelationships.ts",
     "test:create-job": "tsx src/testCreateJobAndNotify.ts",
     "generate:emilio-link": "tsx src/generateEmilioHubLink.ts",
+    "check:env": "tsx scripts/check-env.ts",
     "next:dev": "next dev",
     "next:build": "next build",
     "next:start": "next start"

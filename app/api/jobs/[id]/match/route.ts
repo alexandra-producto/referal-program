@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { matchJobWithAllCandidates } from "../../../../../src/agents/matchJobCandidate";
+import { matchJobWithAllCandidates } from "@/src/agents/matchJobCandidate";
 
 /**
  * POST /api/jobs/[id]/match
