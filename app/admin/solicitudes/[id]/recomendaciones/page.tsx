@@ -184,6 +184,7 @@ export default function RecomendacionesPage({
               </div>
             </div>
           </Card>
+          </motion.div>
         )}
 
         {/* Recommendations Header */}
