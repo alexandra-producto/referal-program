@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npm run next:build",
+  "buildCommand": "next build --webpack",
   "devCommand": "npm run next:dev",
   "installCommand": "npm install",
   "framework": "nextjs",
