@@ -1,11 +1,12 @@
 {
-  "buildCommand": "next build --webpack",
+  "buildCommand": "NEXT_PRIVATE_SKIP_TURBOPACK=1 next build",
   "devCommand": "npm run next:dev",
   "installCommand": "npm install",
   "framework": "nextjs",
   "regions": ["iad1"],
   "env": {
-    "NODE_ENV": "production"
+    "NODE_ENV": "production",
+    "NEXT_PRIVATE_SKIP_TURBOPACK": "1"
   },
   "cleanUrls": true,
   "trailingSlash": false
