@@ -1,12 +1,11 @@
 {
-  "buildCommand": "NEXT_PRIVATE_SKIP_TURBOPACK=1 next build",
+  "buildCommand": "next build",
   "devCommand": "npm run next:dev",
   "installCommand": "npm install",
   "framework": "nextjs",
   "regions": ["iad1"],
   "env": {
-    "NODE_ENV": "production",
-    "NEXT_PRIVATE_SKIP_TURBOPACK": "1"
+    "NODE_ENV": "production"
   },
   "cleanUrls": true,
   "trailingSlash": false

@@ -19,7 +19,7 @@
     "generate:emilio-link": "tsx src/generateEmilioHubLink.ts",
     "check:env": "tsx scripts/check-env.ts",
     "next:dev": "next dev",
-    "next:build": "next build --webpack",
+    "next:build": "NEXT_PRIVATE_SKIP_TURBOPACK=1 next build",
     "next:start": "next start"
   },
   "keywords": [],
