@@ -7,17 +7,30 @@ const nextConfig = {
   transpilePackages: [],
   webpack: (config, { isServer }) => {
     // Configurar aliases para resolver imports
+    // Usar path.resolve para asegurar rutas absolutas
+    const rootPath = path.resolve(__dirname);
+    const srcPath = path.resolve(__dirname, 'src');
+    
     config.resolve.alias = {
       ...config.resolve.alias,
-      '@': path.resolve(__dirname),
-      '@/src': path.resolve(__dirname, 'src'),
+      '@': rootPath,
+      '@/src': srcPath,
     };
     
     // Asegurar que webpack resuelva correctamente los módulos
     config.resolve.modules = [
-      path.resolve(__dirname, 'src'),
+      srcPath,
       path.resolve(__dirname, 'app'),
       'node_modules',
+    ];
+    
+    // Asegurar que webpack pueda resolver extensiones TypeScript
+    config.resolve.extensions = [
+      '.tsx',
+      '.ts',
+      '.jsx',
+      '.js',
+      '.json',
     ];
     
     return config;
