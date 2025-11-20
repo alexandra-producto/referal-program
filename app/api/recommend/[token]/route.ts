@@ -81,7 +81,7 @@ export async function GET(
     );
 
     // Obtener match scores de job_candidate_matches para cada candidato
-    const { supabase } = await import("../../../../src/db/supabaseClient");
+    const { supabase } = await import("@/src/db/supabaseClient");
     const candidateIds = candidates.map((c: any) => c.id);
     
     let matchScores: Map<string, number> = new Map();
