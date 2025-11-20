@@ -2,12 +2,12 @@
 
 import { useEffect, useState, use } from "react";
 import { Users, MapPin, Building, User, Send, UserPlus, Link as LinkIcon, ArrowLeft, CheckCircle2 } from "lucide-react";
-import { Button } from "../../../components/ui/button";
-import { Card } from "../../../components/ui/card";
-import { Textarea } from "../../../components/ui/textarea";
-import { Input } from "../../../components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
-import { ImageWithFallback } from "../../../components/ImageWithFallback";
+import { ImageWithFallback } from "@/components/ImageWithFallback";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,7 +17,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "../../../components/ui/alert-dialog";
+} from "@/components/ui/alert-dialog";
 
 interface Candidate {
   id: string;
@@ -36,6 +36,7 @@ interface Job {
   company_name: string;
   job_title?: string;
   role_title?: string;
+  description?: string | null;
   non_negotiables?: string[] | null;
   owner_candidate_id?: string | null;
   owner_role?: string | null; // Role of the job owner

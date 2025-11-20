@@ -4,11 +4,11 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { ArrowLeft, Briefcase, FileText, Eye, BriefcaseIcon, ArrowUp, Code, MapPin, Send, LogOut } from "lucide-react";
-import { Button } from "../../../components/ui/button";
-import { Card } from "../../../components/ui/card";
-import { Input } from "../../../components/ui/input";
-import { Textarea } from "../../../components/ui/textarea";
-import { ProductLatamLogo } from "../../../components/ProductLatamLogo";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { ProductLatamLogo } from "@/components/ProductLatamLogo";
 import { authStore } from "@/app/lib/authStore";
 
 type Modality = "remote" | "hybrid" | "onsite";

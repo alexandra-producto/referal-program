@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Clock, LogOut } from "lucide-react";
-import { Button } from "../../../components/ui/button";
+import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { ProductLatamLogo } from "../../../components/ProductLatamLogo";
+import { ProductLatamLogo } from "@/components/ProductLatamLogo";
 import { authStore } from "../../lib/authStore";
 
 interface OwnerCandidate {

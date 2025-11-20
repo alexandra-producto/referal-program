@@ -4,8 +4,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Linkedin, Zap, Search, HelpCircle, AlertCircle } from "lucide-react";
-import { Button } from "../../../components/ui/button";
-import { ProductLatamLogo } from "../../../components/ProductLatamLogo";
+import { Button } from "@/components/ui/button";
+import { ProductLatamLogo } from "@/components/ProductLatamLogo";
 
 export default function LoginPage() {
   const router = useRouter();

@@ -67,7 +67,7 @@ async function testWithRealData() {
     console.log("4️⃣ Buscando jobs relacionados...");
     const { data: jobMatches, error: jobMatchError } = await supabase
       .from("job_candidate_matches")
-      .select("job_id, fit_score")
+      .select("job_id, match_score")
       .eq("candidate_id", alexandra.id)
       .limit(5);
 
@@ -79,9 +79,9 @@ async function testWithRealData() {
 
     if (jobMatches && jobMatches.length > 0) {
       // Buscar el job con mejor match
-      const bestMatch = jobMatches.sort((a, b) => (b.fit_score || 0) - (a.fit_score || 0))[0];
+      const bestMatch = jobMatches.sort((a, b) => (b.match_score || 0) - (a.match_score || 0))[0];
       job = await getJobById(bestMatch.job_id);
-      console.log(`   ✅ Job encontrado: ${job?.role_title} en ${job?.company_name} (Match: ${bestMatch.fit_score}%)\n`);
+      console.log(`   ✅ Job encontrado: ${job?.role_title} en ${job?.company_name} (Match: ${bestMatch.match_score}%)\n`);
     } else {
       // Si no hay matches, buscar cualquier job
       job = await getJobByCompanyNameLike("");
@@ -110,7 +110,7 @@ async function testWithRealData() {
 
     console.log(`   ✅ Candidatos encontrados: ${recommendableCandidates.length}`);
     recommendableCandidates.forEach((c, i) => {
-      console.log(`      ${i + 1}. ${c.full_name}${c.fit_score ? ` (${c.fit_score}% match)` : ""}`);
+      console.log(`      ${i + 1}. ${c.full_name}${c.match_score ? ` (${c.match_score}% match)` : ""}`);
     });
     console.log("");
 

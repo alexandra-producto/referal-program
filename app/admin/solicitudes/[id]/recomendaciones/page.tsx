@@ -4,11 +4,11 @@ import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { ArrowLeft, Building, MapPin, Send, CheckCircle2, HelpCircle } from "lucide-react";
-import { Button } from "../../../../components/ui/button";
-import { Card } from "../../../../components/ui/card";
-import { ProductLatamLogo } from "../../../../components/ProductLatamLogo";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { ProductLatamLogo } from "@/components/ProductLatamLogo";
 import { authStore } from "@/app/lib/authStore";
-import { ImageWithFallback } from "../../../../../../components/ImageWithFallback";
+import { ImageWithFallback } from "@/components/ImageWithFallback";
 
 interface Candidate {
   id: string;

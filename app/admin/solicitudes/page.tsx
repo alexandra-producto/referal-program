@@ -4,9 +4,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Building, LogOut, List, Grid, Plus, Users, Zap, MoreVertical, Eye } from "lucide-react";
-import { Button } from "../../../components/ui/button";
-import { Card } from "../../../components/ui/card";
-import { ProductLatamLogo } from "../../../components/ProductLatamLogo";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { ProductLatamLogo } from "@/components/ProductLatamLogo";
 import { authStore } from "@/app/lib/authStore";
 
 interface OwnerCandidate {
@@ -21,12 +21,11 @@ interface Job {
   job_title: string;
   description: string | null;
   company_name: string;
-  status: string;
+  status: string; // Status viene directamente de jobs.status
   owner_candidate_id: string | null;
   owner_role_title: string | null;
   created_at: string;
   recommendations_count: number;
-  status: string; // Status viene directamente de jobs.status
   ownerCandidate: OwnerCandidate | null;
 }
 

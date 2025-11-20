@@ -65,7 +65,7 @@ async function testEmilioWhatsapp() {
     console.log(`   ✅ Candidatos encontrados: ${recommendableCandidates.length}`);
     if (recommendableCandidates.length > 0) {
       recommendableCandidates.forEach((c, i) => {
-        console.log(`      ${i + 1}. ${c.full_name}${c.fit_score ? ` (${c.fit_score}% match)` : ""}${c.shared_experience ? ` - ${c.shared_experience}` : ""}`);
+        console.log(`      ${i + 1}. ${c.full_name}${c.match_score ? ` (${c.match_score}% match)` : ""}${c.shared_experience ? ` - ${c.shared_experience}` : ""}`);
       });
     } else {
       console.log("   ⚠️ No hay candidatos recomendables. El mensaje se enviará sin candidatos.");
@@ -90,7 +90,7 @@ async function testEmilioWhatsapp() {
     const candidatesData = recommendableCandidates.map(c => ({
       full_name: c.full_name,
       current_company: c.current_company,
-      fit_score: c.fit_score,
+      match_score: c.match_score,
       shared_experience: c.shared_experience,
     }));
 
