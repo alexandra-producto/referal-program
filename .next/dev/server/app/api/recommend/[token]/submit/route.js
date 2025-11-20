@@ -1,0 +1,10 @@
+var R=require("../../../../../chunks/[turbopack]_runtime.js")("server/app/api/recommend/[token]/submit/route.js")
+R.c("server/chunks/56593_next_f3dea271._.js")
+R.c("server/chunks/56593_@supabase_realtime-js_dist_module_35b25a6a._.js")
+R.c("server/chunks/56593_@supabase_storage-js_dist_module_542814f1._.js")
+R.c("server/chunks/56593_@supabase_auth-js_dist_module_e7246e51._.js")
+R.c("server/chunks/56593_408c364e._.js")
+R.c("server/chunks/[root-of-the-server]__261da9ef._.js")
+R.c("server/chunks/86017__next-internal_server_app_api_recommend_[token]_submit_route_actions_e674c1ef.js")
+R.m("[project]/Referal MVP/node_modules/next/dist/esm/build/templates/app-route.js { INNER_APP_ROUTE => \"[project]/Referal MVP/app/api/recommend/[token]/submit/route.ts [app-route] (ecmascript)\" } [app-route] (ecmascript)")
+module.exports=R.m("[project]/Referal MVP/node_modules/next/dist/esm/build/templates/app-route.js { INNER_APP_ROUTE => \"[project]/Referal MVP/app/api/recommend/[token]/submit/route.ts [app-route] (ecmascript)\" } [app-route] (ecmascript)").exports

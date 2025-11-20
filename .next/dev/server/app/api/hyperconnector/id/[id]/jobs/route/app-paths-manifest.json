@@ -1,0 +1,3 @@
+{
+  "/api/hyperconnector/id/[id]/jobs/route": "app/api/hyperconnector/id/[id]/jobs/route.js"
+}

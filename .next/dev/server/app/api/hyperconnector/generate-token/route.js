@@ -1,0 +1,10 @@
+var R=require("../../../../chunks/[turbopack]_runtime.js")("server/app/api/hyperconnector/generate-token/route.js")
+R.c("server/chunks/56593_next_b920016b._.js")
+R.c("server/chunks/56593_@supabase_realtime-js_dist_module_35b25a6a._.js")
+R.c("server/chunks/56593_@supabase_storage-js_dist_module_542814f1._.js")
+R.c("server/chunks/56593_@supabase_auth-js_dist_module_e7246e51._.js")
+R.c("server/chunks/56593_408c364e._.js")
+R.c("server/chunks/[root-of-the-server]__ec43d63d._.js")
+R.c("server/chunks/142cb_server_app_api_hyperconnector_generate-token_route_actions_7f59f6a3.js")
+R.m("[project]/Referal MVP/node_modules/next/dist/esm/build/templates/app-route.js { INNER_APP_ROUTE => \"[project]/Referal MVP/app/api/hyperconnector/generate-token/route.ts [app-route] (ecmascript)\" } [app-route] (ecmascript)")
+module.exports=R.m("[project]/Referal MVP/node_modules/next/dist/esm/build/templates/app-route.js { INNER_APP_ROUTE => \"[project]/Referal MVP/app/api/hyperconnector/generate-token/route.ts [app-route] (ecmascript)\" } [app-route] (ecmascript)").exports

@@ -1,0 +1,87 @@
+import { getCandidateById } from '../domain/candidates';
+import { createJob } from '../domain/jobs';
+import { CreateJobRequest, buildRequirementsJson } from '../types/jobCreation';
+import { supabase } from '../db/supabaseClient';
+
+/**
+ * Obtiene el título actual del candidate desde candidate_experience si está disponible
+ */
+async function getCandidateCurrentTitle(candidateId: string): Promise<string | null> {
+  try {
+    // Primero intentar obtener desde candidate_experience
+    const { data: experienceData } = await supabase
+      .from('candidate_experience')
+      .select('title')
+      .eq('candidate_id', candidateId)
+      .eq('is_current', true)
+      .order('start_date', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (experienceData?.title) {
+      return experienceData.title;
+    }
+
+    return null;
+  } catch (error) {
+    console.warn('Error fetching candidate experience:', error);
+    return null;
+  }
+}
+
+/**
+ * Crea un job desde un candidate logueado
+ * 
+ * @param candidateId - ID del candidate logueado
+ * @param request - Datos del job desde la UI
+ * @returns El job creado
+ */
+export async function createJobFromCandidate(
+  candidateId: string,
+  request: CreateJobRequest
+) {
+  // 1. Buscar el candidate
+  const candidate = await getCandidateById(candidateId);
+  if (!candidate) {
+    throw new Error(`Candidate with id ${candidateId} not found`);
+  }
+
+  // 2. Obtener company_name del candidate
+  const companyName = candidate.current_company;
+  if (!companyName) {
+    throw new Error('Candidate must have a current_company to create a job');
+  }
+
+  // 3. Obtener owner_role_title (intentar desde current_job_title o candidate_experience)
+  let ownerRoleTitle: string | null = candidate.current_job_title || null;
+  
+  if (!ownerRoleTitle) {
+    ownerRoleTitle = await getCandidateCurrentTitle(candidateId);
+  }
+
+  // 4. Calcular remote_ok según la modalidad
+  const remoteOk = request.modality === 'remote' || request.modality === 'hybrid';
+
+  // 5. Construir requirements_json
+  const requirementsJson = buildRequirementsJson(request);
+
+  // 6. Crear el objeto job
+  const jobData = {
+    company_name: companyName,
+    job_title: request.jobTitle,
+    job_level: null, // V1: no se usa
+    location: null, // V1: no se usa
+    remote_ok: remoteOk,
+    description: request.description,
+    requirements_json: requirementsJson,
+    status: 'open',
+    owner_candidate_id: candidateId,
+    owner_role_title: ownerRoleTitle,
+  };
+
+  // 7. Crear el job (con matching automático)
+  const job = await createJob(jobData, { triggerMatching: true });
+
+  return job;
+}
+

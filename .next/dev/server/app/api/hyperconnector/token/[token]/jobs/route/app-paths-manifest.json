@@ -1,0 +1,3 @@
+{
+  "/api/hyperconnector/token/[token]/jobs/route": "app/api/hyperconnector/token/[token]/jobs/route.js"
+}

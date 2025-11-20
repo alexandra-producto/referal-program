@@ -1,0 +1,13 @@
+[00:00:01.558] Server  LOG      ✓ Ready in 1112ms
+[00:00:26.692] Server  LOG      ○ Compiling /solicitante/login-simulado ...
+[00:00:29.133] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:50.839] Server  LOG     [dotenv@17.2.3] injecting env (0) from .env.local -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+[00:00:50.848] Server  LOG     [dotenv@17.2.3] injecting env (0) from .env.local -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+[00:00:50.866] Server  LOG     🔄 Intercambiando código por token...
+[00:00:51.345] Server  LOG     ✅ Token obtenido exitosamente
+[00:00:51.351] Server  LOG     🔄 Obteniendo información del usuario...
+[00:00:52.055] Server  LOG     ✅ UserInfo obtenido: {}
+[00:00:52.943] Server  LOG     ✅ Profile obtenido: "No"
+[00:00:52.945] Server  LOG     📋 Datos parseados: {}
+[00:00:52.946] Server  LOG     📋 Headline parseado: {}
+[00:00:56.783] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold

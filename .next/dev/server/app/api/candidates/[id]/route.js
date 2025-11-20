@@ -1,0 +1,11 @@
+var R=require("../../../../chunks/[turbopack]_runtime.js")("server/app/api/candidates/[id]/route.js")
+R.c("server/chunks/Referal MVP_src_agents_bfb2261f._.js")
+R.c("server/chunks/56593_next_c2d143b4._.js")
+R.c("server/chunks/56593_@supabase_realtime-js_dist_module_35b25a6a._.js")
+R.c("server/chunks/56593_@supabase_storage-js_dist_module_542814f1._.js")
+R.c("server/chunks/56593_@supabase_auth-js_dist_module_e7246e51._.js")
+R.c("server/chunks/56593_408c364e._.js")
+R.c("server/chunks/[root-of-the-server]__02fb572c._.js")
+R.c("server/chunks/Referal MVP__next-internal_server_app_api_candidates_[id]_route_actions_8c99e2df.js")
+R.m("[project]/Referal MVP/node_modules/next/dist/esm/build/templates/app-route.js { INNER_APP_ROUTE => \"[project]/Referal MVP/app/api/candidates/[id]/route.ts [app-route] (ecmascript)\" } [app-route] (ecmascript)")
+module.exports=R.m("[project]/Referal MVP/node_modules/next/dist/esm/build/templates/app-route.js { INNER_APP_ROUTE => \"[project]/Referal MVP/app/api/candidates/[id]/route.ts [app-route] (ecmascript)\" } [app-route] (ecmascript)").exports
