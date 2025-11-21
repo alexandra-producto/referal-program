@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Clock, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -33,7 +33,7 @@ interface Hyperconnector {
   full_name: string;
 }
 
-export default function HyperconnectorJobsHomePage() {
+function HyperconnectorJobsHomeContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get("token");
@@ -279,5 +279,22 @@ export default function HyperconnectorJobsHomePage() {
         </motion.div>
       </div>
     </div>
+  );
+}
+
+export default function HyperconnectorJobsHomePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-200 via-purple-200 to-indigo-300">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
+            <p className="mt-4 text-gray-700">Cargando...</p>
+          </div>
+        </div>
+      }
+    >
+      <HyperconnectorJobsHomeContent />
+    </Suspense>
   );
 }
