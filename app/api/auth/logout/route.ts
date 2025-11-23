@@ -9,20 +9,14 @@ async function handleLogout() {
   // Eliminar la cookie de sesión
   await deleteSession();
   
-  // Construir URL de logout de LinkedIn
+  // Redirigir directamente a nuestra página de login
   const appUrl = getAppUrl();
-  const redirectUri = `${appUrl}/solicitante/login-simulado`;
-  
-  // URL de logout de LinkedIn que redirige de vuelta a nuestra app
-  const linkedinLogoutUrl = `https://www.linkedin.com/oauth/v2/logout?redirect_uri=${encodeURIComponent(redirectUri)}`;
-  
-  // Redirigir a LinkedIn para cerrar sesión allí también
-  return NextResponse.redirect(linkedinLogoutUrl);
+  return NextResponse.redirect(new URL("/solicitante/login-simulado", appUrl));
 }
 
 /**
  * GET /api/auth/logout
- * Cierra la sesión del usuario y redirige a LinkedIn para cerrar sesión allí también
+ * Cierra la sesión del usuario y redirige a la página de login
  */
 export async function GET(request: NextRequest) {
   try {
@@ -37,7 +31,7 @@ export async function GET(request: NextRequest) {
 
 /**
  * POST /api/auth/logout
- * Cierra la sesión del usuario y redirige a LinkedIn para cerrar sesión allí también
+ * Cierra la sesión del usuario y redirige a la página de login
  */
 export async function POST(request: NextRequest) {
   try {
