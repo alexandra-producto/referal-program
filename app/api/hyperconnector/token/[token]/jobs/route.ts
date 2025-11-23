@@ -99,7 +99,7 @@ export async function GET(
     // Obtener información completa de los jobs
     const { data: jobs, error: jobsError } = await supabase
       .from("jobs")
-      .select("*")
+      .select("*, owner_role_title")
       .in("id", jobIds);
 
     if (jobsError) {
@@ -141,6 +141,7 @@ export async function GET(
 
         return {
           ...job,
+          owner_role: job.owner_role_title || job.owner_role || null,
           eligibleCandidatesCount,
           bestMatchScore,
           ownerCandidate,

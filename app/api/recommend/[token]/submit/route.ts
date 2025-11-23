@@ -82,7 +82,10 @@ export async function POST(
         console.log(`✅ ${candidateRecommendations.length} recomendación(es) creada(s) exitosamente`);
       } catch (candidateError: any) {
         console.error("❌ Error creando recomendaciones para candidatos:", candidateError);
-        throw candidateError;
+        console.error("   - Error details:", JSON.stringify(candidateError, null, 2));
+        console.error("   - Error message:", candidateError.message);
+        console.error("   - Error code:", candidateError.code);
+        throw new Error(`Error al crear recomendación: ${candidateError.message || candidateError.details || "Error desconocido"}`);
       }
     }
 
@@ -111,22 +114,30 @@ export async function POST(
         console.log("✅ Recomendación personalizada creada exitosamente");
       } catch (customError: any) {
         console.error("❌ Error creando recomendación personalizada:", customError);
+        console.error("   - Error details:", JSON.stringify(customError, null, 2));
+        console.error("   - Error message:", customError.message);
+        console.error("   - Error code:", customError.code);
         // Si falla por linkedin_url, intentar sin ese campo
-        if (customError.message?.includes("linkedin_url") || customError.message?.includes("column")) {
+        if (customError.message?.includes("linkedin_url") || customError.message?.includes("column") || customError.code === "PGRST116") {
           console.log("⚠️ Intentando sin linkedin_url, incluyendo en notes...");
-          const fallbackPayload = {
-            hyperconnector_id: hyperconnectorId,
-            job_id: jobId,
-            candidate_id: null,
-            notes: `${notes || ""}\n\nLinkedIn: ${linkedinUrl}`.trim(),
-            status: "pending",
-            created_at: new Date().toISOString(),
-          };
-          const customRecommendation = await createRecommendation(fallbackPayload);
-          recommendations.push(customRecommendation);
-          console.log("✅ Recomendación personalizada creada (sin linkedin_url)");
+          try {
+            const fallbackPayload = {
+              hyperconnector_id: hyperconnectorId,
+              job_id: jobId,
+              candidate_id: null,
+              notes: `${notes || ""}\n\nLinkedIn: ${linkedinUrl}`.trim(),
+              status: "pending",
+              created_at: new Date().toISOString(),
+            };
+            const customRecommendation = await createRecommendation(fallbackPayload);
+            recommendations.push(customRecommendation);
+            console.log("✅ Recomendación personalizada creada (sin linkedin_url)");
+          } catch (fallbackError: any) {
+            console.error("❌ Error en fallback:", fallbackError);
+            throw new Error(`Error al crear recomendación personalizada: ${fallbackError.message || fallbackError.details || "Error desconocido"}`);
+          }
         } else {
-          throw customError;
+          throw new Error(`Error al crear recomendación personalizada: ${customError.message || customError.details || "Error desconocido"}`);
         }
       }
     }
@@ -148,10 +159,23 @@ export async function POST(
     });
   } catch (error: any) {
     console.error("❌ Error en POST /api/recommend/[token]/submit:", error);
-    console.error("Stack:", error.stack);
+    console.error("   - Error message:", error.message);
+    console.error("   - Error details:", JSON.stringify(error, null, 2));
+    console.error("   - Stack:", error.stack);
+    
+    // Extraer mensaje de error más descriptivo
+    let errorMessage = "Error al crear la recomendación";
+    if (error.message) {
+      errorMessage = error.message;
+    } else if (error.details) {
+      errorMessage = error.details;
+    } else if (error.error?.message) {
+      errorMessage = error.error.message;
+    }
+    
     return NextResponse.json(
       { 
-        error: "Error al crear la recomendación",
+        error: errorMessage,
         details: process.env.NODE_ENV === "development" ? error.message : undefined
       },
       { status: 500 }

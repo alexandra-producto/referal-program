@@ -26,6 +26,7 @@ interface Candidate {
   current_job_title?: string | null;
   country?: string | null;
   industry?: string | null;
+  profile_picture_url?: string | null;
   fit_score: number | null;
   match_score: number | null; // Match score from job_candidate_matches
   shared_experience: string | null;
@@ -190,11 +191,23 @@ export default function RecommendPage({
         }),
       });
 
-      const responseData = await response.json();
+      let responseData;
+      try {
+        responseData = await response.json();
+      } catch (parseError) {
+        console.error("❌ Error parseando respuesta:", parseError);
+        const text = await response.text();
+        console.error("   - Respuesta recibida:", text);
+        alert("Error al procesar la respuesta del servidor. Por favor intenta de nuevo.");
+        return;
+      }
 
       if (!response.ok) {
         console.error("❌ Error en la respuesta:", responseData);
-        alert(responseData.error || responseData.details || "Error al enviar la recomendación");
+        console.error("   - Status:", response.status);
+        console.error("   - Error completo:", JSON.stringify(responseData, null, 2));
+        const errorMessage = responseData.error || responseData.details || responseData.message || "Error al enviar la recomendación";
+        alert(errorMessage);
         return;
       }
 
@@ -389,13 +402,15 @@ export default function RecommendPage({
                 <div className="p-8">
                   {/* Person Header */}
                   <div className="flex flex-col md:flex-row gap-6 pb-6 relative">
-                    <div className="flex-shrink-0">
-                      <ImageWithFallback
-                        src={null}
-                        alt={person.full_name}
-                        className="w-24 h-24 rounded-2xl object-cover ring-2 ring-blue-200/50 shadow-md"
-                      />
-                    </div>
+                    {person.profile_picture_url && (
+                      <div className="flex-shrink-0">
+                        <ImageWithFallback
+                          src={person.profile_picture_url}
+                          alt={person.full_name}
+                          className="w-24 h-24 rounded-2xl object-cover ring-2 ring-blue-200/50 shadow-md"
+                        />
+                      </div>
+                    )}
 
                     <div className="flex-1 space-y-3">
                       <div className="flex items-start justify-between gap-4">
