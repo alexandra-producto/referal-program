@@ -11,6 +11,7 @@ export interface User {
   linkedin_url?: string | null;
   current_job_title?: string | null;
   current_company?: string | null;
+  profile_picture_url?: string | null;
   auth_provider?: string | null;
   provider_user_id?: string | null;
   last_login_at?: string | null;

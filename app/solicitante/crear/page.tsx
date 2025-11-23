@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { ArrowLeft, Briefcase, FileText, Eye, BriefcaseIcon, ArrowUp, Code, MapPin, Send, LogOut } from "lucide-react";
+import { ArrowLeft, Briefcase, FileText, Eye, ArrowUp, Code, MapPin, Send, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -24,7 +24,6 @@ export default function CrearSolicitudPage() {
   const [description, setDescription] = useState("");
   const [nonNegotiables, setNonNegotiables] = useState("");
   const [desiredTrajectory, setDesiredTrajectory] = useState("");
-  const [scenario, setScenario] = useState("");
   const [technicalBackgroundNeeded, setTechnicalBackgroundNeeded] = useState(false);
   const [modality, setModality] = useState<Modality | "">("");
 
@@ -79,7 +78,6 @@ export default function CrearSolicitudPage() {
           description: description.trim(),
           nonNegotiables: nonNegotiables.trim(),
           desiredTrajectory: desiredTrajectory.trim(),
-          scenario: scenario.trim(),
           technicalBackgroundNeeded,
           modality,
         }),
@@ -105,8 +103,8 @@ export default function CrearSolicitudPage() {
   };
 
   const handleLogout = async () => {
-    await authStore.clearSession();
-    router.push("/solicitante/login-simulado");
+    // Redirigir directamente al endpoint de logout que cerrará sesión en LinkedIn también
+    window.location.href = "/api/auth/logout";
   };
 
   return (
@@ -125,7 +123,6 @@ export default function CrearSolicitudPage() {
                 Bienvenido {session?.fullName || "Usuario"}
               </p>
             </div>
-            <ProductLatamLogo />
           </div>
           <Button
             onClick={() => router.push("/solicitante/solicitudes")}
@@ -185,7 +182,7 @@ export default function CrearSolicitudPage() {
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <Briefcase className="h-5 w-5 text-gray-700" />
-                <h2 className="text-gray-800 font-semibold text-xl">Título del Puesto</h2>
+                <h2 className="text-gray-800 font-semibold text-xl">Título del Puesto <span className="text-red-500">*</span></h2>
               </div>
               <Input
                 value={jobTitle}
@@ -200,17 +197,17 @@ export default function CrearSolicitudPage() {
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <FileText className="h-5 w-5 text-gray-700" />
-                <h2 className="text-gray-800 font-semibold text-xl">Descripción del Rol</h2>
+                <h2 className="text-gray-800 font-semibold text-xl">Descripción del Rol <span className="text-red-500">*</span></h2>
               </div>
               <div className="relative">
                 <Textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Ej: Busco un Product Manager con experiencia en fintech, conocimiento de metodologías ágiles y habilidades de liderazgo. Ideal que tenga experiencia en startups de rápido crecimiento..."
-                  className="bg-white border-gray-300 rounded-xl min-h-[120px] text-gray-900 resize-none"
+                  className="bg-white border-gray-300 rounded-xl min-h-[120px] text-gray-900 resize-none pr-24"
                   required
                 />
-                <div className="absolute top-3 right-3 text-gray-500 text-sm">
+                <div className="absolute bottom-3 right-3 text-gray-500 text-sm">
                   {description.length}/80 caracteres mínimos
                 </div>
               </div>
@@ -220,11 +217,11 @@ export default function CrearSolicitudPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* Left Column */}
               <div className="space-y-6">
-                {/* Innegociables del Rol */}
+                {/* Skills Innegociables del Rol */}
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
                     <Eye className="h-5 w-5 text-gray-700" />
-                    <h2 className="text-gray-800 font-semibold text-lg">Innegociables del Rol</h2>
+                    <h2 className="text-gray-800 font-semibold text-lg">Skills Innegociables del Rol</h2>
                   </div>
                   <Textarea
                     value={nonNegotiables}
@@ -235,26 +232,6 @@ export default function CrearSolicitudPage() {
                   <div className="flex items-start gap-2 text-gray-600 text-sm">
                     <span className="text-yellow-500">💡</span>
                     <p>Piensa en cosas que esta persona absolutamente debe tener o haber hecho.</p>
-                  </div>
-                </div>
-
-                {/* Situaciones que deberá saber navegar */}
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <BriefcaseIcon className="h-5 w-5 text-gray-700" />
-                    <h2 className="text-gray-800 font-semibold text-lg">
-                      Situaciones que deberá saber navegar
-                    </h2>
-                  </div>
-                  <Textarea
-                    value={scenario}
-                    onChange={(e) => setScenario(e.target.value)}
-                    placeholder="Describe un escenario difícil que esta persona deberá enfrentar. ¿Qué resultado ideal esperas?"
-                    className="bg-white border-gray-300 rounded-xl min-h-[100px] text-gray-900 resize-none"
-                  />
-                  <div className="flex items-start gap-2 text-gray-600 text-sm">
-                    <span className="text-yellow-500">💡</span>
-                    <p>Esto nos ayuda a identificar el seniority del rol.</p>
                   </div>
                 </div>
 
@@ -303,7 +280,7 @@ export default function CrearSolicitudPage() {
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
                     <MapPin className="h-5 w-5 text-gray-700" />
-                    <h2 className="text-gray-800 font-semibold text-lg">Modalidad del rol</h2>
+                    <h2 className="text-gray-800 font-semibold text-lg">Modalidad del rol <span className="text-red-500">*</span></h2>
                   </div>
                   <select
                     value={modality}
@@ -333,6 +310,23 @@ export default function CrearSolicitudPage() {
             </div>
           </Card>
         </form>
+        </motion.div>
+
+        {/* Logout Button at the bottom */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+          className="flex justify-center pt-8"
+        >
+          <Button
+            onClick={handleLogout}
+            variant="outline"
+            className="gap-2 h-10 px-4 rounded-xl border border-gray-300 text-gray-700 bg-white/80 hover:bg-white backdrop-blur-sm"
+          >
+            <LogOut className="h-4 w-4" />
+            Cerrar Sesión
+          </Button>
         </motion.div>
       </div>
     </div>

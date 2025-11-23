@@ -121,50 +121,122 @@ export async function getUserInfo(accessToken: string): Promise<LinkedInUserInfo
 
 /**
  * Obtiene perfil adicional del usuario (headline, vanityName)
+ * Usa la API v2 de LinkedIn para obtener información completa del perfil
  */
 export async function getProfile(accessToken: string): Promise<LinkedInProfile | null> {
   try {
+    // Intentar obtener el perfil con la proyección completa
     const response = await fetch(
       "https://api.linkedin.com/v2/me?projection=(id,vanityName,localizedFirstName,localizedLastName,headline)",
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
+          "X-Restli-Protocol-Version": "2.0.0",
         },
       }
     );
 
     if (!response.ok) {
-      // Si falla, no es crítico, retornamos null
+      const errorText = await response.text();
+      console.warn("⚠️ Error obteniendo perfil de LinkedIn:", response.status, errorText);
+      
+      // Intentar obtener solo el headline desde otro endpoint
+      try {
+        const headlineResponse = await fetch(
+          "https://api.linkedin.com/v2/me?projection=(id,headline)",
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "X-Restli-Protocol-Version": "2.0.0",
+            },
+          }
+        );
+        
+        if (headlineResponse.ok) {
+          const headlineData = await headlineResponse.json();
+          console.log("✅ Headline obtenido desde endpoint alternativo:", headlineData);
+          return headlineData;
+        }
+      } catch (altError) {
+        console.warn("⚠️ Error en endpoint alternativo:", altError);
+      }
+      
       return null;
     }
 
-    return await response.json();
+    const profile = await response.json();
+    console.log("✅ Profile completo obtenido:", {
+      id: profile.id,
+      headline: profile.headline,
+      vanityName: profile.vanityName,
+    });
+    
+    return profile;
   } catch (error) {
-    console.warn("Error obteniendo perfil adicional de LinkedIn:", error);
+    console.warn("❌ Error obteniendo perfil adicional de LinkedIn:", error);
     return null;
   }
 }
 
 /**
  * Parsea el headline de LinkedIn para extraer current_role y current_company
+ * Maneja múltiples formatos comunes de LinkedIn headlines
  */
 export function parseHeadline(headline?: string): {
   current_role: string | null;
   current_company: string | null;
 } {
   if (!headline) {
+    console.log("⚠️ No headline provided");
     return { current_role: null, current_company: null };
   }
 
-  // Buscar patrón "Role at Company"
+  console.log("📋 Parsing headline:", headline);
+
+  // Patrón 1: "Role at Company" (más común)
   const atMatch = headline.match(/^(.+?)\s+at\s+(.+)$/i);
   if (atMatch) {
-    return {
-      current_role: atMatch[1].trim(),
-      current_company: atMatch[2].trim(),
-    };
+    const role = atMatch[1].trim();
+    const company = atMatch[2].trim();
+    console.log("✅ Matched 'at' pattern:", { role, company });
+    return { current_role: role, current_company: company };
   }
 
+  // Patrón 2: "Role | Company"
+  const pipeMatch = headline.match(/^(.+?)\s*\|\s*(.+)$/);
+  if (pipeMatch) {
+    const role = pipeMatch[1].trim();
+    const company = pipeMatch[2].trim();
+    console.log("✅ Matched '|' pattern:", { role, company });
+    return { current_role: role, current_company: company };
+  }
+
+  // Patrón 3: "Role en Company" (español)
+  const enMatch = headline.match(/^(.+?)\s+en\s+(.+)$/i);
+  if (enMatch) {
+    const role = enMatch[1].trim();
+    const company = enMatch[2].trim();
+    console.log("✅ Matched 'en' pattern:", { role, company });
+    return { current_role: role, current_company: company };
+  }
+
+  // Patrón 4: "Role @ Company"
+  const atSymbolMatch = headline.match(/^(.+?)\s+@\s+(.+)$/);
+  if (atSymbolMatch) {
+    const role = atSymbolMatch[1].trim();
+    const company = atSymbolMatch[2].trim();
+    console.log("✅ Matched '@' pattern:", { role, company });
+    return { current_role: role, current_company: company };
+  }
+
+  // Si no coincide con ningún patrón, intentar extraer solo el rol (primera parte antes de cualquier separador)
+  const firstPart = headline.split(/[|@]|at|en/i)[0]?.trim();
+  if (firstPart && firstPart.length > 0) {
+    console.log("⚠️ No pattern matched, using first part as role:", firstPart);
+    return { current_role: firstPart, current_company: null };
+  }
+
+  console.log("⚠️ Could not parse headline");
   return { current_role: null, current_company: null };
 }
 

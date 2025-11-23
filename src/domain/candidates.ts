@@ -79,6 +79,7 @@ export async function upsertCandidate(candidateData: {
   current_company?: string | null;
   current_job_title?: string | null;
   linkedin_url?: string | null;
+  profile_picture_url?: string | null;
 }): Promise<any> {
   // Buscar candidate existente
   let existing = null;

@@ -34,10 +34,12 @@ export async function GET(request: NextRequest) {
 
     // Guardar state en cookie firmada
     const cookieStore = await cookies();
+    // Usar sameSite: "none" y secure: true para que funcione con redirects externos de LinkedIn
+    const isProduction = process.env.NODE_ENV === "production" || process.env.VERCEL;
     cookieStore.set("oauth_state", state, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      secure: isProduction, // true en producción/Vercel, false en desarrollo local
+      sameSite: isProduction ? "none" : "lax", // "none" requiere secure: true
       maxAge: 600, // 10 minutos
       path: "/",
     });

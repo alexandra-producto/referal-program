@@ -53,7 +53,19 @@ export async function GET(request: NextRequest) {
     const cookieStore = await cookies();
     const storedState = cookieStore.get("oauth_state")?.value;
 
+    console.log("🔍 Validando state:", {
+      hasStoredState: !!storedState,
+      hasStateParam: !!state,
+      statesMatch: storedState === state,
+      storedStateLength: storedState?.length,
+      stateParamLength: state?.length,
+    });
+
     if (!storedState || storedState !== state) {
+      console.error("❌ State mismatch o cookie no encontrada:", {
+        storedState: storedState ? `${storedState.substring(0, 20)}...` : "null",
+        stateParam: state ? `${state.substring(0, 20)}...` : "null",
+      });
       return NextResponse.redirect(
         new URL("/solicitante/login-simulado?error=invalid_state", request.url)
       );
@@ -94,6 +106,14 @@ export async function GET(request: NextRequest) {
       
       profile = await getProfile(accessToken);
       console.log("✅ Profile obtenido:", profile ? "Sí" : "No");
+      if (profile) {
+        console.log("📋 Profile data:", {
+          headline: profile.headline,
+          vanityName: profile.vanityName,
+          firstName: profile.localizedFirstName,
+          lastName: profile.localizedLastName,
+        });
+      }
     } catch (error: any) {
       console.error("❌ Error obteniendo información del usuario:", error);
       throw new Error(`Error obteniendo información de LinkedIn: ${error.message}`);
@@ -103,8 +123,9 @@ export async function GET(request: NextRequest) {
     const linkedinId = userInfo.sub;
     const email = userInfo.email || userInfo.name?.toLowerCase().replace(/\s+/g, ".") + "@linkedin.com";
     const fullName = userInfo.name || `${userInfo.given_name || ""} ${userInfo.family_name || ""}`.trim() || "Usuario";
+    const profilePictureUrl = userInfo.picture || null;
     
-    console.log("📋 Datos parseados:", { linkedinId, email, fullName });
+    console.log("📋 Datos parseados:", { linkedinId, email, fullName, profilePictureUrl });
     
     const { current_role, current_company } = parseHeadline(profile?.headline);
     const linkedinUrl = buildLinkedInUrl(profile?.vanityName);
@@ -132,6 +153,7 @@ export async function GET(request: NextRequest) {
         linkedin_url: linkedinUrl,
         current_job_title,
         current_company,
+        profile_picture_url: profilePictureUrl,
         auth_provider: "linkedin",
         provider_user_id: linkedinId,
       });
@@ -169,6 +191,7 @@ export async function GET(request: NextRequest) {
         linkedin_url: linkedinUrl,
         current_job_title,
         current_company,
+        profile_picture_url: profilePictureUrl,
         auth_provider: "linkedin",
         provider_user_id: linkedinId,
       });
@@ -182,6 +205,7 @@ export async function GET(request: NextRequest) {
         current_company: current_company,
         current_job_title: current_job_title,
         linkedin_url: linkedinUrl,
+        profile_picture_url: profilePictureUrl,
       });
 
       await updateLastLogin(user.id);
@@ -218,6 +242,7 @@ export async function GET(request: NextRequest) {
         linkedin_url: linkedinUrl,
         current_job_title,
         current_company,
+        profile_picture_url: profilePictureUrl,
         auth_provider: "linkedin",
         provider_user_id: linkedinId,
       });
@@ -231,6 +256,7 @@ export async function GET(request: NextRequest) {
         current_company: current_company,
         current_job_title: current_job_title,
         linkedin_url: linkedinUrl,
+        profile_picture_url: profilePictureUrl,
       });
 
       console.log("💾 Paso 3: Creando/actualizando hyperconnector con user_id...");
@@ -241,6 +267,9 @@ export async function GET(request: NextRequest) {
         full_name: fullName,
         candidate_id: candidate.id,
         linkedin_url: linkedinUrl,
+        current_job_title: current_job_title,
+        current_company: current_company,
+        profile_picture_url: profilePictureUrl,
       });
 
       await updateLastLogin(user.id);

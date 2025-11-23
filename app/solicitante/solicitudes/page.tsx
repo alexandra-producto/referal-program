@@ -59,8 +59,8 @@ export default function MisSolicitudesPage() {
   };
 
   const handleLogout = async () => {
-    await authStore.clearSession();
-    router.push("/solicitante/login-simulado");
+    // Redirigir directamente al endpoint de logout que cerrará sesión en LinkedIn también
+    window.location.href = "/api/auth/logout";
   };
 
   const truncateText = (text: string, maxLength: number) => {
@@ -95,7 +95,6 @@ export default function MisSolicitudesPage() {
                 Bienvenido {session?.fullName || "Usuario"}
               </p>
             </div>
-            <ProductLatamLogo />
           </div>
           <Button
             onClick={handleLogout}
@@ -126,42 +125,14 @@ export default function MisSolicitudesPage() {
             Aquí puedes ver todas las solicitudes que has realizado y las recomendaciones que has recibido
           </p>
 
-          <div className="flex items-center justify-between max-w-4xl mx-auto pt-4">
-            {/* View Mode Toggle */}
-            <div className="flex items-center gap-2">
-              <Button
-                onClick={() => setViewMode("lista")}
-                variant={viewMode === "lista" ? "default" : "outline"}
-                className={`rounded-xl ${
-                  viewMode === "lista"
-                    ? "bg-teal-500 text-white"
-                    : "bg-white/80 text-gray-700 border-gray-300 backdrop-blur-sm"
-                }`}
-              >
-                <List className="h-4 w-4 mr-2" />
-                Lista
-              </Button>
-              <Button
-                onClick={() => setViewMode("tarjetas")}
-                variant={viewMode === "tarjetas" ? "default" : "outline"}
-                className={`rounded-xl ${
-                  viewMode === "tarjetas"
-                    ? "bg-teal-500 text-white"
-                    : "bg-white/80 text-gray-700 border-gray-300 backdrop-blur-sm"
-                }`}
-              >
-                <Grid className="h-4 w-4 mr-2" />
-                Tarjetas
-              </Button>
-            </div>
-
-            {/* Create Button */}
+          {/* Create Button - Centered */}
+          <div className="flex justify-center pt-4">
             <Button
               onClick={() => router.push("/solicitante/crear")}
-              className="bg-teal-500 hover:bg-teal-600 text-white rounded-xl flex items-center gap-2 px-6 shadow-lg"
+              className="bg-teal-500 hover:bg-teal-600 text-white rounded-xl flex items-center gap-2 px-6 shadow-lg h-12"
             >
               <Plus className="h-5 w-5" />
-              Obtener Recomendación
+              Solicitar Recomendación
             </Button>
           </div>
         </motion.div>
@@ -180,7 +151,34 @@ export default function MisSolicitudesPage() {
             </Card>
           ) : viewMode === "lista" ? (
             /* Table View */
-            <Card className="backdrop-blur-[130px] bg-white/40 border border-white/50 rounded-3xl shadow-xl overflow-hidden">
+            <Card className="backdrop-blur-[130px] bg-white/40 border border-white/50 rounded-3xl shadow-xl overflow-hidden relative">
+            {/* View Mode Toggle - Top Right */}
+            <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
+              <Button
+                onClick={() => setViewMode("lista")}
+                variant={viewMode === "lista" ? "default" : "outline"}
+                className={`rounded-xl h-9 ${
+                  viewMode === "lista"
+                    ? "bg-teal-500 text-white"
+                    : "bg-white/80 text-gray-700 border-gray-300 backdrop-blur-sm"
+                }`}
+              >
+                <List className="h-4 w-4 mr-2" />
+                Lista
+              </Button>
+              <Button
+                onClick={() => setViewMode("tarjetas")}
+                variant={viewMode === "tarjetas" ? "default" : "outline"}
+                className={`rounded-xl h-9 ${
+                  viewMode === "tarjetas"
+                    ? "bg-teal-500 text-white"
+                    : "bg-white/80 text-gray-700 border-gray-300 backdrop-blur-sm"
+                }`}
+              >
+                <Grid className="h-4 w-4 mr-2" />
+                Tarjetas
+              </Button>
+            </div>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-teal-100/50">
@@ -232,7 +230,35 @@ export default function MisSolicitudesPage() {
           </Card>
         ) : (
           /* Cards View */
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="relative">
+            {/* View Mode Toggle - Top Right */}
+            <div className="absolute top-0 right-0 z-10 flex items-center gap-2 mb-4">
+              <Button
+                onClick={() => setViewMode("lista")}
+                variant={viewMode === "lista" ? "default" : "outline"}
+                className={`rounded-xl h-9 ${
+                  viewMode === "lista"
+                    ? "bg-teal-500 text-white"
+                    : "bg-white/80 text-gray-700 border-gray-300 backdrop-blur-sm"
+                }`}
+              >
+                <List className="h-4 w-4 mr-2" />
+                Lista
+              </Button>
+              <Button
+                onClick={() => setViewMode("tarjetas")}
+                variant={viewMode === "tarjetas" ? "default" : "outline"}
+                className={`rounded-xl h-9 ${
+                  viewMode === "tarjetas"
+                    ? "bg-teal-500 text-white"
+                    : "bg-white/80 text-gray-700 border-gray-300 backdrop-blur-sm"
+                }`}
+              >
+                <Grid className="h-4 w-4 mr-2" />
+                Tarjetas
+              </Button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-12">
             {jobs.map((job, index) => (
               <motion.div
                 key={job.id}
@@ -258,6 +284,7 @@ export default function MisSolicitudesPage() {
                 </Card>
               </motion.div>
             ))}
+            </div>
           </div>
         )}
         </motion.div>

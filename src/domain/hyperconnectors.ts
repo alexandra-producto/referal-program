@@ -53,6 +53,9 @@ export async function upsertHyperconnector(hyperconnectorData: {
   full_name?: string;
   candidate_id?: string;
   linkedin_url?: string | null;
+  current_job_title?: string | null;
+  current_company?: string | null;
+  profile_picture_url?: string | null;
 }): Promise<any> {
   // Buscar hyperconnector existente
   let existing = null;

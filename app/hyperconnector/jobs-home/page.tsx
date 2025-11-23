@@ -128,8 +128,8 @@ function HyperconnectorJobsHomeContent() {
   };
 
   const handleLogout = async () => {
-    await authStore.clearSession();
-    router.push("/solicitante/login-simulado");
+    // Redirigir directamente al endpoint de logout que cerrará sesión en LinkedIn también
+    window.location.href = "/api/auth/logout";
   };
 
   if (loading) {
