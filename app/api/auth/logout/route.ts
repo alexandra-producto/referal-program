@@ -9,9 +9,16 @@ async function handleLogout() {
   // Eliminar la cookie de sesión
   await deleteSession();
   
-  // Redirigir directamente a nuestra página de login
+  // Construir URL de logout de LinkedIn y redirigir a nuestra página
   const appUrl = getAppUrl();
-  return NextResponse.redirect(new URL("/solicitante/login-simulado", appUrl));
+  const redirectUri = `${appUrl}/solicitante/login-simulado`;
+  
+  // Usar el endpoint tradicional de logout de LinkedIn
+  // Este endpoint cierra la sesión de LinkedIn y luego podemos redirigir
+  const linkedinLogoutUrl = `https://www.linkedin.com/uas/logout?session_redirect=${encodeURIComponent(redirectUri)}`;
+  
+  // Redirigir a LinkedIn para cerrar sesión allí también
+  return NextResponse.redirect(linkedinLogoutUrl);
 }
 
 /**

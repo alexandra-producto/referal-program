@@ -65,6 +65,7 @@ export function getLinkedInAuthUrl(state: string, role: string): string {
     redirect_uri: redirectUri,
     scope: "openid profile email",
     state: state,
+    prompt: "consent", // Forzar que LinkedIn siempre pida autorización
   });
 
   return `https://www.linkedin.com/oauth/v2/authorization?${params.toString()}`;
