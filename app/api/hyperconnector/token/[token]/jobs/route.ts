@@ -139,12 +139,22 @@ export async function GET(
           }
         }
 
+        // Obtener conteo de recomendaciones del hyperconnector para este job
+        const { data: myRecommendations } = await supabase
+          .from("recommendations")
+          .select("id")
+          .eq("job_id", job.id)
+          .eq("hyperconnector_id", hyperconnectorId);
+
+        const myRecommendationsCount = myRecommendations?.length || 0;
+
         return {
           ...job,
           owner_role: job.owner_role_title || job.owner_role || null,
           eligibleCandidatesCount,
           bestMatchScore,
           ownerCandidate,
+          myRecommendationsCount,
         };
       })
     );

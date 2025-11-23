@@ -129,6 +129,15 @@ export async function GET(
           ownerCandidate = owner;
         }
 
+        // Obtener conteo de recomendaciones del hyperconnector para este job
+        const { data: myRecommendations } = await supabase
+          .from("recommendations")
+          .select("id")
+          .eq("job_id", job.id)
+          .eq("hyperconnector_id", hyperconnectorId);
+
+        const myRecommendationsCount = myRecommendations?.length || 0;
+
         return {
           id: job.id,
           company_name: job.company_name,
@@ -140,6 +149,7 @@ export async function GET(
           eligibleCandidatesCount,
           bestMatchScore,
           ownerCandidate,
+          myRecommendationsCount,
         };
       })
     );
