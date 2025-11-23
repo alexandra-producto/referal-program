@@ -30,7 +30,8 @@ interface Recommendation {
   job_id: string;
   candidate_id: string | null;
   hyperconnector_id: string;
-  notes: string | null;
+  letter_q1: string | null;
+  letter_q2: string | null;
   status: string;
   created_at: string;
   candidate: Candidate | null;
@@ -304,10 +305,21 @@ export default function RecomendacionesPage({
                       </div>
                     )}
 
-                    {/* Recommendation Notes */}
-                    {rec.notes && (
-                      <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-gray-200">
-                        <p className="text-gray-700 leading-relaxed">{rec.notes}</p>
+                    {/* Recommendation Questions */}
+                    {(rec.letter_q1 || rec.letter_q2) && (
+                      <div className="space-y-4">
+                        {rec.letter_q1 && (
+                          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-gray-200">
+                            <p className="text-gray-600 text-sm font-semibold mb-2">1. ¿Cuál es el superpoder de esta persona?</p>
+                            <p className="text-gray-700 leading-relaxed">{rec.letter_q1}</p>
+                          </div>
+                        )}
+                        {rec.letter_q2 && (
+                          <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-gray-200">
+                            <p className="text-gray-600 text-sm font-semibold mb-2">2. Describe una situación en la que esta persona haya aplicado el super poder.</p>
+                            <p className="text-gray-700 leading-relaxed">{rec.letter_q2}</p>
+                          </div>
+                        )}
                       </div>
                     )}
 

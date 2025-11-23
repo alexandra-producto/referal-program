@@ -40,11 +40,12 @@ export async function POST(
 
     // Obtener datos del body
     const body = await request.json();
-    const { candidateIds, notes, linkedinUrl } = body;
+    const { candidateIds, q1, q2, linkedinUrl } = body;
 
     console.log("📋 Datos recibidos:", {
       candidateIds: candidateIds?.length || 0,
-      hasNotes: !!notes,
+      hasQ1: !!q1,
+      hasQ2: !!q2,
       hasLinkedInUrl: !!linkedinUrl,
     });
 
@@ -70,7 +71,8 @@ export async function POST(
               hyperconnector_id: hyperconnectorId,
               job_id: jobId,
               candidate_id: candidateId,
-              notes: notes || null,
+              letter_q1: q1 || null,
+              letter_q2: q2 || null,
               status: "pending",
               created_at: new Date().toISOString(),
             };
@@ -97,13 +99,13 @@ export async function POST(
           hyperconnector_id: hyperconnectorId,
           job_id: jobId,
           candidate_id: null, // null para recomendaciones personalizadas
-          notes: notes || null,
+          letter_q1: q1 || null,
+          letter_q2: q2 || null,
           status: "pending",
           created_at: new Date().toISOString(),
         };
         
         // Solo agregar linkedin_url si el campo existe en la tabla
-        // Si no existe, incluiremos la URL en notes
         if (linkedinUrl) {
           customPayload.linkedin_url = linkedinUrl;
         }
@@ -119,13 +121,14 @@ export async function POST(
         console.error("   - Error code:", customError.code);
         // Si falla por linkedin_url, intentar sin ese campo
         if (customError.message?.includes("linkedin_url") || customError.message?.includes("column") || customError.code === "PGRST116") {
-          console.log("⚠️ Intentando sin linkedin_url, incluyendo en notes...");
+          console.log("⚠️ Intentando sin linkedin_url...");
           try {
             const fallbackPayload = {
               hyperconnector_id: hyperconnectorId,
               job_id: jobId,
               candidate_id: null,
-              notes: `${notes || ""}\n\nLinkedIn: ${linkedinUrl}`.trim(),
+              letter_q1: q1 || null,
+              letter_q2: q2 || null,
               status: "pending",
               created_at: new Date().toISOString(),
             };

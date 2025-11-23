@@ -169,13 +169,19 @@ export default function RecommendPage({
     
     try {
       const candidateIds = selectedPersonId === "custom" ? [] : [selectedPersonId!];
-      const notes = selectedPersonId === "custom"
-        ? `1. ${customAnswers.q1}\n2. ${customAnswers.q2}`
-        : `1. ${answers[selectedPersonId!]?.q1}\n2. ${answers[selectedPersonId!]?.q2}`;
+      
+      // Enviar q1 y q2 por separado para guardar en letter_q1 y letter_q2
+      const q1 = selectedPersonId === "custom"
+        ? customAnswers.q1
+        : answers[selectedPersonId!]?.q1 || "";
+      const q2 = selectedPersonId === "custom"
+        ? customAnswers.q2
+        : answers[selectedPersonId!]?.q2 || "";
 
       console.log("📤 Enviando recomendación:", {
         candidateIds,
-        hasNotes: !!notes,
+        hasQ1: !!q1,
+        hasQ2: !!q2,
         linkedinUrl: selectedPersonId === "custom" ? linkedinUrl : null,
       });
 
@@ -186,7 +192,8 @@ export default function RecommendPage({
         },
         body: JSON.stringify({
           candidateIds,
-          notes,
+          q1,
+          q2,
           linkedinUrl: selectedPersonId === "custom" ? linkedinUrl : null,
         }),
       });
