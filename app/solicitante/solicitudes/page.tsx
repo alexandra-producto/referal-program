@@ -156,24 +156,16 @@ export default function MisSolicitudesPage() {
             <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
               <Button
                 onClick={() => setViewMode("lista")}
-                variant={viewMode === "lista" ? "default" : "outline"}
-                className={`rounded-xl h-9 ${
-                  viewMode === "lista"
-                    ? "bg-teal-500 text-white"
-                    : "bg-white/80 text-gray-700 border-gray-300 backdrop-blur-sm"
-                }`}
+                variant="default"
+                className="rounded-xl h-9 bg-teal-500 text-white"
               >
                 <List className="h-4 w-4 mr-2" />
                 Lista
               </Button>
               <Button
                 onClick={() => setViewMode("tarjetas")}
-                variant={viewMode === "tarjetas" ? "default" : "outline"}
-                className={`rounded-xl h-9 ${
-                  viewMode === "tarjetas"
-                    ? "bg-teal-500 text-white"
-                    : "bg-white/80 text-gray-700 border-gray-300 backdrop-blur-sm"
-                }`}
+                variant="outline"
+                className="rounded-xl h-9 bg-white/80 text-gray-700 border-gray-300 backdrop-blur-sm"
               >
                 <Grid className="h-4 w-4 mr-2" />
                 Tarjetas
@@ -235,24 +227,16 @@ export default function MisSolicitudesPage() {
             <div className="absolute top-0 right-0 z-10 flex items-center gap-2 mb-4">
               <Button
                 onClick={() => setViewMode("lista")}
-                variant={viewMode === "lista" ? "default" : "outline"}
-                className={`rounded-xl h-9 ${
-                  viewMode === "lista"
-                    ? "bg-teal-500 text-white"
-                    : "bg-white/80 text-gray-700 border-gray-300 backdrop-blur-sm"
-                }`}
+                variant="outline"
+                className="rounded-xl h-9 bg-white/80 text-gray-700 border-gray-300 backdrop-blur-sm"
               >
                 <List className="h-4 w-4 mr-2" />
                 Lista
               </Button>
               <Button
                 onClick={() => setViewMode("tarjetas")}
-                variant={viewMode === "tarjetas" ? "default" : "outline"}
-                className={`rounded-xl h-9 ${
-                  viewMode === "tarjetas"
-                    ? "bg-teal-500 text-white"
-                    : "bg-white/80 text-gray-700 border-gray-300 backdrop-blur-sm"
-                }`}
+                variant="default"
+                className="rounded-xl h-9 bg-teal-500 text-white"
               >
                 <Grid className="h-4 w-4 mr-2" />
                 Tarjetas
