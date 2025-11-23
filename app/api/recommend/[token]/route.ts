@@ -105,6 +105,19 @@ export async function GET(
       match_score: matchScores.get(candidate.id) || null,
     }));
 
+    // Obtener recomendaciones existentes del hyperconnector para este job
+    // Para marcar permanentemente los candidatos ya recomendados
+    const { data: existingRecommendations } = await supabase
+      .from("recommendations")
+      .select("candidate_id")
+      .eq("job_id", jobId)
+      .eq("hyperconnector_id", hyperconnectorId)
+      .not("candidate_id", "is", null);
+
+    const alreadyRecommendedCandidateIds = (existingRecommendations || [])
+      .map((r: any) => r.candidate_id)
+      .filter(Boolean);
+
     // Obtener información del owner candidate (quien postuló el job)
     let ownerCandidate = null;
     if (job.owner_candidate_id) {
@@ -147,6 +160,7 @@ export async function GET(
       candidates: candidatesWithMatch,
       ownerCandidate,
       token,
+      alreadyRecommendedCandidateIds, // IDs de candidatos ya recomendados por este hyperconnector
     });
   } catch (error: any) {
     console.error("❌ Error en GET /api/recommend/[token]:", error);

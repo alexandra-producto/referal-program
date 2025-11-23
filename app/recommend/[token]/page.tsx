@@ -83,6 +83,7 @@ export default function RecommendPage({
     hyperconnector: Hyperconnector;
     candidates: Candidate[];
     ownerCandidate?: OwnerCandidate | null;
+    alreadyRecommendedCandidateIds?: string[];
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -97,6 +98,10 @@ export default function RecommendPage({
         }
         const result = await response.json();
         setData(result);
+        // Inicializar recommendedIds con los candidatos ya recomendados permanentemente
+        if (result.alreadyRecommendedCandidateIds && result.alreadyRecommendedCandidateIds.length > 0) {
+          setRecommendedIds(result.alreadyRecommendedCandidateIds);
+        }
       } catch (err: any) {
         setError("Error al cargar los datos");
         console.error(err);
@@ -221,19 +226,28 @@ export default function RecommendPage({
       console.log("✅ Recomendación enviada exitosamente:", responseData);
       setShowSuccessMessage(true);
 
-      // Reset forms
+      // Reset forms pero mantener el candidato en recommendedIds permanentemente
       if (selectedPersonId === "custom") {
         setLinkedinUrl("");
         setCustomAnswers({ q1: "", q2: "" });
         setShowCustomForm(false);
+        // Para recomendaciones personalizadas, no agregamos a recommendedIds
+        // ya que no hay un candidate_id específico
       } else if (selectedPersonId) {
+        // Limpiar las respuestas del formulario
         setAnswers((prev) => {
           const newAnswers = { ...prev };
           delete newAnswers[selectedPersonId];
           return newAnswers;
         });
         setExpandedPersonId(null);
-        setRecommendedIds((prev) => [...prev, selectedPersonId]);
+        // Agregar permanentemente a recommendedIds (no se eliminará)
+        setRecommendedIds((prev) => {
+          if (!prev.includes(selectedPersonId)) {
+            return [...prev, selectedPersonId];
+          }
+          return prev;
+        });
       }
 
       setTimeout(() => {

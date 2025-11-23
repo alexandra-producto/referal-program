@@ -2,10 +2,9 @@
 
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Clock, LogOut, CheckCircle2, X, Send } from "lucide-react";
+import { Clock, LogOut, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { ProductLatamLogo } from "@/components/ProductLatamLogo";
 import { authStore } from "../../lib/authStore";
 
@@ -14,19 +13,6 @@ interface OwnerCandidate {
   full_name: string;
   current_company: string | null;
   email?: string | null;
-}
-
-interface Recommendation {
-  id: string;
-  candidate_id: string | null;
-  letter_q1: string | null;
-  letter_q2: string | null;
-  linkedin_url: string | null;
-  candidate?: {
-    full_name: string;
-    current_company: string | null;
-  } | null;
-  created_at: string;
 }
 
 interface Job {
@@ -58,10 +44,6 @@ function HyperconnectorJobsHomeContent() {
   const [hyperconnector, setHyperconnector] = useState<Hyperconnector | null>(null);
   const [hyperconnectorId, setHyperconnectorId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
-  const [showRecommendationsDialog, setShowRecommendationsDialog] = useState(false);
-  const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
-  const [loadingRecommendations, setLoadingRecommendations] = useState(false);
 
   useEffect(() => {
     async function fetchJobs() {
@@ -111,7 +93,7 @@ function HyperconnectorJobsHomeContent() {
     fetchJobs();
   }, [token, router]);
 
-  const handleJobClick = async (jobId: string) => {
+  const handleJobClick = async (jobId: string, hasRecommendations: boolean) => {
     let currentHyperconnectorId = hyperconnectorId;
     
     // Si no hay hyperconnectorId del token, obtenerlo de la sesión
@@ -124,45 +106,32 @@ function HyperconnectorJobsHomeContent() {
       currentHyperconnectorId = session.hyperconnectorId;
     }
 
-    // Obtener recomendaciones del hyperconnector para este job
-    setSelectedJobId(jobId);
-    setLoadingRecommendations(true);
-    setShowRecommendationsDialog(true);
-
-    try {
-      const response = await fetch(`/api/jobs/${jobId}/recommendations`);
-      if (response.ok) {
-        const data = await response.json();
-        // Filtrar solo las recomendaciones del hyperconnector actual
-        const myRecs = (data.recommendations || []).filter(
-          (rec: any) => rec.hyperconnector_id === currentHyperconnectorId
-        );
-        setRecommendations(myRecs);
-      } else {
-        setRecommendations([]);
+    // Si ya hay recomendaciones, redirigir directamente a la página de recomendación
+    if (hasRecommendations) {
+      try {
+        // Generar token para este job
+        const newTokenResponse = await fetch(`/api/hyperconnector/generate-token`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            hyperconnectorId: currentHyperconnectorId,
+            jobId,
+          }),
+        });
+        
+        if (newTokenResponse.ok) {
+          const { token: newToken } = await newTokenResponse.json();
+          router.push(`/recommend/${newToken}`);
+        }
+      } catch (error) {
+        console.error("Error generating token:", error);
       }
-    } catch (err) {
-      console.error("Error fetching recommendations:", err);
-      setRecommendations([]);
-    } finally {
-      setLoadingRecommendations(false);
+      return;
     }
-  };
 
-  const handleCreateNewRecommendation = async (jobId: string) => {
-    let currentHyperconnectorId = hyperconnectorId;
-    
-    if (!currentHyperconnectorId) {
-      const session = await authStore.getSession();
-      if (!session || !session.hyperconnectorId) {
-        setError("No se pudo identificar el hyperconnector");
-        return;
-      }
-      currentHyperconnectorId = session.hyperconnectorId;
-    }
-    
+    // Si no hay recomendaciones, mostrar modal o redirigir a crear recomendación
+    // Por ahora, redirigir directamente a crear recomendación
     try {
-      // Generar nuevo token para este job
       const newTokenResponse = await fetch(`/api/hyperconnector/generate-token`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -174,15 +143,13 @@ function HyperconnectorJobsHomeContent() {
       
       if (newTokenResponse.ok) {
         const { token: newToken } = await newTokenResponse.json();
-        setShowRecommendationsDialog(false);
         router.push(`/recommend/${newToken}`);
-      } else {
-        console.error("Error generating token");
       }
     } catch (error) {
       console.error("Error generating token:", error);
     }
   };
+
 
   const handleLogout = async () => {
     // Redirigir directamente al endpoint de logout que cerrará sesión en LinkedIn también
@@ -302,7 +269,7 @@ function HyperconnectorJobsHomeContent() {
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.4, delay: index * 0.1 }}
-                        onClick={() => handleJobClick(job.id)}
+                        onClick={() => handleJobClick(job.id, (job.myRecommendationsCount || 0) > 0)}
                         className="border-b border-gray-200/50 hover:bg-white/30 cursor-pointer transition-colors"
                       >
                         <td className="py-4 px-4">
@@ -344,141 +311,6 @@ function HyperconnectorJobsHomeContent() {
           )}
         </motion.div>
       </div>
-
-      {/* Modal de Recomendaciones */}
-      <AnimatePresence>
-        {showRecommendationsDialog && selectedJobId && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
-            onClick={() => setShowRecommendationsDialog(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-3xl shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col"
-            >
-              {/* Header */}
-              <div className="flex items-center justify-between p-6 border-b border-gray-200">
-                <h2 className="text-2xl font-semibold text-gray-800">
-                  Mis Recomendaciones
-                </h2>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setShowRecommendationsDialog(false)}
-                  className="rounded-full"
-                >
-                  <X className="h-5 w-5" />
-                </Button>
-              </div>
-
-              {/* Content */}
-              <div className="flex-1 overflow-y-auto p-6">
-                {loadingRecommendations ? (
-                  <div className="flex items-center justify-center py-12">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
-                  </div>
-                ) : recommendations.length === 0 ? (
-                  <div className="text-center py-12">
-                    <p className="text-gray-600 text-lg mb-4">
-                      Aún no has hecho recomendaciones para este puesto.
-                    </p>
-                    <Button
-                      onClick={() => handleCreateNewRecommendation(selectedJobId)}
-                      className="bg-purple-500 hover:bg-purple-600 text-white rounded-xl gap-2"
-                    >
-                      <Send className="h-4 w-4" />
-                      Hacer Primera Recomendación
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="space-y-6">
-                    {recommendations.map((rec, index) => (
-                      <motion.div
-                        key={rec.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                      >
-                        <Card className="p-6 border border-gray-200">
-                          <div className="space-y-4">
-                            {/* Candidato o LinkedIn URL */}
-                            {rec.candidate ? (
-                              <div>
-                                <h3 className="text-lg font-semibold text-gray-800 mb-1">
-                                  {rec.candidate.full_name}
-                                </h3>
-                                {rec.candidate.current_company && (
-                                  <p className="text-gray-600 text-sm">
-                                    {rec.candidate.current_company}
-                                  </p>
-                                )}
-                              </div>
-                            ) : rec.linkedin_url ? (
-                              <div>
-                                <h3 className="text-lg font-semibold text-gray-800 mb-1">
-                                  Recomendación Personalizada
-                                </h3>
-                                <a
-                                  href={rec.linkedin_url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-blue-600 text-sm hover:underline"
-                                >
-                                  {rec.linkedin_url}
-                                </a>
-                              </div>
-                            ) : null}
-
-                            {/* Preguntas y Respuestas */}
-                            {rec.letter_q1 && (
-                              <div className="bg-gray-50 rounded-xl p-4">
-                                <p className="text-gray-600 text-sm font-semibold mb-2">
-                                  1. ¿Cuál es el superpoder de esta persona?
-                                </p>
-                                <p className="text-gray-700 leading-relaxed">
-                                  {rec.letter_q1}
-                                </p>
-                              </div>
-                            )}
-
-                            {rec.letter_q2 && (
-                              <div className="bg-gray-50 rounded-xl p-4">
-                                <p className="text-gray-600 text-sm font-semibold mb-2">
-                                  2. Describe una situación en la que esta persona haya aplicado el super poder.
-                                </p>
-                                <p className="text-gray-700 leading-relaxed">
-                                  {rec.letter_q2}
-                                </p>
-                              </div>
-                            )}
-                          </div>
-                        </Card>
-                      </motion.div>
-                    ))}
-
-                    {/* Botón para agregar más recomendaciones */}
-                    <div className="pt-4">
-                      <Button
-                        onClick={() => handleCreateNewRecommendation(selectedJobId)}
-                        className="w-full bg-purple-500 hover:bg-purple-600 text-white rounded-xl gap-2 h-12"
-                      >
-                        <Send className="h-4 w-4" />
-                        Agregar Otra Recomendación
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }
