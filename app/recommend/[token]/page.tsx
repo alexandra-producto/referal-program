@@ -65,7 +65,7 @@ export default function RecommendPage({
   
   const [loading, setLoading] = useState(true);
   const [expandedPersonId, setExpandedPersonId] = useState<string | null>(null);
-  const [answers, setAnswers] = useState<Record<string, { q1: string; q2: string; q3: string }>>({});
+  const [answers, setAnswers] = useState<Record<string, { q1: string; q2: string }>>({});
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [selectedPersonId, setSelectedPersonId] = useState<string | null>(null);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
@@ -75,7 +75,7 @@ export default function RecommendPage({
   const [showCustomForm, setShowCustomForm] = useState(false);
   const [linkedinUrl, setLinkedinUrl] = useState("");
   const [linkedinUrlError, setLinkedinUrlError] = useState("");
-  const [customAnswers, setCustomAnswers] = useState({ q1: "", q2: "", q3: "" });
+  const [customAnswers, setCustomAnswers] = useState({ q1: "", q2: "" });
 
   const [data, setData] = useState<{
     job: Job;
@@ -121,7 +121,7 @@ export default function RecommendPage({
     }
   };
 
-  const handleAnswerChange = (personId: string, question: "q1" | "q2" | "q3", value: string) => {
+  const handleAnswerChange = (personId: string, question: "q1" | "q2", value: string) => {
     setAnswers((prev) => ({
       ...prev,
       [personId]: {
@@ -131,7 +131,7 @@ export default function RecommendPage({
     }));
   };
 
-  const handleCustomAnswerChange = (question: "q1" | "q2" | "q3", value: string) => {
+  const handleCustomAnswerChange = (question: "q1" | "q2", value: string) => {
     setCustomAnswers((prev) => ({
       ...prev,
       [question]: value,
@@ -141,7 +141,7 @@ export default function RecommendPage({
   const isFormComplete = (personId: string) => {
     const personAnswers = answers[personId];
     if (!personAnswers) return false;
-    return personAnswers.q1?.length >= 20 && personAnswers.q2?.length >= 20 && personAnswers.q3?.length >= 20;
+    return personAnswers.q1?.length >= 20 && personAnswers.q2?.length >= 20;
   };
 
   const isCustomFormComplete = () => {
@@ -149,8 +149,7 @@ export default function RecommendPage({
       linkedinUrl &&
       validateLinkedinUrl(linkedinUrl) &&
       customAnswers.q1.length >= 20 &&
-      customAnswers.q2.length >= 20 &&
-      customAnswers.q3.length >= 20
+      customAnswers.q2.length >= 20
     );
   };
 
@@ -170,8 +169,8 @@ export default function RecommendPage({
     try {
       const candidateIds = selectedPersonId === "custom" ? [] : [selectedPersonId!];
       const notes = selectedPersonId === "custom"
-        ? `1. ${customAnswers.q1}\n2. ${customAnswers.q2}\n3. ${customAnswers.q3}`
-        : `1. ${answers[selectedPersonId!]?.q1}\n2. ${answers[selectedPersonId!]?.q2}\n3. ${answers[selectedPersonId!]?.q3}`;
+        ? `1. ${customAnswers.q1}\n2. ${customAnswers.q2}`
+        : `1. ${answers[selectedPersonId!]?.q1}\n2. ${answers[selectedPersonId!]?.q2}`;
 
       console.log("📤 Enviando recomendación:", {
         candidateIds,
@@ -205,7 +204,7 @@ export default function RecommendPage({
       // Reset forms
       if (selectedPersonId === "custom") {
         setLinkedinUrl("");
-        setCustomAnswers({ q1: "", q2: "", q3: "" });
+        setCustomAnswers({ q1: "", q2: "" });
         setShowCustomForm(false);
       } else if (selectedPersonId) {
         setAnswers((prev) => {
@@ -268,12 +267,12 @@ export default function RecommendPage({
   return (
     <div className="min-h-screen px-4 py-12 relative bg-gradient-to-b from-cyan-100 via-blue-100 to-sky-200">
       <div className="max-w-5xl mx-auto space-y-8 relative z-10">
-        {/* Botón "Ver más solicitudes" - Arriba a la izquierda */}
+        {/* Botón "Ver más solicitudes" - Arriba a la izquierda, fuera del card */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="absolute top-0 left-0 z-20"
+          className="mb-4"
         >
           <Button
             onClick={() => {
@@ -281,7 +280,7 @@ export default function RecommendPage({
               window.location.href = `/hyperconnector/jobs-home?token=${token}`;
             }}
             variant="outline"
-            className="gap-2 h-10 px-4 rounded-full border border-cyan-300 text-gray-700 bg-cyan-50/80 hover:bg-cyan-100 backdrop-blur-sm"
+            className="gap-2 h-10 px-4 rounded-full border border-cyan-300 text-gray-700 bg-cyan-50/80 hover:bg-cyan-100 active:bg-cyan-200 active:scale-95 transition-all duration-150 backdrop-blur-sm"
           >
             <ArrowLeft className="h-4 w-4" />
             Ver más perfiles abiertos
@@ -481,12 +480,10 @@ export default function RecommendPage({
                           <div className="space-y-4">
                             <div className="space-y-2">
                               <label className="text-gray-800 font-semibold">
-                                1. ¿Qué habilidad admiraste de{" "}
-                                <span className="font-semibold">{person.full_name}</span> cuando
-                                trabajaron juntos?
+                                1. ¿Cuál es el superpoder de esta persona?
                               </label>
                               <Textarea
-                                placeholder="Describe una habilidad específica que observaste..."
+                                placeholder="Describe el superpoder o habilidad única de esta persona..."
                                 value={answers[person.id]?.q1 || ""}
                                 onChange={(e) =>
                                   handleAnswerChange(person.id, "q1", e.target.value)
@@ -500,11 +497,10 @@ export default function RecommendPage({
 
                             <div className="space-y-2">
                               <label className="text-gray-800 font-semibold">
-                                2. ¿Por qué confías en{" "}
-                                <span className="font-semibold">{person.full_name}</span>?
+                                2. Describe una situación en la que esta persona haya aplicado el super poder.
                               </label>
                               <Textarea
-                                placeholder="Comparte por qué confías en esta persona..."
+                                placeholder="Comparte un ejemplo específico de cómo esta persona aplicó su superpoder..."
                                 value={answers[person.id]?.q2 || ""}
                                 onChange={(e) =>
                                   handleAnswerChange(person.id, "q2", e.target.value)
@@ -515,25 +511,6 @@ export default function RecommendPage({
                                 {answers[person.id]?.q2?.length || 0}/20 caracteres mínimos
                               </p>
                             </div>
-
-                            <div className="space-y-2">
-                              <label className="text-gray-800 font-semibold">
-                                3. ¿Por qué{" "}
-                                <span className="font-semibold">{person.full_name}</span> sería el
-                                candidato ideal para este puesto?
-                              </label>
-                              <Textarea
-                                placeholder="Explica por qué es ideal para este rol específico..."
-                                value={answers[person.id]?.q3 || ""}
-                                onChange={(e) =>
-                                  handleAnswerChange(person.id, "q3", e.target.value)
-                                }
-                                className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 min-h-[80px] rounded-xl font-medium"
-                              />
-                              <p className="text-gray-500 text-xs">
-                                {answers[person.id]?.q3?.length || 0}/20 caracteres mínimos
-                              </p>
-                            </div>
                           </div>
 
                           <div className="flex gap-3">
@@ -542,7 +519,7 @@ export default function RecommendPage({
                               disabled={
                                 !isFormComplete(person.id) || recommendedIds.includes(person.id)
                               }
-                              className="bg-blue-600 hover:bg-blue-700 gap-2 h-12 rounded-xl text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 active:scale-95 transition-all duration-150 gap-2 h-12 rounded-xl text-white disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                               <Send className="h-4 w-4" />
                               Enviar Recomendación
@@ -550,7 +527,7 @@ export default function RecommendPage({
                             <Button
                               onClick={() => setExpandedPersonId(null)}
                               variant="outline"
-                              className="h-12 px-6 rounded-xl border border-gray-300 text-gray-700 bg-white hover:bg-gray-50"
+                              className="h-12 px-6 rounded-xl border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 active:bg-gray-100 active:scale-95 transition-all duration-150"
                             >
                               Cancelar
                             </Button>
@@ -560,7 +537,7 @@ export default function RecommendPage({
                         <div className="border-t border-gray-300/30 pt-6">
                           <Button
                             onClick={() => setExpandedPersonId(person.id)}
-                            className="bg-blue-600 hover:bg-blue-700 gap-2 h-12 rounded-xl text-white"
+                            className="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 active:scale-95 transition-all duration-150 gap-2 h-12 rounded-xl text-white"
                           >
                             <Send className="h-4 w-4" />
                             Enviar Recomendación
@@ -621,10 +598,10 @@ export default function RecommendPage({
 
                       <div className="space-y-2">
                         <label className="text-white text-sm">
-                          1. ¿Qué habilidad admiraste de esta persona cuando trabajaron juntos?
+                          1. ¿Cuál es el superpoder de esta persona?
                         </label>
                         <Textarea
-                          placeholder="Describe una habilidad específica que observaste..."
+                          placeholder="Describe el superpoder o habilidad única de esta persona..."
                           value={customAnswers.q1}
                           onChange={(e) => handleCustomAnswerChange("q1", e.target.value)}
                           className="backdrop-blur-sm bg-white/20 border-white/40 text-white placeholder:text-white/50 min-h-[80px] rounded-xl"
@@ -636,10 +613,10 @@ export default function RecommendPage({
 
                       <div className="space-y-2">
                         <label className="text-white text-sm">
-                          2. ¿Por qué confías en esta persona?
+                          2. Describe una situación en la que esta persona haya aplicado ese superpoder.
                         </label>
                         <Textarea
-                          placeholder="Comparte por qué confías en esta persona..."
+                          placeholder="Comparte un ejemplo específico de cómo esta persona aplicó su superpoder..."
                           value={customAnswers.q2}
                           onChange={(e) => handleCustomAnswerChange("q2", e.target.value)}
                           className="backdrop-blur-sm bg-white/20 border-white/40 text-white placeholder:text-white/50 min-h-[80px] rounded-xl"
@@ -649,28 +626,13 @@ export default function RecommendPage({
                         </p>
                       </div>
 
-                      <div className="space-y-2">
-                        <label className="text-white text-sm">
-                          3. ¿Por qué sería el candidato ideal para este puesto?
-                        </label>
-                        <Textarea
-                          placeholder="Explica por qué es ideal para este rol específico..."
-                          value={customAnswers.q3}
-                          onChange={(e) => handleCustomAnswerChange("q3", e.target.value)}
-                          className="backdrop-blur-sm bg-white/20 border-white/40 text-white placeholder:text-white/50 min-h-[80px] rounded-xl"
-                        />
-                        <p className="text-white/60 text-xs">
-                          {customAnswers.q3.length}/20 caracteres mínimos
-                        </p>
-                      </div>
-
                       <div className="flex gap-3">
                         <div className="relative flex-1">
                           <div className="absolute bg-[#0047ff] blur-[22px] h-5 left-14 mix-blend-hard-light top-9 w-64" />
                           <Button
                             onClick={handleCustomRecommendClick}
                             disabled={!isCustomFormComplete()}
-                            className="relative bg-[#0047ff] hover:bg-[#0047ff]/90 gap-2 h-12 rounded-2xl shadow-[3px_4px_8px_0px_inset_rgba(0,114,255,0.5),0px_-4px_12px_0px_inset_rgba(5,59,203,0.5)] text-white disabled:opacity-50 disabled:cursor-not-allowed w-full"
+                            className="relative bg-[#0047ff] hover:bg-[#0047ff]/90 active:bg-[#0033cc] active:scale-95 transition-all duration-150 gap-2 h-12 rounded-2xl shadow-[3px_4px_8px_0px_inset_rgba(0,114,255,0.5),0px_-4px_12px_0px_inset_rgba(5,59,203,0.5)] text-white disabled:opacity-50 disabled:cursor-not-allowed w-full"
                           >
                             <UserPlus className="h-4 w-4" />
                             Enviar Recomendación
@@ -679,7 +641,7 @@ export default function RecommendPage({
                         <Button
                           onClick={() => setShowCustomForm(false)}
                           variant="outline"
-                          className="h-12 px-6 rounded-2xl border border-white text-white bg-transparent hover:bg-white/10"
+                          className="h-12 px-6 rounded-2xl border border-white text-white bg-transparent hover:bg-white/10 active:bg-white/20 active:scale-95 transition-all duration-150"
                         >
                           Cancelar
                         </Button>
@@ -690,7 +652,7 @@ export default function RecommendPage({
                       <div className="absolute bg-[#0047ff] blur-[22px] h-5 left-14 mix-blend-hard-light top-9 w-64" />
                       <Button
                         onClick={() => setShowCustomForm(true)}
-                        className="relative bg-[#0047ff] hover:bg-[#0047ff]/90 gap-2 h-12 rounded-2xl shadow-[3px_4px_8px_0px_inset_rgba(0,114,255,0.5),0px_-4px_12px_0px_inset_rgba(5,59,203,0.5)] text-white"
+                        className="relative bg-[#0047ff] hover:bg-[#0047ff]/90 active:bg-[#0033cc] active:scale-95 transition-all duration-150 gap-2 h-12 rounded-2xl shadow-[3px_4px_8px_0px_inset_rgba(0,114,255,0.5),0px_-4px_12px_0px_inset_rgba(5,59,203,0.5)] text-white"
                       >
                         <UserPlus className="h-4 w-4" />
                         Recomendar a alguien de mi red

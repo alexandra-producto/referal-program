@@ -146,7 +146,7 @@ export default function MisSolicitudesPage() {
           {jobs.length === 0 ? (
             <Card className="backdrop-blur-[130px] bg-white/40 border border-white/50 rounded-3xl shadow-xl p-12 text-center">
               <p className="text-gray-700 text-lg">
-                No tienes solicitudes aún. Crea tu primera solicitud haciendo clic en "Obtener Recomendación".
+                No tienes solicitudes aún. Crea tu primera solicitud haciendo clic en "Solicitar Recomendación".
               </p>
             </Card>
           ) : viewMode === "lista" ? (
