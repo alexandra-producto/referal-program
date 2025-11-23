@@ -6,18 +6,19 @@ import { getAppUrl } from "@/src/utils/appUrl";
  * Función compartida para cerrar sesión
  */
 async function handleLogout() {
-  // Eliminar la cookie de sesión
+  // Eliminar la cookie de sesión local primero
   await deleteSession();
   
-  // Construir URL de logout de LinkedIn y redirigir a nuestra página
+  // Construir URL de logout de LinkedIn que cierra la sesión y redirige a nuestra página
   const appUrl = getAppUrl();
   const redirectUri = `${appUrl}/solicitante/login-simulado`;
   
-  // Usar el endpoint tradicional de logout de LinkedIn
-  // Este endpoint cierra la sesión de LinkedIn y luego podemos redirigir
+  // Usar el endpoint de logout de LinkedIn con session_redirect
+  // Esto cierra la sesión de LinkedIn y luego redirige a nuestra app
   const linkedinLogoutUrl = `https://www.linkedin.com/uas/logout?session_redirect=${encodeURIComponent(redirectUri)}`;
   
   // Redirigir a LinkedIn para cerrar sesión allí también
+  // Cuando el usuario vuelva, LinkedIn le pedirá autorización nuevamente
   return NextResponse.redirect(linkedinLogoutUrl);
 }
 
