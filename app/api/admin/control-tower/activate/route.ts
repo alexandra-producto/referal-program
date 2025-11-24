@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/src/db/supabaseClient";
 import { calculateAIMatch } from "@/src/agents/aiMatchingAgent";
 import { createOrUpdateJobCandidateMatch } from "@/src/domain/jobCandidateMatches";
+import { exec } from "child_process";
+import { promisify } from "util";
+import { resolve } from "path";
+
+const execAsync = promisify(exec);
 
 /**
  * POST /api/admin/control-tower/activate
@@ -92,10 +97,10 @@ export async function POST(request: NextRequest) {
             // Procesar cada candidato sin match
             for (const candidateId of candidatesToMatch) {
               try {
-                // Calcular match usando AI
+                // Calcular match usando AI (llama al script Python)
                 const matchResult = await calculateAIMatch(job.id, candidateId);
 
-                // Guardar en base de datos
+                // El script Python ya guarda en la BD, pero lo hacemos aquí también por seguridad
                 await createOrUpdateJobCandidateMatch({
                   job_id: job.id,
                   candidate_id: candidateId,
@@ -111,7 +116,7 @@ export async function POST(request: NextRequest) {
                 );
 
                 // Pequeño delay para no sobrecargar OpenAI API
-                await new Promise((resolve) => setTimeout(resolve, 100));
+                await new Promise((resolve) => setTimeout(resolve, 200));
               } catch (error: any) {
                 console.error(
                   `   ❌ Error matching job ${job.id} con candidate ${candidateId}:`,

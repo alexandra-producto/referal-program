@@ -38,6 +38,19 @@ export async function calculateAIMatch(
   candidateId: string
 ): Promise<AIMatchResult> {
   try {
+    // En Vercel/producción, Python no está disponible por defecto
+    // Para desarrollo local, ejecutar el script directamente
+    // Para producción, necesitarías una API externa o convertir a TypeScript
+    
+    const isVercel = !!process.env.VERCEL;
+    const isProduction = process.env.NODE_ENV === 'production';
+    
+    if (isVercel || isProduction) {
+      // En Vercel, intentar ejecutar Python (puede fallar si no está disponible)
+      // TODO: Considerar usar una API externa o servicio separado para producción
+      console.warn('⚠️  [AI MATCHING] Ejecutando en Vercel - Python puede no estar disponible');
+    }
+    
     // Ruta al script Python (desde la raíz del proyecto)
     const projectRoot = resolve(process.cwd());
     const pythonScript = resolve(projectRoot, 'services/python/matching_service.py');
@@ -45,6 +58,7 @@ export async function calculateAIMatch(
     console.log(`🤖 [AI MATCHING] Ejecutando matching para Job ${jobId} ↔ Candidate ${candidateId}`);
     
     // Ejecutar el script Python
+    // Nota: En Vercel esto puede fallar si Python no está instalado
     const { stdout, stderr } = await execAsync(
       `python3 "${pythonScript}" "${jobId}" "${candidateId}"`,
       {
@@ -55,6 +69,7 @@ export async function calculateAIMatch(
           PATH: process.env.PATH || '',
         },
         maxBuffer: 10 * 1024 * 1024, // 10MB buffer para respuestas grandes
+        timeout: 60000, // 60 segundos timeout
       }
     );
 
