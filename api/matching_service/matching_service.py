@@ -66,16 +66,10 @@ except ImportError as e:
 # - SUPABASE_URL: URL de tu proyecto Supabase
 # - SUPABASE_SERVICE_ROLE_KEY: Service role key de Supabase (con permisos completos)
 
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
-
-if not OPENAI_API_KEY:
-    raise ValueError("❌ OPENAI_API_KEY no está configurada. Configúrala en tu .env o variables de entorno")
-if not SUPABASE_URL:
-    raise ValueError("❌ SUPABASE_URL no está configurada")
-if not SUPABASE_SERVICE_ROLE_KEY:
-    raise ValueError("❌ SUPABASE_SERVICE_ROLE_KEY no está configurada")
+# Variables de entorno (se cargan cuando se necesiten)
+OPENAI_API_KEY = None
+SUPABASE_URL = None
+SUPABASE_SERVICE_ROLE_KEY = None
 
 # Inicializar clientes (lazy initialization)
 # Se inicializarán cuando se llame calculate_and_save_match
@@ -84,8 +78,17 @@ supabase: Client = None
 
 def _ensure_clients_initialized():
     """Inicializa los clientes si no están inicializados"""
-    global openai_client, supabase
+    global openai_client, supabase, OPENAI_API_KEY, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
     
+    # Cargar variables de entorno si no están cargadas
+    if OPENAI_API_KEY is None:
+        OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+    if SUPABASE_URL is None:
+        SUPABASE_URL = os.getenv("SUPABASE_URL")
+    if SUPABASE_SERVICE_ROLE_KEY is None:
+        SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+    
+    # Validar que estén configuradas
     if not OPENAI_API_KEY:
         raise ValueError("❌ OPENAI_API_KEY no está configurada. Configúrala en variables de entorno de Vercel")
     if not SUPABASE_URL:
@@ -93,6 +96,7 @@ def _ensure_clients_initialized():
     if not SUPABASE_SERVICE_ROLE_KEY:
         raise ValueError("❌ SUPABASE_SERVICE_ROLE_KEY no está configurada. Configúrala en variables de entorno de Vercel")
     
+    # Inicializar clientes si no están inicializados
     if openai_client is None:
         openai_client = OpenAI(api_key=OPENAI_API_KEY)
     if supabase is None:
