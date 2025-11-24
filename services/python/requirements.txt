@@ -1,0 +1,8 @@
+# Dependencias para AI Matching Service
+# Instalar con: pip install -r requirements.txt
+
+openai>=1.50.0
+pydantic>=2.0.0
+supabase>=2.0.0
+python-dotenv>=1.0.0
+

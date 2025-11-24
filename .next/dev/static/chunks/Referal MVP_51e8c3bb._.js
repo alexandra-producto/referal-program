@@ -146,13 +146,13 @@ var _s = __turbopack_context__.k.signature();
 ;
 ;
 ;
-function LoginPage() {
+function LoginPageContent() {
     _s();
     const router = (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRouter"])();
     const searchParams = (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useSearchParams"])();
     const [error, setError] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(null);
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
-        "LoginPage.useEffect": ()=>{
+        "LoginPageContent.useEffect": ()=>{
             const errorParam = searchParams.get("error");
             if (errorParam) {
                 switch(errorParam){
@@ -185,20 +185,20 @@ function LoginPage() {
                 }
                 // Limpiar el error después de 10 segundos para permitir reintentar
                 const timer = setTimeout({
-                    "LoginPage.useEffect.timer": ()=>{
+                    "LoginPageContent.useEffect.timer": ()=>{
                         setError(null);
                         // Limpiar el parámetro de error de la URL
                         const newUrl = new URL(window.location.href);
                         newUrl.searchParams.delete("error");
                         window.history.replaceState({}, "", newUrl.toString());
                     }
-                }["LoginPage.useEffect.timer"], 10000);
+                }["LoginPageContent.useEffect.timer"], 10000);
                 return ({
-                    "LoginPage.useEffect": ()=>clearTimeout(timer)
-                })["LoginPage.useEffect"];
+                    "LoginPageContent.useEffect": ()=>clearTimeout(timer)
+                })["LoginPageContent.useEffect"];
             }
         }
-    }["LoginPage.useEffect"], [
+    }["LoginPageContent.useEffect"], [
         searchParams
     ]);
     const handleLinkedInLogin = (role)=>{
@@ -485,15 +485,61 @@ function LoginPage() {
         columnNumber: 5
     }, this);
 }
-_s(LoginPage, "5T9NW877JQl3rr+u03bF2Rq8Sjk=", false, function() {
+_s(LoginPageContent, "5T9NW877JQl3rr+u03bF2Rq8Sjk=", false, function() {
     return [
         __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRouter"],
         __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useSearchParams"]
     ];
 });
-_c = LoginPage;
-var _c;
-__turbopack_context__.k.register(_c, "LoginPage");
+_c = LoginPageContent;
+function LoginPage() {
+    return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Suspense"], {
+        fallback: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+            className: "min-h-screen flex items-center justify-center bg-gradient-to-b from-purple-100 via-pink-100 to-rose-200",
+            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                className: "text-center",
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"
+                    }, void 0, false, {
+                        fileName: "[project]/Referal MVP/app/solicitante/login-simulado/page.tsx",
+                        lineNumber: 195,
+                        columnNumber: 13
+                    }, void 0),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                        className: "mt-4 text-gray-700",
+                        children: "Cargando..."
+                    }, void 0, false, {
+                        fileName: "[project]/Referal MVP/app/solicitante/login-simulado/page.tsx",
+                        lineNumber: 196,
+                        columnNumber: 13
+                    }, void 0)
+                ]
+            }, void 0, true, {
+                fileName: "[project]/Referal MVP/app/solicitante/login-simulado/page.tsx",
+                lineNumber: 194,
+                columnNumber: 11
+            }, void 0)
+        }, void 0, false, {
+            fileName: "[project]/Referal MVP/app/solicitante/login-simulado/page.tsx",
+            lineNumber: 193,
+            columnNumber: 9
+        }, void 0),
+        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(LoginPageContent, {}, void 0, false, {
+            fileName: "[project]/Referal MVP/app/solicitante/login-simulado/page.tsx",
+            lineNumber: 201,
+            columnNumber: 7
+        }, this)
+    }, void 0, false, {
+        fileName: "[project]/Referal MVP/app/solicitante/login-simulado/page.tsx",
+        lineNumber: 191,
+        columnNumber: 5
+    }, this);
+}
+_c1 = LoginPage;
+var _c, _c1;
+__turbopack_context__.k.register(_c, "LoginPageContent");
+__turbopack_context__.k.register(_c1, "LoginPage");
 if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelpers !== null) {
     __turbopack_context__.k.registerExports(__turbopack_context__.m, globalThis.$RefreshHelpers$);
 }

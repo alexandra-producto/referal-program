@@ -7,15 +7,46 @@ import { getCandidateById } from "../domain/candidates";
 import { getExperienceForCandidate } from "../domain/candidateExperience";
 import { createOrUpdateJobCandidateMatch } from "../domain/jobCandidateMatches";
 import { computeJobCandidateMatch, Job, Candidate, CandidateExperience } from "./computeJobCandidateMatch";
+import { calculateAIMatch } from "./aiMatchingAgent";
 
 /**
  * Matches a job with a candidate and saves the result to job_candidate_matches
+ * Usa el nuevo servicio AI (OpenAI GPT-4o) para calcular matches
  */
 export async function matchJobCandidate(
   jobId: string,
-  candidateId: string
+  candidateId: string,
+  options?: { useAI?: boolean }
 ): Promise<{ score: number; detail: any }> {
-  // Fetch all required data
+  // Por defecto usar AI, pero permitir fallback al sistema antiguo
+  const useAI = options?.useAI !== false;
+
+  if (useAI) {
+    try {
+      // Usar el nuevo servicio AI
+      const matchResult = await calculateAIMatch(jobId, candidateId);
+
+      // Upsert to database (ya se guarda en el script Python, pero lo hacemos aquí también por seguridad)
+      await createOrUpdateJobCandidateMatch({
+        job_id: jobId,
+        candidate_id: candidateId,
+        match_score: matchResult.score,
+        match_detail: matchResult.detail,
+        match_source: "openai-gpt4o",
+        updated_at: new Date().toISOString(),
+      });
+
+      return {
+        score: matchResult.score,
+        detail: matchResult.detail,
+      };
+    } catch (error: any) {
+      console.error(`⚠️  Error en AI matching, usando fallback:`, error.message);
+      // Fallback al sistema antiguo si falla el AI
+    }
+  }
+
+  // Sistema antiguo (fallback)
   const job = await getJobById(jobId);
   if (!job) {
     throw new Error(`Job not found: ${jobId}`);

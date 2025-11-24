@@ -215,9 +215,12 @@ export default function AdminSolicitudesPage() {
                 <Users className="h-4 w-4" />
                 Recomendar
               </Button>
-              <Button className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white rounded-xl flex items-center gap-2 shadow-lg">
+              <Button
+                onClick={() => router.push("/admin/control-tower")}
+                className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white rounded-xl flex items-center gap-2 shadow-lg"
+              >
                 <Zap className="h-4 w-4" />
-                Vista Hiperconector
+                Control Tower
               </Button>
             </div>
           </div>

@@ -1,13 +1,160 @@
-[00:00:01.558] Server  LOG      ✓ Ready in 1112ms
-[00:00:26.692] Server  LOG      ○ Compiling /solicitante/login-simulado ...
-[00:00:29.133] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:00:50.839] Server  LOG     [dotenv@17.2.3] injecting env (0) from .env.local -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
-[00:00:50.848] Server  LOG     [dotenv@17.2.3] injecting env (0) from .env.local -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
-[00:00:50.866] Server  LOG     🔄 Intercambiando código por token...
-[00:00:51.345] Server  LOG     ✅ Token obtenido exitosamente
-[00:00:51.351] Server  LOG     🔄 Obteniendo información del usuario...
-[00:00:52.055] Server  LOG     ✅ UserInfo obtenido: {}
-[00:00:52.943] Server  LOG     ✅ Profile obtenido: "No"
-[00:00:52.945] Server  LOG     📋 Datos parseados: {}
-[00:00:52.946] Server  LOG     📋 Headline parseado: {}
-[00:00:56.783] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:02.122] Server  LOG      ✓ Ready in 1859ms
+[00:00:13.993] Server  ERROR    ⨯ ./Referal MVP/app/solicitante/solicitudes/page.tsx:290:7
+Parsing ecmascript source code failed
+  288 |         )}
+  289 |         </motion.div>
+> 290 |       </div>
+      |       ^
+  291 |     </div>
+  292 |   );
+  293 | }
+
+Expression expected
+
+
+
+./Referal MVP/app/solicitante/solicitudes/page.tsx:288:10
+Parsing ecmascript source code failed
+  286 |             ))}
+  287 |           </div>
+> 288 |         )}
+      |          ^
+  289 |         </motion.div>
+  290 |       </div>
+  291 |     </div>
+
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+
+
+
+./Referal MVP/app/solicitante/solicitudes/page.tsx:290:8
+Parsing ecmascript source code failed
+  288 |         )}
+  289 |         </motion.div>
+> 290 |       </div>
+      |        ^^^^^
+  291 |     </div>
+  292 |   );
+  293 | }
+
+Unterminated regexp literal
+
+
+[00:00:14.771] Browser ERROR   uncaughtError: Error: ./Referal MVP/app/solicitante/solicitudes/page.tsx:290:7
+Parsing ecmascript source code failed
+  288 |         )}
+  289 |         </motion.div>
+> 290 |       </div>
+      |       ^
+  291 |     </div>
+  292 |   );
+  293 | }
+
+Expression expected
+
+
+[00:00:15.030] Browser ERROR   ./Referal MVP/app/solicitante/solicitudes/page.tsx:290:7
+Parsing ecmascript source code failed
+  288 |         )}
+  289 |         </motion.div>
+> 290 |       </div>
+      |       ^
+  291 |     </div>
+  292 |   );
+  293 | }
+
+Expression expected
+[00:00:15.030] Browser ERROR   ./Referal MVP/app/solicitante/solicitudes/page.tsx:288:10
+Parsing ecmascript source code failed
+  286 |             ))}
+  287 |           </div>
+> 288 |         )}
+      |          ^
+  289 |         </motion.div>
+  290 |       </div>
+  291 |     </div>
+
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+[00:00:15.030] Browser ERROR   ./Referal MVP/app/solicitante/solicitudes/page.tsx:290:8
+Parsing ecmascript source code failed
+  288 |         )}
+  289 |         </motion.div>
+> 290 |       </div>
+      |        ^^^^^
+  291 |     </div>
+  292 |   );
+  293 | }
+
+Unterminated regexp literal
+[00:00:15.030] Browser ERROR   ./Referal MVP/app/solicitante/solicitudes/page.tsx:290:7
+Parsing ecmascript source code failed
+  288 |         )}
+  289 |         </motion.div>
+> 290 |       </div>
+      |       ^
+  291 |     </div>
+  292 |   );
+  293 | }
+
+Expression expected
+[00:00:15.030] Browser ERROR   ./Referal MVP/app/solicitante/solicitudes/page.tsx:288:10
+Parsing ecmascript source code failed
+  286 |             ))}
+  287 |           </div>
+> 288 |         )}
+      |          ^
+  289 |         </motion.div>
+  290 |       </div>
+  291 |     </div>
+
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+[00:00:15.030] Browser ERROR   ./Referal MVP/app/solicitante/solicitudes/page.tsx:290:8
+Parsing ecmascript source code failed
+  288 |         )}
+  289 |         </motion.div>
+> 290 |       </div>
+      |        ^^^^^
+  291 |     </div>
+  292 |   );
+  293 | }
+
+Unterminated regexp literal
+[00:00:15.205] Browser ERROR   ./Referal MVP/app/solicitante/solicitudes/page.tsx:290:7
+Parsing ecmascript source code failed
+  288 |         )}
+  289 |         </motion.div>
+> 290 |       </div>
+      |       ^
+  291 |     </div>
+  292 |   );
+  293 | }
+
+Expression expected
+[00:00:15.205] Browser ERROR   ./Referal MVP/app/solicitante/solicitudes/page.tsx:288:10
+Parsing ecmascript source code failed
+  286 |             ))}
+  287 |           </div>
+> 288 |         )}
+      |          ^
+  289 |         </motion.div>
+  290 |       </div>
+  291 |     </div>
+
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+[00:00:15.205] Browser ERROR   ./Referal MVP/app/solicitante/solicitudes/page.tsx:290:8
+Parsing ecmascript source code failed
+  288 |         )}
+  289 |         </motion.div>
+> 290 |       </div>
+      |        ^^^^^
+  291 |     </div>
+  292 |   );
+  293 | }
+
+Unterminated regexp literal
+[00:00:48.617] Server  LOG      ✓ Compiled in 832ms
+[00:00:49.571] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:01:13.886] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:01:17.544] Server  ERROR   ❌ LINKEDIN_CLIENT_ID no encontrado en process.env
+[00:01:17.544] Server  ERROR   Variables disponibles: []
+[00:01:17.638] Server  ERROR   Error en /api/auth/linkedin: Error: LINKEDIN_CLIENT_ID no está configurado. Verifica que esté en .env.local
