@@ -8,11 +8,6 @@
     "NODE_ENV": "production"
   },
   "cleanUrls": true,
-  "trailingSlash": false,
-  "functions": {
-    "api/ai-match.py": {
-      "runtime": "python3.9"
-    }
-  }
+  "trailingSlash": false
 }
 
