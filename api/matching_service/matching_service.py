@@ -77,9 +77,26 @@ if not SUPABASE_URL:
 if not SUPABASE_SERVICE_ROLE_KEY:
     raise ValueError("❌ SUPABASE_SERVICE_ROLE_KEY no está configurada")
 
-# Inicializar clientes
-openai_client = OpenAI(api_key=OPENAI_API_KEY)
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+# Inicializar clientes (lazy initialization)
+# Se inicializarán cuando se llame calculate_and_save_match
+openai_client = None
+supabase: Client = None
+
+def _ensure_clients_initialized():
+    """Inicializa los clientes si no están inicializados"""
+    global openai_client, supabase
+    
+    if not OPENAI_API_KEY:
+        raise ValueError("❌ OPENAI_API_KEY no está configurada. Configúrala en variables de entorno de Vercel")
+    if not SUPABASE_URL:
+        raise ValueError("❌ SUPABASE_URL no está configurada. Configúrala en variables de entorno de Vercel")
+    if not SUPABASE_SERVICE_ROLE_KEY:
+        raise ValueError("❌ SUPABASE_SERVICE_ROLE_KEY no está configurada. Configúrala en variables de entorno de Vercel")
+    
+    if openai_client is None:
+        openai_client = OpenAI(api_key=OPENAI_API_KEY)
+    if supabase is None:
+        supabase = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
 
 # ============================================================================
@@ -298,6 +315,9 @@ def calculate_and_save_match(job_id: str, candidate_id: str) -> Dict[str, Any]:
     Returns:
         Dict con match_score, match_detail y status
     """
+    # Asegurar que los clientes estén inicializados
+    _ensure_clients_initialized()
+    
     print(f"\n🔍 [AI MATCHING] Iniciando matching para Job {job_id} ↔ Candidate {candidate_id}")
     
     # ========================================================================

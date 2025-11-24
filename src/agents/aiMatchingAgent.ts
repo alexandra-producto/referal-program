@@ -43,13 +43,17 @@ export async function calculateAIMatch(
     
     // En Vercel/producción, usar la Serverless Function de Python
     if (isVercel || isProduction) {
-      const apiUrl = process.env.VERCEL_URL 
+      // En Vercel, usar la URL relativa (mismo dominio)
+      // En producción, VERCEL_URL puede no estar disponible en runtime, usar URL relativa
+      const apiUrl = process.env.VERCEL_URL && !isProduction
         ? `https://${process.env.VERCEL_URL}`
-        : process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+        : ''; // URL relativa funciona mejor en Vercel
       
-      console.log(`🤖 [AI MATCHING] Llamando a API de Python en: ${apiUrl}/api/ai-match`);
+      const apiEndpoint = apiUrl ? `${apiUrl}/api/ai-match` : '/api/ai-match';
       
-      const response = await fetch(`${apiUrl}/api/ai-match`, {
+      console.log(`🤖 [AI MATCHING] Llamando a API de Python en: ${apiEndpoint}`);
+      
+      const response = await fetch(apiEndpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
