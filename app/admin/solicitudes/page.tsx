@@ -36,6 +36,7 @@ export default function AdminSolicitudesPage() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>("lista");
+  const [navigating, setNavigating] = useState<string | null>(null);
 
   useEffect(() => {
     // Verificar autenticación
@@ -72,7 +73,18 @@ export default function AdminSolicitudesPage() {
   };
 
   const handleViewRecommendations = (jobId: string) => {
+    setNavigating(`recommendations-${jobId}`);
     router.push(`/admin/solicitudes/${jobId}/recomendaciones`);
+  };
+
+  const handleNavigateToCreate = () => {
+    setNavigating("create");
+    router.push("/solicitante/crear");
+  };
+
+  const handleNavigateToControlTower = () => {
+    setNavigating("control-tower");
+    router.push("/admin/control-tower");
   };
 
   const getStatusColor = (status: string) => {
@@ -141,12 +153,11 @@ export default function AdminSolicitudesPage() {
             <div className="backdrop-blur-[130px] bg-white/40 border border-white/50 rounded-2xl px-4 py-2 shadow-lg">
               <p className="text-gray-800 font-medium">Bienvenido Admin</p>
             </div>
-            <ProductLatamLogo />
           </div>
           <Button
             onClick={handleLogout}
             variant="outline"
-            className="gap-2 h-10 px-4 rounded-xl border border-gray-300 text-gray-700 bg-white/80 hover:bg-white backdrop-blur-sm"
+            className="gap-2 h-10 px-4 rounded-xl border border-gray-300 text-gray-700 bg-white/80 hover:bg-white active:bg-gray-100 transition-all duration-200 backdrop-blur-sm"
           >
             <LogOut className="h-4 w-4" />
             Cerrar Sesión
@@ -183,10 +194,10 @@ export default function AdminSolicitudesPage() {
                 onClick={() => setViewMode("lista")}
                 variant={viewMode === "lista" ? "default" : "outline"}
                 size="icon"
-                className={`rounded-xl ${
+                className={`rounded-xl transition-all duration-200 ${
                   viewMode === "lista"
-                    ? "bg-orange-500 text-white"
-                    : "bg-white/80 text-gray-700 border-gray-300 backdrop-blur-sm"
+                    ? "bg-orange-500 text-white hover:bg-orange-600 active:bg-orange-700"
+                    : "bg-white/80 text-gray-700 border-gray-300 backdrop-blur-sm hover:bg-white active:bg-gray-100"
                 }`}
               >
                 <List className="h-4 w-4" />
@@ -195,10 +206,10 @@ export default function AdminSolicitudesPage() {
                 onClick={() => setViewMode("grid")}
                 variant={viewMode === "grid" ? "default" : "outline"}
                 size="icon"
-                className={`rounded-xl ${
+                className={`rounded-xl transition-all duration-200 ${
                   viewMode === "grid"
-                    ? "bg-orange-500 text-white"
-                    : "bg-white/80 text-gray-700 border-gray-300 backdrop-blur-sm"
+                    ? "bg-orange-500 text-white hover:bg-orange-600 active:bg-orange-700"
+                    : "bg-white/80 text-gray-700 border-gray-300 backdrop-blur-sm hover:bg-white active:bg-gray-100"
                 }`}
               >
                 <Grid className="h-4 w-4" />
@@ -207,20 +218,43 @@ export default function AdminSolicitudesPage() {
 
             {/* Action Buttons */}
             <div className="flex items-center gap-3">
-              <Button className="bg-orange-500 hover:bg-orange-600 text-white rounded-xl flex items-center gap-2 shadow-lg">
-                <Plus className="h-4 w-4" />
-                Obtener Recomendación
+              <Button 
+                onClick={handleNavigateToCreate}
+                disabled={navigating === "create"}
+                className="bg-orange-500 hover:bg-orange-600 active:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl flex items-center gap-2 shadow-lg transition-all duration-200"
+              >
+                {navigating === "create" ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    Cargando...
+                  </>
+                ) : (
+                  <>
+                    <Plus className="h-4 w-4" />
+                    Solicitar Recomendación
+                  </>
+                )}
               </Button>
-              <Button className="bg-orange-500 hover:bg-orange-600 text-white rounded-xl flex items-center gap-2 shadow-lg">
+              <Button className="bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white rounded-xl flex items-center gap-2 shadow-lg transition-all duration-200">
                 <Users className="h-4 w-4" />
                 Recomendar
               </Button>
               <Button
-                onClick={() => router.push("/admin/control-tower")}
-                className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white rounded-xl flex items-center gap-2 shadow-lg"
+                onClick={handleNavigateToControlTower}
+                disabled={navigating === "control-tower"}
+                className="bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 active:from-pink-700 active:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl flex items-center gap-2 shadow-lg transition-all duration-200"
               >
-                <Zap className="h-4 w-4" />
-                Control Tower
+                {navigating === "control-tower" ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    Cargando...
+                  </>
+                ) : (
+                  <>
+                    <Zap className="h-4 w-4" />
+                    Control Tower
+                  </>
+                )}
               </Button>
             </div>
           </div>
@@ -287,15 +321,22 @@ export default function AdminSolicitudesPage() {
                       <td className="px-6 py-4">
                         <Button
                           onClick={() => handleViewRecommendations(job.id)}
-                          disabled={job.recommendations_count === 0}
+                          disabled={job.recommendations_count === 0 || navigating === `recommendations-${job.id}`}
                           variant="outline"
-                          className={`rounded-xl ${
+                          className={`rounded-xl transition-all duration-200 ${
                             job.recommendations_count === 0
                               ? "bg-gray-300 text-gray-500 border-gray-300 cursor-not-allowed"
-                              : "bg-orange-500 hover:bg-orange-600 text-white border-orange-500"
+                              : "bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white border-orange-500"
                           }`}
                         >
-                          Ver {job.recommendations_count}
+                          {navigating === `recommendations-${job.id}` ? (
+                            <>
+                              <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-2"></div>
+                              Cargando...
+                            </>
+                          ) : (
+                            `Ver ${job.recommendations_count}`
+                          )}
                         </Button>
                       </td>
                     </motion.tr>
@@ -343,14 +384,21 @@ export default function AdminSolicitudesPage() {
 
                   <Button
                     onClick={() => handleViewRecommendations(job.id)}
-                    disabled={job.recommendations_count === 0}
-                    className={`w-full rounded-xl mb-3 ${
+                    disabled={job.recommendations_count === 0 || navigating === `recommendations-${job.id}`}
+                    className={`w-full rounded-xl mb-3 transition-all duration-200 ${
                       job.recommendations_count === 0
                         ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                        : "bg-orange-500 hover:bg-orange-600 text-white"
+                        : "bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white"
                     }`}
                   >
-                    Ver {job.recommendations_count} Recomendaciones
+                    {navigating === `recommendations-${job.id}` ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        Cargando...
+                      </>
+                    ) : (
+                      `Ver ${job.recommendations_count} Recomendaciones`
+                    )}
                   </Button>
 
                   <div className={`flex items-center gap-2 px-3 py-2 rounded-xl border ${getStatusColor(job.status)}`}>

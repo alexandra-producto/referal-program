@@ -125,7 +125,7 @@ export default function ControlTowerPage() {
             <Button
               onClick={handleBack}
               variant="outline"
-              className="gap-2 h-10 px-4 rounded-xl border border-gray-300 text-gray-700 bg-white/80 hover:bg-white"
+              className="gap-2 h-10 px-4 rounded-xl border border-gray-300 text-gray-700 bg-white/80 hover:bg-white active:bg-gray-100 transition-all duration-200"
             >
               <ArrowLeft className="h-4 w-4" />
               Volver
@@ -135,7 +135,7 @@ export default function ControlTowerPage() {
           <Button
             onClick={handleLogout}
             variant="outline"
-            className="gap-2 h-10 px-4 rounded-xl border border-gray-300 text-gray-700 bg-white/80 hover:bg-white"
+            className="gap-2 h-10 px-4 rounded-xl border border-gray-300 text-gray-700 bg-white/80 hover:bg-white active:bg-gray-100 transition-all duration-200"
           >
             <LogOut className="h-4 w-4" />
             Cerrar Sesión
@@ -187,7 +187,7 @@ export default function ControlTowerPage() {
               <Button
                 onClick={handleActivateAgent}
                 disabled={activating}
-                className="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white rounded-xl h-12 gap-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 active:from-pink-700 active:to-purple-700 text-white rounded-xl h-12 gap-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
               >
                 {activating ? (
                   <>

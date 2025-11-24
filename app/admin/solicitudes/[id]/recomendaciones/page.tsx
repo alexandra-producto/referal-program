@@ -140,11 +140,11 @@ export default function RecomendacionesPage({
           transition={{ duration: 0.6 }}
           className="flex items-center justify-between"
         >
-          <ProductLatamLogo />
+          <div></div>
           <Button
             onClick={() => router.push("/admin/solicitudes")}
             variant="outline"
-            className="gap-2 h-10 px-4 rounded-xl border border-gray-300 text-gray-700 bg-white/80 hover:bg-white backdrop-blur-sm"
+            className="gap-2 h-10 px-4 rounded-xl border border-gray-300 text-gray-700 bg-white/80 hover:bg-white active:bg-gray-100 backdrop-blur-sm transition-all duration-200"
           >
             <ArrowLeft className="h-4 w-4" />
             Volver a Solicitudes
@@ -325,7 +325,7 @@ export default function RecomendacionesPage({
 
                     {/* Action Button */}
                     <div className="flex justify-end">
-                      <Button className="bg-orange-500 hover:bg-orange-600 text-white rounded-xl flex items-center gap-2 shadow-lg">
+                      <Button className="bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white rounded-xl flex items-center gap-2 shadow-lg transition-all duration-200">
                         <Send className="h-4 w-4" />
                         Enviar
                       </Button>
@@ -344,7 +344,7 @@ export default function RecomendacionesPage({
         <Button
           variant="outline"
           size="icon"
-          className="rounded-full w-12 h-12 bg-gray-800 hover:bg-gray-700 text-white border-gray-700"
+          className="rounded-full w-12 h-12 bg-gray-800 hover:bg-gray-700 active:bg-gray-600 text-white border-gray-700 transition-all duration-200"
         >
           <HelpCircle className="h-5 w-5" />
         </Button>
