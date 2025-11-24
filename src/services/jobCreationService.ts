@@ -66,7 +66,7 @@ export async function createJobFromCandidate(
   const requirementsJson = buildRequirementsJson(request);
 
   // 6. Crear el objeto job
-  const jobData = {
+  const jobData: any = {
     company_name: companyName,
     job_title: request.jobTitle,
     job_level: null, // V1: no se usa
@@ -78,6 +78,11 @@ export async function createJobFromCandidate(
     owner_candidate_id: candidateId,
     owner_role_title: ownerRoleTitle,
   };
+
+  // Agregar document_url si existe
+  if (request.documentUrl) {
+    jobData.document_url = request.documentUrl;
+  }
 
   // 7. Crear el job (con matching automático)
   const job = await createJob(jobData, { triggerMatching: true });

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { ArrowLeft, Briefcase, FileText, Eye, ArrowUp, Code, MapPin, Send, LogOut } from "lucide-react";
+import { ArrowLeft, Briefcase, FileText, Eye, ArrowUp, Code, MapPin, Send, LogOut, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -26,6 +26,9 @@ export default function CrearSolicitudPage() {
   const [desiredTrajectory, setDesiredTrajectory] = useState("");
   const [technicalBackgroundNeeded, setTechnicalBackgroundNeeded] = useState(false);
   const [modality, setModality] = useState<Modality | "">("");
+  const [documentFile, setDocumentFile] = useState<File | null>(null);
+  const [documentUrl, setDocumentUrl] = useState<string | null>(null);
+  const [uploadingDocument, setUploadingDocument] = useState(false);
 
   useEffect(() => {
     // Verificar autenticación
@@ -80,6 +83,7 @@ export default function CrearSolicitudPage() {
           desiredTrajectory: desiredTrajectory.trim(),
           technicalBackgroundNeeded,
           modality,
+          documentUrl: documentUrl, // Incluir URL del documento si existe
         }),
       });
 
@@ -105,6 +109,60 @@ export default function CrearSolicitudPage() {
   const handleLogout = async () => {
     // Redirigir directamente al endpoint de logout que cerrará sesión en LinkedIn también
     window.location.href = "/api/auth/logout";
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validar que sea PDF
+    if (file.type !== "application/pdf") {
+      alert("Solo se permiten archivos PDF");
+      e.target.value = ""; // Limpiar el input
+      return;
+    }
+
+    // Validar tamaño (máximo 10MB)
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      alert("El archivo es demasiado grande. Máximo 10MB");
+      e.target.value = ""; // Limpiar el input
+      return;
+    }
+
+    setDocumentFile(file);
+    setUploadingDocument(true);
+
+    try {
+      // Subir el archivo
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/jobs/upload-document", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Error al subir el archivo");
+      }
+
+      const data = await response.json();
+      setDocumentUrl(data.url);
+    } catch (error: any) {
+      console.error("Error uploading document:", error);
+      alert(`Error al subir el documento: ${error.message}`);
+      setDocumentFile(null);
+      e.target.value = ""; // Limpiar el input
+    } finally {
+      setUploadingDocument(false);
+    }
+  };
+
+  const handleRemoveDocument = () => {
+    setDocumentFile(null);
+    setDocumentUrl(null);
   };
 
   return (
@@ -210,6 +268,68 @@ export default function CrearSolicitudPage() {
                 <div className="absolute bottom-3 right-3 text-gray-500 text-sm">
                   {description.length}/80 caracteres mínimos
                 </div>
+              </div>
+            </div>
+
+            {/* Subir Documento */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Upload className="h-5 w-5 text-gray-700" />
+                <h2 className="text-gray-800 font-semibold text-xl">Documento del Rol (Opcional)</h2>
+              </div>
+              
+              {!documentUrl ? (
+                <div className="space-y-2">
+                  <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-xl cursor-pointer bg-white hover:bg-gray-50 transition-colors">
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                      <Upload className="w-8 h-8 mb-2 text-gray-500" />
+                      <p className="mb-2 text-sm text-gray-500">
+                        <span className="font-semibold">Click para subir</span> o arrastra el archivo
+                      </p>
+                      <p className="text-xs text-gray-500">PDF (MAX. 10MB)</p>
+                    </div>
+                    <input
+                      type="file"
+                      className="hidden"
+                      accept="application/pdf"
+                      onChange={handleFileChange}
+                      disabled={uploadingDocument}
+                    />
+                  </label>
+                  {uploadingDocument && (
+                    <div className="flex items-center gap-2 text-blue-600 text-sm">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                      Subiendo documento...
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="flex items-center justify-between p-4 bg-green-50 border-2 border-green-200 rounded-xl">
+                  <div className="flex items-center gap-3">
+                    <FileText className="h-6 w-6 text-green-600" />
+                    <div>
+                      <p className="text-green-800 font-semibold">
+                        {documentFile?.name || "Documento subido"}
+                      </p>
+                      <p className="text-green-600 text-sm">
+                        {documentFile ? `${(documentFile.size / 1024 / 1024).toFixed(2)} MB` : "Listo"}
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    type="button"
+                    onClick={handleRemoveDocument}
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8 rounded-full border-red-300 text-red-600 hover:bg-red-50"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+              <div className="flex items-start gap-2 text-gray-600 text-sm">
+                <span className="text-blue-500">ℹ️</span>
+                <p>Puedes subir un documento PDF con información adicional sobre el rol (JD, descripción detallada, etc.)</p>
               </div>
             </div>
 

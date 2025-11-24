@@ -9,6 +9,7 @@ export interface CreateJobRequest {
   scenario: string;
   technicalBackgroundNeeded: boolean;
   modality: 'remote' | 'hybrid' | 'onsite';
+  documentUrl?: string | null; // URL del documento PDF (opcional)
 }
 
 /**
@@ -30,7 +31,7 @@ export function validateCreateJobRequest(body: any): { valid: boolean; error?: s
     return { valid: false, error: 'Request body is required' };
   }
 
-  const { jobTitle, description, nonNegotiables, desiredTrajectory, scenario, technicalBackgroundNeeded, modality } = body;
+  const { jobTitle, description, nonNegotiables, desiredTrajectory, scenario, technicalBackgroundNeeded, modality, documentUrl } = body;
 
   // Validar campos requeridos
   if (!jobTitle || typeof jobTitle !== 'string' || jobTitle.trim().length === 0) {
@@ -71,6 +72,7 @@ export function validateCreateJobRequest(body: any): { valid: boolean; error?: s
       scenario: scenario.trim(),
       technicalBackgroundNeeded,
       modality,
+      documentUrl: documentUrl || null, // Opcional, puede ser null
     },
   };
 }
