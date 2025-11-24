@@ -587,7 +587,8 @@ export default function RecommendPage({
             </motion.div>
           ))}
 
-          {/* Recommend Someone Else Card */}
+          {/* Recommend Someone Else Card - OCULTO: Funcionalidad no implementada en backend */}
+          {/* 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -699,6 +700,7 @@ export default function RecommendPage({
               </div>
             </Card>
           </motion.div>
+          */
         </div>
       </div>
 
