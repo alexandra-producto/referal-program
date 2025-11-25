@@ -18,6 +18,7 @@
     "test:create-job": "tsx src/testCreateJobAndNotify.ts",
     "generate:emilio-link": "tsx src/generateEmilioHubLink.ts",
     "check:env": "tsx scripts/check-env.ts",
+    "test:linkedin-profile": "tsx scripts/test-linkedin-profile.ts",
     "pre-push": "tsx scripts/pre-push-check.ts",
     "next:dev": "next dev",
     "next:build": "NEXT_PRIVATE_SKIP_TURBOPACK=1 next build",
