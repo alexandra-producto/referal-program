@@ -7,6 +7,7 @@ import {
   exchangeCodeForToken,
   getUserInfo,
   getProfile,
+  getCurrentPosition,
   parseHeadline,
   buildLinkedInUrl,
 } from "@/src/utils/linkedinAuth";
@@ -127,25 +128,32 @@ export async function GET(request: NextRequest) {
     
     console.log("📋 Datos parseados:", { linkedinId, email, fullName, profilePictureUrl });
     
-    // Verificar si profile existe y tiene headline
-    if (!profile) {
-      console.warn("⚠️ Profile no obtenido de LinkedIn");
-    } else if (!profile.headline) {
-      console.warn("⚠️ Profile obtenido pero sin headline:", profile);
+    // Obtener posición actual directamente de LinkedIn API
+    const { title: positionTitle, companyName: positionCompany } = await getCurrentPosition(accessToken);
+    
+    // Si no hay posición actual, intentar parsear del headline como fallback
+    let current_job_title = positionTitle;
+    let current_company = positionCompany;
+    
+    if (!current_job_title || !current_company) {
+      console.log("⚠️ No se obtuvo posición actual, intentando parsear headline como fallback...");
+      const { current_role, current_company: headlineCompany } = parseHeadline(profile?.headline);
+      if (!current_job_title && current_role) {
+        current_job_title = current_role;
+      }
+      if (!current_company && headlineCompany) {
+        current_company = headlineCompany;
+      }
     }
     
-    const { current_role, current_company } = parseHeadline(profile?.headline);
     const linkedinUrl = buildLinkedInUrl(profile?.vanityName);
     
-    // Mapear current_role a current_job_title para la tabla users
-    const current_job_title = current_role;
-    
-    console.log("📋 Headline parseado:", { 
-      headline: profile?.headline || "N/A",
-      current_job_title, 
-      current_company, 
+    console.log("📋 Datos de posición obtenidos:", { 
+      fromPositions: { title: positionTitle, companyName: positionCompany },
+      final: { current_job_title, current_company },
       linkedinUrl,
-      vanityName: profile?.vanityName || "N/A"
+      vanityName: profile?.vanityName || "N/A",
+      headline: profile?.headline || "N/A"
     });
 
     // Procesar según el rol

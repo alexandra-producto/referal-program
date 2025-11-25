@@ -52,6 +52,23 @@ export interface LinkedInProfile {
   headline?: string;
 }
 
+export interface LinkedInPosition {
+  id: number;
+  title?: string;
+  companyName?: string;
+  isCurrent?: boolean;
+  timePeriod?: {
+    startDate?: {
+      year?: number;
+      month?: number;
+    };
+    endDate?: {
+      year?: number;
+      month?: number;
+    };
+  };
+}
+
 /**
  * Genera la URL de autorización de LinkedIn
  */
@@ -118,6 +135,81 @@ export async function getUserInfo(accessToken: string): Promise<LinkedInUserInfo
   }
 
   return await response.json();
+}
+
+/**
+ * Obtiene la posición actual del usuario desde LinkedIn
+ * Usa el endpoint de positions para obtener el título y empresa actual
+ */
+export async function getCurrentPosition(accessToken: string): Promise<{ title: string | null; companyName: string | null }> {
+  try {
+    // Intentar obtener posiciones usando el endpoint de positions
+    // Nota: Este endpoint puede requerir permisos adicionales
+    const response = await fetch(
+      "https://api.linkedin.com/v2/me?projection=(id,positions~)",
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "X-Restli-Protocol-Version": "2.0.0",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.warn("⚠️ Error obteniendo posiciones de LinkedIn:", response.status, errorText);
+      
+      // Intentar con endpoint alternativo sin projection
+      try {
+        const altResponse = await fetch(
+          "https://api.linkedin.com/v2/positions",
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "X-Restli-Protocol-Version": "2.0.0",
+            },
+          }
+        );
+        
+        if (altResponse.ok) {
+          const altData = await altResponse.json();
+          const positions = altData.elements || [];
+          const currentPosition = positions.find((pos: any) => pos.isCurrent === true);
+          
+          if (currentPosition) {
+            const title = currentPosition.title || null;
+            const companyName = currentPosition.companyName || null;
+            console.log("✅ Posición actual encontrada (endpoint alternativo):", { title, companyName });
+            return { title, companyName };
+          }
+        }
+      } catch (altError) {
+        console.warn("⚠️ Error en endpoint alternativo de posiciones:", altError);
+      }
+      
+      return { title: null, companyName: null };
+    }
+
+    const data = await response.json();
+    // La estructura puede variar, intentar diferentes formatos
+    const positions = data.positions?.elements || data.positions || [];
+
+    // Buscar la posición actual (isCurrent: true)
+    const currentPosition = positions.find((pos: any) => pos.isCurrent === true || pos.timePeriod?.endDate === null);
+
+    if (currentPosition) {
+      const title = currentPosition.title || currentPosition.localizedTitle || null;
+      const companyName = currentPosition.companyName || currentPosition.company?.localizedName || null;
+      console.log("✅ Posición actual encontrada:", { title, companyName, position: currentPosition });
+      return { title, companyName };
+    }
+
+    console.log("⚠️ No se encontró posición actual en LinkedIn. Posiciones disponibles:", positions.length);
+    return { title: null, companyName: null };
+  } catch (error) {
+    console.warn("❌ Error obteniendo posición actual de LinkedIn:", error);
+    return { title: null, companyName: null };
+  }
 }
 
 /**
