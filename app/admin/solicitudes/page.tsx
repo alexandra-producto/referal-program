@@ -37,15 +37,17 @@ export default function AdminSolicitudesPage() {
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>("lista");
   const [navigating, setNavigating] = useState<string | null>(null);
+  const [session, setSession] = useState<any>(null);
 
   useEffect(() => {
     // Verificar autenticación
     async function checkAuth() {
-      const session = await authStore.getSession();
-      if (!session || session.role !== "admin") {
+      const currentSession = await authStore.getSession();
+      if (!currentSession || currentSession.role !== "admin") {
         router.push("/solicitante/login-simulado");
         return;
       }
+      setSession(currentSession);
 
       fetchJobs();
     }
@@ -151,7 +153,7 @@ export default function AdminSolicitudesPage() {
         >
           <div className="flex items-center gap-4">
             <div className="backdrop-blur-[130px] bg-white/40 border border-white/50 rounded-2xl px-4 py-2 shadow-lg">
-              <p className="text-gray-800 font-medium">Bienvenido Admin</p>
+              <p className="text-gray-800 font-medium">Hola {session?.fullName || "Admin"}</p>
             </div>
           </div>
           <Button

@@ -10,10 +10,10 @@ interface ProductLatamLogoProps {
 }
 
 const sizeMap = {
-  sm: { width: 120, height: 54 },
-  md: { width: 192, height: 86 },
-  lg: { width: 240, height: 108 },
-  xl: { width: 320, height: 144 },
+  sm: { width: 83, height: 37 },
+  md: { width: 132, height: 59 },
+  lg: { width: 166, height: 75 },
+  xl: { width: 221, height: 99 },
 };
 
 export function ProductLatamLogo({ 

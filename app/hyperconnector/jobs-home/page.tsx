@@ -192,7 +192,7 @@ function HyperconnectorJobsHomeContent() {
           className="flex items-center justify-between"
         >
           <h2 className="text-gray-800 text-lg font-medium">
-            Bienvenida {firstName}
+            Hola {firstName}
           </h2>
           <Button
             onClick={handleLogout}

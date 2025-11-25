@@ -1195,10 +1195,6 @@
     border-color: var(--color-purple-600);
   }
 
-  .border-red-200 {
-    border-color: var(--color-red-200);
-  }
-
   .border-red-300 {
     border-color: var(--color-red-300);
   }
@@ -1401,10 +1397,6 @@
 
   .bg-purple-500 {
     background-color: var(--color-purple-500);
-  }
-
-  .bg-red-50 {
-    background-color: var(--color-red-50);
   }
 
   .bg-red-100 {
@@ -2345,10 +2337,6 @@
 
   .focus\:border-blue-400:focus {
     border-color: var(--color-blue-400);
-  }
-
-  .focus\:border-blue-500:focus {
-    border-color: var(--color-blue-500);
   }
 
   .focus\:ring-2:focus {
