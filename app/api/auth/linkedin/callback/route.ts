@@ -92,6 +92,11 @@ export async function GET(request: NextRequest) {
     try {
       accessToken = await exchangeCodeForToken(code);
       console.log("✅ Token obtenido exitosamente");
+      // TEMPORAL: Log del token para testing (eliminar después de obtener el token)
+      if (process.env.NODE_ENV === "development") {
+        console.log("🔑 ACCESS TOKEN PARA TEST (copiar a .env.local como TEST_LINKEDIN_ACCESS_TOKEN):");
+        console.log(accessToken);
+      }
     } catch (error: any) {
       console.error("❌ Error intercambiando código por token:", error);
       throw new Error(`Error obteniendo token de LinkedIn: ${error.message}`);
