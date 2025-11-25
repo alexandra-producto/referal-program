@@ -144,7 +144,8 @@ export async function GET(request: NextRequest) {
         );
       }
 
-      // Upsert user
+      console.log("💾 Paso 1: Creando/actualizando user...");
+      // 1. Crear/actualizar USER primero
       const user = await upsertUser({
         email,
         full_name: fullName,
@@ -158,12 +159,25 @@ export async function GET(request: NextRequest) {
         provider_user_id: linkedinId,
       });
 
+      console.log("💾 Paso 2: Creando/actualizando candidate con user_id...");
+      // 2. Crear/actualizar CANDIDATE con user_id (admin también es candidate)
+      const candidate = await upsertCandidate({
+        user_id: user.id,
+        email,
+        full_name: fullName,
+        current_company: current_company,
+        current_job_title: current_job_title,
+        linkedin_url: linkedinUrl,
+        profile_picture_url: profilePictureUrl,
+      });
+
       await updateLastLogin(user.id);
 
       // Crear sesión
       const sessionToken = await createSession({
         userId: user.id,
         role: "admin",
+        candidateId: candidate.id, // Agregar candidateId para admin también
         email: user.email,
         fullName: user.full_name,
       });

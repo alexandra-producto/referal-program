@@ -66,10 +66,9 @@ export default function CrearSolicitudPage() {
       return;
     }
     
-    // Si es admin, usar un candidateId por defecto o manejar de otra forma
-    // Por ahora, requerimos candidateId para crear jobs
-    if (session.role !== "admin" && !session.candidateId) {
-      alert("No estás autenticado como solicitante");
+    // Verificar que tenga candidateId (ahora admin también lo tiene)
+    if (!session.candidateId) {
+      alert("Error: No se encontró información de candidato. Por favor inicia sesión nuevamente.");
       return;
     }
 
@@ -98,7 +97,7 @@ export default function CrearSolicitudPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          candidateId: session.role === "admin" ? null : session.candidateId,
+          candidateId: session.candidateId, // Admin ahora también tiene candidateId
           jobTitle: jobTitle.trim(),
           description: description.trim(),
           nonNegotiables: nonNegotiables.trim(),
@@ -116,9 +115,13 @@ export default function CrearSolicitudPage() {
 
       setShowSuccess(true);
       
-      // Redirigir después de 2 segundos
+      // Redirigir después de 2 segundos según el rol
       setTimeout(() => {
-        router.push("/solicitante/solicitudes");
+        if (session.role === "admin") {
+          router.push("/admin/solicitudes");
+        } else {
+          router.push("/solicitante/solicitudes");
+        }
       }, 2000);
     } catch (error: any) {
       console.error("Error creating job:", error);
