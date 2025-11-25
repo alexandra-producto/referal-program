@@ -318,6 +318,13 @@ export default function MisSolicitudesPage() {
                     <Building className="h-4 w-4" />
                     <span className="text-sm">{job.company_name}</span>
                   </div>
+                  <button 
+                    onClick={() => handleViewDetails(job.id)}
+                    className="text-teal-600 text-sm mb-4 flex items-center gap-1 hover:text-teal-700 transition-colors"
+                  >
+                    <Eye className="h-3 w-3" />
+                    Ver detalles
+                  </button>
                   <Button
                     variant="outline"
                     disabled={job.recommendations_count === 0}
