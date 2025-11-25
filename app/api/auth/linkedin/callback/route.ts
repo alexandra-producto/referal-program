@@ -113,12 +113,16 @@ export async function GET(request: NextRequest) {
       profile = await getProfile(accessToken);
       console.log("✅ Profile obtenido:", profile ? "Sí" : "No");
       if (profile) {
-        console.log("📋 Profile data:", {
-          headline: profile.headline,
-          vanityName: profile.vanityName,
-          firstName: profile.localizedFirstName,
-          lastName: profile.localizedLastName,
+        console.log("📋 Profile data completo:", JSON.stringify(profile, null, 2));
+        console.log("📋 Profile data resumido:", {
+          headline: profile.headline || "NO HEADLINE",
+          vanityName: profile.vanityName || "NO VANITYNAME",
+          firstName: profile.localizedFirstName || "NO FIRSTNAME",
+          lastName: profile.localizedLastName || "NO LASTNAME",
+          id: profile.id,
         });
+      } else {
+        console.log("❌ Profile es null - no se pudo obtener");
       }
     } catch (error: any) {
       console.error("❌ Error obteniendo información del usuario:", error);

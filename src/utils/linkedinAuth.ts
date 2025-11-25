@@ -271,12 +271,14 @@ export async function getProfile(accessToken: string): Promise<LinkedInProfile |
     }
 
     const profile = await response.json();
-    console.log("✅ Profile completo obtenido:", {
+    console.log("✅ Profile completo obtenido (raw):", JSON.stringify(profile, null, 2));
+    console.log("✅ Profile resumido:", {
       id: profile.id,
       headline: profile.headline || "NO HEADLINE",
       vanityName: profile.vanityName || "NO VANITYNAME",
       hasHeadline: !!profile.headline,
       hasVanityName: !!profile.vanityName,
+      allKeys: Object.keys(profile),
     });
     
     // Si no hay headline, intentar obtenerlo desde otro endpoint
