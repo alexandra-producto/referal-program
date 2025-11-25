@@ -6,7 +6,6 @@ export interface CreateJobRequest {
   description: string;
   nonNegotiables: string;
   desiredTrajectory: string;
-  scenario: string;
   technicalBackgroundNeeded: boolean;
   modality: 'remote' | 'hybrid' | 'onsite';
   documentUrl?: string | null; // URL del documento PDF (opcional)
@@ -18,7 +17,6 @@ export interface CreateJobRequest {
 export interface RequirementsJson {
   non_negotiables_text: string;
   desired_trajectory_text: string;
-  scenario_text: string;
   needs_technical_background: boolean;
   modality: 'remote' | 'hybrid' | 'onsite';
 }
@@ -31,7 +29,7 @@ export function validateCreateJobRequest(body: any): { valid: boolean; error?: s
     return { valid: false, error: 'Request body is required' };
   }
 
-  const { jobTitle, description, nonNegotiables, desiredTrajectory, scenario, technicalBackgroundNeeded, modality, documentUrl } = body;
+  const { jobTitle, description, nonNegotiables, desiredTrajectory, technicalBackgroundNeeded, modality, documentUrl } = body;
 
   // Validar campos requeridos
   if (!jobTitle || typeof jobTitle !== 'string' || jobTitle.trim().length === 0) {
@@ -50,10 +48,6 @@ export function validateCreateJobRequest(body: any): { valid: boolean; error?: s
     return { valid: false, error: 'desiredTrajectory is required and must be a string' };
   }
 
-  if (!scenario || typeof scenario !== 'string') {
-    return { valid: false, error: 'scenario is required and must be a string' };
-  }
-
   if (typeof technicalBackgroundNeeded !== 'boolean') {
     return { valid: false, error: 'technicalBackgroundNeeded is required and must be a boolean' };
   }
@@ -69,7 +63,6 @@ export function validateCreateJobRequest(body: any): { valid: boolean; error?: s
       description: description.trim(),
       nonNegotiables: nonNegotiables.trim(),
       desiredTrajectory: desiredTrajectory.trim(),
-      scenario: scenario.trim(),
       technicalBackgroundNeeded,
       modality,
       documentUrl: documentUrl || null, // Opcional, puede ser null
@@ -84,7 +77,6 @@ export function buildRequirementsJson(request: CreateJobRequest): RequirementsJs
   return {
     non_negotiables_text: request.nonNegotiables,
     desired_trajectory_text: request.desiredTrajectory,
-    scenario_text: request.scenario,
     needs_technical_background: request.technicalBackgroundNeeded,
     modality: request.modality,
   };
