@@ -490,7 +490,7 @@ function AdminSolicitudesPage() {
                                     className: "text-gray-800 font-medium",
                                     children: [
                                         "Hola ",
-                                        session?.fullName || "Admin"
+                                        session?.fullName?.split(" ")[0] || "Admin"
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",

@@ -151,26 +151,27 @@ export default function MisSolicitudesPage() {
             </Card>
           ) : viewMode === "lista" ? (
             /* Table View */
-            <Card className="backdrop-blur-[130px] bg-white/40 border border-white/50 rounded-3xl shadow-xl overflow-hidden relative">
-            {/* View Mode Toggle - Top Right */}
-            <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
-              <Button
-                onClick={() => setViewMode("lista")}
-                variant="default"
-                className="rounded-xl h-9 bg-teal-500 text-white"
-              >
-                <List className="h-4 w-4 mr-2" />
-                Lista
-              </Button>
-              <Button
-                onClick={() => setViewMode("tarjetas")}
-                variant="outline"
-                className="rounded-xl h-9 bg-white/80 text-gray-700 border-gray-300 backdrop-blur-sm"
-              >
-                <Grid className="h-4 w-4 mr-2" />
-                Tarjetas
-              </Button>
-            </div>
+            <div className="relative">
+              {/* View Mode Toggle - Top Right */}
+              <div className="flex justify-end items-center gap-2 mb-4">
+                <Button
+                  onClick={() => setViewMode("lista")}
+                  variant="default"
+                  className="rounded-xl h-9 bg-teal-500 text-white"
+                >
+                  <List className="h-4 w-4 mr-2" />
+                  Lista
+                </Button>
+                <Button
+                  onClick={() => setViewMode("tarjetas")}
+                  variant="outline"
+                  className="rounded-xl h-9 bg-white/80 text-gray-700 border-gray-300 backdrop-blur-sm"
+                >
+                  <Grid className="h-4 w-4 mr-2" />
+                  Tarjetas
+                </Button>
+              </div>
+            <Card className="backdrop-blur-[130px] bg-white/40 border border-white/50 rounded-3xl shadow-xl overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-teal-100/50">
@@ -209,7 +210,17 @@ export default function MisSolicitudesPage() {
                       <td className="px-6 py-4">
                         <Button
                           variant="outline"
-                          className="bg-teal-500 hover:bg-teal-600 text-white border-teal-500 rounded-xl"
+                          disabled={job.recommendations_count === 0}
+                          onClick={() => {
+                            if (job.recommendations_count > 0) {
+                              router.push(`/solicitante/solicitudes/${job.id}/recomendaciones`);
+                            }
+                          }}
+                          className={`rounded-xl ${
+                            job.recommendations_count === 0
+                              ? "bg-gray-300 text-gray-500 border-gray-300 cursor-not-allowed"
+                              : "bg-teal-500 hover:bg-teal-600 text-white border-teal-500"
+                          }`}
                         >
                           Ver {job.recommendations_count}
                         </Button>
@@ -220,6 +231,7 @@ export default function MisSolicitudesPage() {
               </table>
             </div>
           </Card>
+          </div>
         ) : (
           /* Cards View */
           <div className="relative">
@@ -261,7 +273,17 @@ export default function MisSolicitudesPage() {
                   </div>
                   <Button
                     variant="outline"
-                    className="w-full bg-teal-500 hover:bg-teal-600 text-white border-teal-500 rounded-xl"
+                    disabled={job.recommendations_count === 0}
+                    onClick={() => {
+                      if (job.recommendations_count > 0) {
+                        router.push(`/admin/solicitudes/${job.id}/recomendaciones`);
+                      }
+                    }}
+                    className={`w-full rounded-xl ${
+                      job.recommendations_count === 0
+                        ? "bg-gray-300 text-gray-500 border-gray-300 cursor-not-allowed"
+                        : "bg-teal-500 hover:bg-teal-600 text-white border-teal-500"
+                    }`}
                   >
                     Ver {job.recommendations_count} recomendaciones
                   </Button>
