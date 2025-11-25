@@ -108,7 +108,14 @@ export async function GET(request: NextRequest) {
     let profile: any;
     try {
       userInfo = await getUserInfo(accessToken);
-      console.log("✅ UserInfo obtenido:", { email: userInfo.email, sub: userInfo.sub });
+      console.log("✅ UserInfo obtenido (raw):", JSON.stringify(userInfo, null, 2));
+      console.log("✅ UserInfo resumido:", { 
+        email: userInfo.email, 
+        sub: userInfo.sub,
+        name: userInfo.name,
+        picture: userInfo.picture ? "YES" : "NO",
+        allKeys: Object.keys(userInfo),
+      });
       
       profile = await getProfile(accessToken);
       console.log("✅ Profile obtenido:", profile ? "Sí" : "No");
