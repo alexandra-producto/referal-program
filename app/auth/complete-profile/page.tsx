@@ -14,21 +14,44 @@ function CompleteProfileContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
+  const [loadingData, setLoadingData] = useState(true);
   const [session, setSession] = useState<any>(null);
   const [currentCompany, setCurrentCompany] = useState("");
   const [currentJobTitle, setCurrentJobTitle] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function checkSession() {
+    async function checkSessionAndLoadData() {
       const currentSession = await authStore.getSession();
       if (!currentSession) {
         router.push("/solicitante/login-simulado");
         return;
       }
       setSession(currentSession);
+
+      // Cargar datos existentes del candidate si existe
+      try {
+        const response = await fetch("/api/auth/complete-profile", {
+          credentials: "include",
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.currentCompany) {
+            setCurrentCompany(data.currentCompany);
+          }
+          if (data.currentJobTitle) {
+            setCurrentJobTitle(data.currentJobTitle);
+          }
+        }
+      } catch (error) {
+        console.error("Error cargando datos del candidate:", error);
+        // Continuar sin pre-llenar si hay error
+      } finally {
+        setLoadingData(false);
+      }
     }
-    checkSession();
+    checkSessionAndLoadData();
   }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -82,7 +105,7 @@ function CompleteProfileContent() {
     }
   };
 
-  if (!session) {
+  if (!session || loadingData) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-blue-100 via-purple-100 to-indigo-200">
         <div className="text-center">

@@ -8,6 +8,62 @@ import { findUserByLinkedInOrEmail } from "@/src/domain/users";
 import { supabase } from "@/src/db/supabaseClient";
 
 /**
+ * GET /api/auth/complete-profile
+ * Obtiene los datos existentes del candidate para pre-llenar el formulario
+ */
+export async function GET(request: NextRequest) {
+  try {
+    // Verificar sesión
+    const cookieStore = await cookies();
+    const sessionToken = cookieStore.get("session")?.value;
+    
+    if (!sessionToken) {
+      return NextResponse.json(
+        { error: "No hay sesión activa" },
+        { status: 401 }
+      );
+    }
+
+    const session = await getSession(sessionToken);
+    if (!session) {
+      return NextResponse.json(
+        { error: "Sesión inválida" },
+        { status: 401 }
+      );
+    }
+
+    // Buscar candidate existente por email
+    const { data: existingCandidate } = await supabase
+      .from("candidates")
+      .select("current_company, current_job_title")
+      .eq("email", session.email)
+      .maybeSingle();
+
+    if (existingCandidate) {
+      return NextResponse.json({
+        currentCompany: existingCandidate.current_company || "",
+        currentJobTitle: existingCandidate.current_job_title || "",
+      });
+    }
+
+    // Si no existe, devolver campos vacíos
+    return NextResponse.json({
+      currentCompany: "",
+      currentJobTitle: "",
+    });
+  } catch (error: any) {
+    console.error("❌ Error obteniendo datos del candidate:", error);
+    return NextResponse.json(
+      {
+        error: "Error al obtener datos del perfil",
+        details: process.env.NODE_ENV === "development" ? error.message : undefined,
+      },
+      { status: 500 }
+    );
+  }
+}
+
+/**
  * POST /api/auth/complete-profile
  * Completa el perfil del usuario con empresa y cargo actual
  */
