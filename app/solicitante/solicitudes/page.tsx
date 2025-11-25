@@ -78,13 +78,21 @@ export default function MisSolicitudesPage() {
     try {
       const response = await fetch(`/api/jobs/${jobId}`);
       if (!response.ok) {
-        throw new Error("Error al cargar los detalles");
+        const errorData = await response.json().catch(() => ({}));
+        console.error("Error response:", response.status, errorData);
+        throw new Error(errorData.error || `Error ${response.status}: ${response.statusText}`);
       }
       const data = await response.json();
+      console.log("Job data recibida:", data);
+      
+      if (!data.job) {
+        throw new Error("No se encontró información del job en la respuesta");
+      }
+      
       setSelectedJob(data.job);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching job details:", error);
-      alert("Error al cargar los detalles de la solicitud");
+      alert(`Error al cargar los detalles de la solicitud: ${error.message || "Error desconocido"}`);
     } finally {
       setLoadingJobDetails(false);
     }
@@ -375,8 +383,9 @@ export default function MisSolicitudesPage() {
               {loadingJobDetails ? (
                 <div className="flex items-center justify-center py-12">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-500"></div>
+                  <span className="ml-3 text-gray-600">Cargando detalles...</span>
                 </div>
-              ) : (
+              ) : selectedJob ? (
                 <>
                   {/* Título y Empresa */}
                   <div className="space-y-2">
