@@ -95,7 +95,8 @@ export async function GET(
       .from("jobs")
       .select("id, company_name, job_title, description, owner_candidate_id, owner_role_title, status")
       .in("id", jobIds)
-      .not("status", "in", "(\"Recomendación Contratada\",\"Recomendación Cancelada\")");
+      .neq("status", "Recomendación Contratada")
+      .neq("status", "Recomendación Cancelada");
 
     if (jobsError) {
       console.error("❌ Error obteniendo jobs:", jobsError);
