@@ -91,12 +91,25 @@ export async function GET(
 
     // Obtener detalles de los jobs
     // Mostrar jobs activos (excluir solo los cerrados/cancelados)
-    const { data: jobs, error: jobsError } = await supabase
+    const { data: allJobs, error: jobsError } = await supabase
       .from("jobs")
       .select("id, company_name, job_title, description, owner_candidate_id, owner_role_title, status")
-      .in("id", jobIds)
-      .neq("status", "Recomendación Contratada")
-      .neq("status", "Recomendación Cancelada");
+      .in("id", jobIds);
+    
+    if (jobsError) {
+      console.error("❌ Error obteniendo jobs:", jobsError);
+      return NextResponse.json(
+        { error: "Error al obtener jobs" },
+        { status: 500 }
+      );
+    }
+    
+    // Filtrar jobs activos (excluir contratados y cancelados)
+    const jobs = (allJobs || []).filter(
+      (job: any) => 
+        job.status !== "Recomendación Contratada" && 
+        job.status !== "Recomendación Cancelada"
+    );
 
     if (jobsError) {
       console.error("❌ Error obteniendo jobs:", jobsError);
