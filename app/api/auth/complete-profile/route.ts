@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { getSession } from "@/src/utils/session";
+import { getSessionFromToken } from "@/src/utils/session";
 import { upsertUser } from "@/src/domain/users";
 import { upsertCandidate } from "@/src/domain/candidates";
 import { upsertHyperconnector } from "@/src/domain/hyperconnectors";
@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const session = await getSession(sessionToken);
+    const session = await getSessionFromToken(sessionToken);
     if (!session) {
       return NextResponse.json(
         { error: "Sesión inválida" },
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const session = await getSession(sessionToken);
+    const session = await getSessionFromToken(sessionToken);
     if (!session) {
       return NextResponse.json(
         { error: "Sesión inválida" },
