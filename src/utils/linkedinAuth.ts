@@ -191,20 +191,29 @@ export async function getCurrentPosition(accessToken: string): Promise<{ title: 
     }
 
     const data = await response.json();
+    console.log("🔍 [getCurrentPosition] Datos completos recibidos:", JSON.stringify(data, null, 2));
+    
     // La estructura puede variar, intentar diferentes formatos
     const positions = data.positions?.elements || data.positions || [];
+    console.log("🔍 [getCurrentPosition] Posiciones encontradas:", positions.length);
+    console.log("🔍 [getCurrentPosition] Estructura de posiciones:", JSON.stringify(positions, null, 2));
 
     // Buscar la posición actual (isCurrent: true)
     const currentPosition = positions.find((pos: any) => pos.isCurrent === true || pos.timePeriod?.endDate === null);
+    console.log("🔍 [getCurrentPosition] Posición actual encontrada:", currentPosition ? "Sí" : "No");
 
     if (currentPosition) {
+      console.log("🔍 [getCurrentPosition] Estructura de posición actual:", JSON.stringify(currentPosition, null, 2));
       const title = currentPosition.title || currentPosition.localizedTitle || null;
       const companyName = currentPosition.companyName || currentPosition.company?.localizedName || null;
-      console.log("✅ Posición actual encontrada:", { title, companyName, position: currentPosition });
+      console.log("✅ [getCurrentPosition] Posición actual extraída:", { title, companyName });
       return { title, companyName };
     }
 
-    console.log("⚠️ No se encontró posición actual en LinkedIn. Posiciones disponibles:", positions.length);
+    console.log("⚠️ [getCurrentPosition] No se encontró posición actual. Posiciones disponibles:", positions.length);
+    if (positions.length > 0) {
+      console.log("🔍 [getCurrentPosition] Primera posición (para debugging):", JSON.stringify(positions[0], null, 2));
+    }
     return { title: null, companyName: null };
   } catch (error) {
     console.warn("❌ Error obteniendo posición actual de LinkedIn:", error);

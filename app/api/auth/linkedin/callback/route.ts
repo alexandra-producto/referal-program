@@ -134,20 +134,26 @@ export async function GET(request: NextRequest) {
     console.log("📋 Datos parseados:", { linkedinId, email, fullName, profilePictureUrl });
     
     // Obtener posición actual directamente de LinkedIn API
+    console.log("🔄 Obteniendo posición actual desde LinkedIn API...");
     const { title: positionTitle, companyName: positionCompany } = await getCurrentPosition(accessToken);
+    console.log("📋 Resultado de getCurrentPosition:", { positionTitle, positionCompany });
     
     // Si no hay posición actual, intentar parsear del headline como fallback
     let current_job_title = positionTitle;
     let current_company = positionCompany;
     
     if (!current_job_title || !current_company) {
-      console.log("⚠️ No se obtuvo posición actual, intentando parsear headline como fallback...");
+      console.log("⚠️ No se obtuvo posición actual desde positions API, intentando parsear headline como fallback...");
+      console.log("📋 Profile headline:", profile?.headline || "NO HEADLINE");
       const { current_role, current_company: headlineCompany } = parseHeadline(profile?.headline);
+      console.log("📋 Resultado de parseHeadline:", { current_role, headlineCompany });
       if (!current_job_title && current_role) {
         current_job_title = current_role;
+        console.log("✅ Usando current_role del headline como current_job_title");
       }
       if (!current_company && headlineCompany) {
         current_company = headlineCompany;
+        console.log("✅ Usando current_company del headline");
       }
     }
     

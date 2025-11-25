@@ -1,10 +1,25 @@
-[00:00:02.789] Server  LOG      ✓ Ready in 1953ms
-[00:02:27.377] Server  LOG     [dotenv@17.2.3] injecting env (0) from .env.local -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
-[00:02:27.382] Server  ERROR   SUPABASE_URL: undefined
-[00:02:27.382] Server  ERROR   SUPABASE_SERVICE_ROLE_KEY: undefined
-[00:02:27.459] Server  ERROR    ⨯ Error: ❌ Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY.
-[00:02:28.628] Browser ERROR   uncaughtError: Error: ❌ Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY.
-[01:40:54.060] Server  LOG        Reload env: .env.local
-[01:40:54.632] Server  LOG     [dotenv@17.2.3] injecting env (0) from .env.local -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
-[01:40:57.720] Server  LOG      ○ Compiling /solicitante/login-simulado ...
-[01:41:01.897] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:01.477] Server  LOG      ✓ Ready in 1057ms
+[00:00:33.076] Server  LOG      ○ Compiling / ...
+[00:00:34.966] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:01:12.371] Server  LOG     [dotenv@17.2.3] injecting env (0) from .env.local -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+[00:01:12.392] Server  LOG     🔍 Validando state: {}
+[00:01:12.398] Server  LOG     🔄 Intercambiando código por token...
+[00:01:12.878] Server  LOG     ✅ Token obtenido exitosamente
+[00:01:12.878] Server  LOG     🔑 ACCESS TOKEN PARA TEST (copiar a .env.local como TEST_LINKEDIN_ACCESS_TOKEN):
+[00:01:12.879] Server  LOG     AQXYJripe0171PbL9JHoVihr2D3qq_zHij0CoaEvtp4iRissbYsuTRjkHsODnR1aqybSgOxV0zjvgxCBsKG3A--15ch6_70OGFLRbKlRStDK6G6zZyr-rVwY9JohSXjau96aDjs8pplE_jUwM9j8xZQFi5aWwkSjEvzQqx2ynzv-vyhHUyWteA5CZQst0aIbSa9MCP3qbMoIogMtuvb-kRzqO_rAba0J_tN7ztv8BEMiTz1whNDNf-7GqpHou_syKfTHldcoZGAuU-osnDv77I6a10VodWNaVJ3THHyGOi46t6d6ys-6334dWBHHvdyDdwrt0VgCLMHLOkPWV3fIFPN1BuZYBQ
+[00:01:12.879] Server  LOG     🔄 Obteniendo información del usuario...
+[00:01:13.961] Server  LOG     ✅ UserInfo obtenido: {}
+[00:01:14.512] Server  WARN    ⚠️ Error obteniendo perfil de LinkedIn: 403 "{\"status\":403,\"serviceErrorCode\":100,\"code\":\"ACCESS_DENIED\",\"message\":\"Not enough permissions to access: me.GET.NO_VERSION\"}"
+[00:01:14.987] Server  LOG     ✅ Profile obtenido: "No"
+[00:01:14.989] Server  LOG     📋 Datos parseados: {}
+[00:01:15.313] Server  WARN    ⚠️ Error obteniendo posiciones de LinkedIn: 403 "{\"status\":403,\"serviceErrorCode\":100,\"code\":\"ACCESS_DENIED\",\"message\":\"Not enough permissions to access: me.GET.NO_VERSION\"}"
+[00:01:15.644] Server  LOG     ⚠️ No se obtuvo posición actual, intentando parsear headline como fallback...
+[00:01:15.645] Server  LOG     ⚠️ No headline provided
+[00:01:15.646] Server  LOG     📋 Datos de posición obtenidos: {}
+[00:01:15.646] Server  LOG     💾 Paso 1: Creando/actualizando user...
+[00:01:15.647] Server  LOG     📋 Datos para upsertUser: {}
+[00:01:17.213] Server  LOG     📝 Actualizando usuario: {}
+[00:01:17.503] Server  LOG     ✅ Usuario actualizado: {}
+[00:01:17.504] Server  LOG     ✅ User actualizado: {}
+[00:01:17.505] Server  LOG     💾 Paso 2: Creando/actualizando candidate con user_id...
+[00:01:19.227] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold

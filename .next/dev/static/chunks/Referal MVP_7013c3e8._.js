@@ -331,6 +331,7 @@ function AdminSolicitudesPage() {
     const [jobs, setJobs] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])([]);
     const [loading, setLoading] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(true);
     const [viewMode, setViewMode] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])("lista");
+    const [navigating, setNavigating] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(null);
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "AdminSolicitudesPage.useEffect": ()=>{
             // Verificar autenticación
@@ -362,11 +363,20 @@ function AdminSolicitudesPage() {
         }
     };
     const handleLogout = async ()=>{
-        await __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$app$2f$lib$2f$authStore$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["authStore"].clearSession();
-        router.push("/solicitante/login-simulado");
+        // Redirigir directamente al endpoint de logout que cerrará sesión en LinkedIn también
+        window.location.href = "/api/auth/logout";
     };
     const handleViewRecommendations = (jobId)=>{
+        setNavigating(`recommendations-${jobId}`);
         router.push(`/admin/solicitudes/${jobId}/recomendaciones`);
+    };
+    const handleNavigateToCreate = ()=>{
+        setNavigating("create");
+        router.push("/solicitante/crear");
+    };
+    const handleNavigateToControlTower = ()=>{
+        setNavigating("control-tower");
+        router.push("/admin/control-tower");
     };
     const getStatusColor = (status)=>{
         // Los estados vienen directamente de la BD
@@ -415,7 +425,7 @@ function AdminSolicitudesPage() {
                         className: "animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"
                     }, void 0, false, {
                         fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                        lineNumber: 124,
+                        lineNumber: 135,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -423,18 +433,18 @@ function AdminSolicitudesPage() {
                         children: "Cargando..."
                     }, void 0, false, {
                         fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                        lineNumber: 125,
+                        lineNumber: 136,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                lineNumber: 123,
+                lineNumber: 134,
                 columnNumber: 9
             }, this)
         }, void 0, false, {
             fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-            lineNumber: 122,
+            lineNumber: 133,
             columnNumber: 7
         }, this);
     }
@@ -459,56 +469,49 @@ function AdminSolicitudesPage() {
                     children: [
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                             className: "flex items-center gap-4",
-                            children: [
-                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                    className: "backdrop-blur-[130px] bg-white/40 border border-white/50 rounded-2xl px-4 py-2 shadow-lg",
-                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
-                                        className: "text-gray-800 font-medium",
-                                        children: "Bienvenido Admin"
-                                    }, void 0, false, {
-                                        fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                        lineNumber: 143,
-                                        columnNumber: 15
-                                    }, this)
+                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "backdrop-blur-[130px] bg-white/40 border border-white/50 rounded-2xl px-4 py-2 shadow-lg",
+                                children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                    className: "text-gray-800 font-medium",
+                                    children: "Bienvenido Admin"
                                 }, void 0, false, {
                                     fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                    lineNumber: 142,
-                                    columnNumber: 13
-                                }, this),
-                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$components$2f$ProductLatamLogo$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["ProductLatamLogo"], {}, void 0, false, {
-                                    fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                    lineNumber: 145,
-                                    columnNumber: 13
+                                    lineNumber: 154,
+                                    columnNumber: 15
                                 }, this)
-                            ]
-                        }, void 0, true, {
+                            }, void 0, false, {
+                                fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
+                                lineNumber: 153,
+                                columnNumber: 13
+                            }, this)
+                        }, void 0, false, {
                             fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                            lineNumber: 141,
+                            lineNumber: 152,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
                             onClick: handleLogout,
                             variant: "outline",
-                            className: "gap-2 h-10 px-4 rounded-xl border border-gray-300 text-gray-700 bg-white/80 hover:bg-white backdrop-blur-sm",
+                            className: "gap-2 h-10 px-4 rounded-xl border border-gray-300 text-gray-700 bg-white/80 hover:bg-white active:bg-gray-100 transition-all duration-200 backdrop-blur-sm",
                             children: [
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$log$2d$out$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__LogOut$3e$__["LogOut"], {
                                     className: "h-4 w-4"
                                 }, void 0, false, {
                                     fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                    lineNumber: 152,
+                                    lineNumber: 162,
                                     columnNumber: 13
                                 }, this),
                                 "Cerrar Sesión"
                             ]
                         }, void 0, true, {
                             fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                            lineNumber: 147,
+                            lineNumber: 157,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                    lineNumber: 135,
+                    lineNumber: 146,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$framer$2d$motion$2f$dist$2f$es$2f$render$2f$components$2f$motion$2f$proxy$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["motion"].div, {
@@ -530,7 +533,7 @@ function AdminSolicitudesPage() {
                             className: "justify-center"
                         }, void 0, false, {
                             fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                            lineNumber: 164,
+                            lineNumber: 174,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h1", {
@@ -538,13 +541,13 @@ function AdminSolicitudesPage() {
                             children: "Todas las Solicitudes"
                         }, void 0, false, {
                             fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                            lineNumber: 167,
+                            lineNumber: 177,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                    lineNumber: 158,
+                    lineNumber: 168,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$framer$2d$motion$2f$dist$2f$es$2f$render$2f$components$2f$motion$2f$proxy$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["motion"].div, {
@@ -571,111 +574,141 @@ function AdminSolicitudesPage() {
                                         onClick: ()=>setViewMode("lista"),
                                         variant: viewMode === "lista" ? "default" : "outline",
                                         size: "icon",
-                                        className: `rounded-xl ${viewMode === "lista" ? "bg-orange-500 text-white" : "bg-white/80 text-gray-700 border-gray-300 backdrop-blur-sm"}`,
+                                        className: `rounded-xl transition-all duration-200 ${viewMode === "lista" ? "bg-orange-500 text-white hover:bg-orange-600 active:bg-orange-700" : "bg-white/80 text-gray-700 border-gray-300 backdrop-blur-sm hover:bg-white active:bg-gray-100"}`,
                                         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$list$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__List$3e$__["List"], {
                                             className: "h-4 w-4"
                                         }, void 0, false, {
                                             fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                            lineNumber: 193,
+                                            lineNumber: 203,
                                             columnNumber: 17
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                        lineNumber: 183,
+                                        lineNumber: 193,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
                                         onClick: ()=>setViewMode("grid"),
                                         variant: viewMode === "grid" ? "default" : "outline",
                                         size: "icon",
-                                        className: `rounded-xl ${viewMode === "grid" ? "bg-orange-500 text-white" : "bg-white/80 text-gray-700 border-gray-300 backdrop-blur-sm"}`,
+                                        className: `rounded-xl transition-all duration-200 ${viewMode === "grid" ? "bg-orange-500 text-white hover:bg-orange-600 active:bg-orange-700" : "bg-white/80 text-gray-700 border-gray-300 backdrop-blur-sm hover:bg-white active:bg-gray-100"}`,
                                         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$grid$2d$3x3$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Grid$3e$__["Grid"], {
                                             className: "h-4 w-4"
                                         }, void 0, false, {
                                             fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                            lineNumber: 205,
+                                            lineNumber: 215,
                                             columnNumber: 17
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                        lineNumber: 195,
+                                        lineNumber: 205,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                lineNumber: 182,
+                                lineNumber: 192,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 className: "flex items-center gap-3",
                                 children: [
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
-                                        className: "bg-orange-500 hover:bg-orange-600 text-white rounded-xl flex items-center gap-2 shadow-lg",
-                                        children: [
-                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$plus$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Plus$3e$__["Plus"], {
-                                                className: "h-4 w-4"
-                                            }, void 0, false, {
-                                                fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                                lineNumber: 212,
-                                                columnNumber: 17
-                                            }, this),
-                                            "Obtener Recomendación"
-                                        ]
-                                    }, void 0, true, {
+                                        onClick: handleNavigateToCreate,
+                                        disabled: navigating === "create",
+                                        className: "bg-orange-500 hover:bg-orange-600 active:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl flex items-center gap-2 shadow-lg transition-all duration-200",
+                                        children: navigating === "create" ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
+                                            children: [
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                    className: "animate-spin rounded-full h-4 w-4 border-b-2 border-white"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
+                                                    lineNumber: 228,
+                                                    columnNumber: 21
+                                                }, this),
+                                                "Cargando..."
+                                            ]
+                                        }, void 0, true) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
+                                            children: [
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$plus$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Plus$3e$__["Plus"], {
+                                                    className: "h-4 w-4"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
+                                                    lineNumber: 233,
+                                                    columnNumber: 21
+                                                }, this),
+                                                "Solicitar Recomendación"
+                                            ]
+                                        }, void 0, true)
+                                    }, void 0, false, {
                                         fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                        lineNumber: 211,
+                                        lineNumber: 221,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
-                                        className: "bg-orange-500 hover:bg-orange-600 text-white rounded-xl flex items-center gap-2 shadow-lg",
+                                        className: "bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white rounded-xl flex items-center gap-2 shadow-lg transition-all duration-200",
                                         children: [
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$users$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Users$3e$__["Users"], {
                                                 className: "h-4 w-4"
                                             }, void 0, false, {
                                                 fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                                lineNumber: 216,
+                                                lineNumber: 239,
                                                 columnNumber: 17
                                             }, this),
                                             "Recomendar"
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                        lineNumber: 215,
+                                        lineNumber: 238,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
-                                        className: "bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 text-white rounded-xl flex items-center gap-2 shadow-lg",
-                                        children: [
-                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$zap$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Zap$3e$__["Zap"], {
-                                                className: "h-4 w-4"
-                                            }, void 0, false, {
-                                                fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                                lineNumber: 220,
-                                                columnNumber: 17
-                                            }, this),
-                                            "Vista Hiperconector"
-                                        ]
-                                    }, void 0, true, {
+                                        onClick: handleNavigateToControlTower,
+                                        disabled: navigating === "control-tower",
+                                        className: "bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 active:from-pink-700 active:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl flex items-center gap-2 shadow-lg transition-all duration-200",
+                                        children: navigating === "control-tower" ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
+                                            children: [
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                    className: "animate-spin rounded-full h-4 w-4 border-b-2 border-white"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
+                                                    lineNumber: 249,
+                                                    columnNumber: 21
+                                                }, this),
+                                                "Cargando..."
+                                            ]
+                                        }, void 0, true) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
+                                            children: [
+                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$zap$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Zap$3e$__["Zap"], {
+                                                    className: "h-4 w-4"
+                                                }, void 0, false, {
+                                                    fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
+                                                    lineNumber: 254,
+                                                    columnNumber: 21
+                                                }, this),
+                                                "Control Tower"
+                                            ]
+                                        }, void 0, true)
+                                    }, void 0, false, {
                                         fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                        lineNumber: 219,
+                                        lineNumber: 242,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                lineNumber: 210,
+                                lineNumber: 220,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                        lineNumber: 180,
+                        lineNumber: 190,
                         columnNumber: 11
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                    lineNumber: 173,
+                    lineNumber: 183,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$framer$2d$motion$2f$dist$2f$es$2f$render$2f$components$2f$motion$2f$proxy$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["motion"].div, {
@@ -698,12 +731,12 @@ function AdminSolicitudesPage() {
                             children: "No hay solicitudes en el sistema."
                         }, void 0, false, {
                             fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                            lineNumber: 235,
+                            lineNumber: 271,
                             columnNumber: 15
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                        lineNumber: 234,
+                        lineNumber: 270,
                         columnNumber: 13
                     }, this) : viewMode === "lista" ? /* Table View */ /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Card"], {
                         className: "backdrop-blur-[130px] bg-white/40 border border-white/50 rounded-3xl shadow-xl overflow-hidden",
@@ -721,7 +754,7 @@ function AdminSolicitudesPage() {
                                                     children: "Perfil Solicitado"
                                                 }, void 0, false, {
                                                     fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                                    lineNumber: 246,
+                                                    lineNumber: 282,
                                                     columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -729,7 +762,7 @@ function AdminSolicitudesPage() {
                                                     children: "Descripción de Rol"
                                                 }, void 0, false, {
                                                     fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                                    lineNumber: 247,
+                                                    lineNumber: 283,
                                                     columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -737,7 +770,7 @@ function AdminSolicitudesPage() {
                                                     children: "Quien Solicita"
                                                 }, void 0, false, {
                                                     fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                                    lineNumber: 248,
+                                                    lineNumber: 284,
                                                     columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -745,7 +778,7 @@ function AdminSolicitudesPage() {
                                                     children: "Puesto"
                                                 }, void 0, false, {
                                                     fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                                    lineNumber: 249,
+                                                    lineNumber: 285,
                                                     columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -753,7 +786,7 @@ function AdminSolicitudesPage() {
                                                     children: "Empresa"
                                                 }, void 0, false, {
                                                     fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                                    lineNumber: 250,
+                                                    lineNumber: 286,
                                                     columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -761,18 +794,18 @@ function AdminSolicitudesPage() {
                                                     children: "Recomendaciones"
                                                 }, void 0, false, {
                                                     fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                                    lineNumber: 251,
+                                                    lineNumber: 287,
                                                     columnNumber: 21
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                            lineNumber: 245,
+                                            lineNumber: 281,
                                             columnNumber: 19
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                        lineNumber: 244,
+                                        lineNumber: 280,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tbody", {
@@ -798,12 +831,12 @@ function AdminSolicitudesPage() {
                                                             children: job.job_title
                                                         }, void 0, false, {
                                                             fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                                            lineNumber: 264,
+                                                            lineNumber: 300,
                                                             columnNumber: 25
                                                         }, this)
                                                     }, void 0, false, {
                                                         fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                                        lineNumber: 263,
+                                                        lineNumber: 299,
                                                         columnNumber: 23
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -813,12 +846,12 @@ function AdminSolicitudesPage() {
                                                             children: truncateText(job.description || "", 60)
                                                         }, void 0, false, {
                                                             fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                                            lineNumber: 267,
+                                                            lineNumber: 303,
                                                             columnNumber: 25
                                                         }, this)
                                                     }, void 0, false, {
                                                         fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                                        lineNumber: 266,
+                                                        lineNumber: 302,
                                                         columnNumber: 23
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -828,12 +861,12 @@ function AdminSolicitudesPage() {
                                                             children: job.ownerCandidate?.full_name || "N/A"
                                                         }, void 0, false, {
                                                             fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                                            lineNumber: 270,
+                                                            lineNumber: 306,
                                                             columnNumber: 25
                                                         }, this)
                                                     }, void 0, false, {
                                                         fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                                        lineNumber: 269,
+                                                        lineNumber: 305,
                                                         columnNumber: 23
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -843,12 +876,12 @@ function AdminSolicitudesPage() {
                                                             children: job.owner_role_title || job.ownerCandidate?.current_job_title || "N/A"
                                                         }, void 0, false, {
                                                             fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                                            lineNumber: 275,
+                                                            lineNumber: 311,
                                                             columnNumber: 25
                                                         }, this)
                                                     }, void 0, false, {
                                                         fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                                        lineNumber: 274,
+                                                        lineNumber: 310,
                                                         columnNumber: 23
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -860,73 +893,81 @@ function AdminSolicitudesPage() {
                                                                     className: "h-4 w-4"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                                                    lineNumber: 281,
+                                                                    lineNumber: 317,
                                                                     columnNumber: 27
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                                     children: job.company_name
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                                                    lineNumber: 282,
+                                                                    lineNumber: 318,
                                                                     columnNumber: 27
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                                            lineNumber: 280,
+                                                            lineNumber: 316,
                                                             columnNumber: 25
                                                         }, this)
                                                     }, void 0, false, {
                                                         fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                                        lineNumber: 279,
+                                                        lineNumber: 315,
                                                         columnNumber: 23
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
                                                         className: "px-6 py-4",
                                                         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
                                                             onClick: ()=>handleViewRecommendations(job.id),
-                                                            disabled: job.recommendations_count === 0,
+                                                            disabled: job.recommendations_count === 0 || navigating === `recommendations-${job.id}`,
                                                             variant: "outline",
-                                                            className: `rounded-xl ${job.recommendations_count === 0 ? "bg-gray-300 text-gray-500 border-gray-300 cursor-not-allowed" : "bg-orange-500 hover:bg-orange-600 text-white border-orange-500"}`,
-                                                            children: [
-                                                                "Ver ",
-                                                                job.recommendations_count
-                                                            ]
-                                                        }, void 0, true, {
+                                                            className: `rounded-xl transition-all duration-200 ${job.recommendations_count === 0 ? "bg-gray-300 text-gray-500 border-gray-300 cursor-not-allowed" : "bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white border-orange-500"}`,
+                                                            children: navigating === `recommendations-${job.id}` ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
+                                                                children: [
+                                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                                        className: "animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-2"
+                                                                    }, void 0, false, {
+                                                                        fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
+                                                                        lineNumber: 334,
+                                                                        columnNumber: 31
+                                                                    }, this),
+                                                                    "Cargando..."
+                                                                ]
+                                                            }, void 0, true) : `Ver ${job.recommendations_count}`
+                                                        }, void 0, false, {
                                                             fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                                            lineNumber: 286,
+                                                            lineNumber: 322,
                                                             columnNumber: 25
                                                         }, this)
                                                     }, void 0, false, {
                                                         fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                                        lineNumber: 285,
+                                                        lineNumber: 321,
                                                         columnNumber: 23
                                                     }, this)
                                                 ]
                                             }, job.id, true, {
                                                 fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                                lineNumber: 256,
+                                                lineNumber: 292,
                                                 columnNumber: 21
                                             }, this))
                                     }, void 0, false, {
                                         fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                        lineNumber: 254,
+                                        lineNumber: 290,
                                         columnNumber: 17
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                lineNumber: 243,
+                                lineNumber: 279,
                                 columnNumber: 15
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                            lineNumber: 242,
+                            lineNumber: 278,
                             columnNumber: 13
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                        lineNumber: 241,
+                        lineNumber: 277,
                         columnNumber: 13
                     }, this) : /* Grid View */ /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                         className: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6",
@@ -954,7 +995,7 @@ function AdminSolicitudesPage() {
                                                     children: job.job_title
                                                 }, void 0, false, {
                                                     fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                                    lineNumber: 317,
+                                                    lineNumber: 360,
                                                     columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -963,18 +1004,18 @@ function AdminSolicitudesPage() {
                                                         className: "h-5 w-5"
                                                     }, void 0, false, {
                                                         fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                                        lineNumber: 319,
+                                                        lineNumber: 362,
                                                         columnNumber: 23
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                                    lineNumber: 318,
+                                                    lineNumber: 361,
                                                     columnNumber: 21
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                            lineNumber: 316,
+                                            lineNumber: 359,
                                             columnNumber: 19
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -982,7 +1023,7 @@ function AdminSolicitudesPage() {
                                             children: truncateText(job.description || "", 100)
                                         }, void 0, false, {
                                             fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                            lineNumber: 323,
+                                            lineNumber: 366,
                                             columnNumber: 19
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -996,7 +1037,7 @@ function AdminSolicitudesPage() {
                                                             children: "Solicitante:"
                                                         }, void 0, false, {
                                                             fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                                            lineNumber: 329,
+                                                            lineNumber: 372,
                                                             columnNumber: 23
                                                         }, this),
                                                         " ",
@@ -1004,7 +1045,7 @@ function AdminSolicitudesPage() {
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                                    lineNumber: 328,
+                                                    lineNumber: 371,
                                                     columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1015,7 +1056,7 @@ function AdminSolicitudesPage() {
                                                             children: "Puesto:"
                                                         }, void 0, false, {
                                                             fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                                            lineNumber: 333,
+                                                            lineNumber: 376,
                                                             columnNumber: 23
                                                         }, this),
                                                         " ",
@@ -1023,7 +1064,7 @@ function AdminSolicitudesPage() {
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                                    lineNumber: 332,
+                                                    lineNumber: 375,
                                                     columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1033,7 +1074,7 @@ function AdminSolicitudesPage() {
                                                             className: "h-4 w-4"
                                                         }, void 0, false, {
                                                             fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                                            lineNumber: 337,
+                                                            lineNumber: 380,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1041,7 +1082,7 @@ function AdminSolicitudesPage() {
                                                             children: "Empresa:"
                                                         }, void 0, false, {
                                                             fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                                            lineNumber: 338,
+                                                            lineNumber: 381,
                                                             columnNumber: 23
                                                         }, this),
                                                         " ",
@@ -1049,27 +1090,34 @@ function AdminSolicitudesPage() {
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                                    lineNumber: 336,
+                                                    lineNumber: 379,
                                                     columnNumber: 21
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                            lineNumber: 327,
+                                            lineNumber: 370,
                                             columnNumber: 19
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
                                             onClick: ()=>handleViewRecommendations(job.id),
-                                            disabled: job.recommendations_count === 0,
-                                            className: `w-full rounded-xl mb-3 ${job.recommendations_count === 0 ? "bg-gray-300 text-gray-500 cursor-not-allowed" : "bg-orange-500 hover:bg-orange-600 text-white"}`,
-                                            children: [
-                                                "Ver ",
-                                                job.recommendations_count,
-                                                " Recomendaciones"
-                                            ]
-                                        }, void 0, true, {
+                                            disabled: job.recommendations_count === 0 || navigating === `recommendations-${job.id}`,
+                                            className: `w-full rounded-xl mb-3 transition-all duration-200 ${job.recommendations_count === 0 ? "bg-gray-300 text-gray-500 cursor-not-allowed" : "bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white"}`,
+                                            children: navigating === `recommendations-${job.id}` ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
+                                                children: [
+                                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                        className: "animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"
+                                                    }, void 0, false, {
+                                                        fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
+                                                        lineNumber: 396,
+                                                        columnNumber: 25
+                                                    }, this),
+                                                    "Cargando..."
+                                                ]
+                                            }, void 0, true) : `Ver ${job.recommendations_count} Recomendaciones`
+                                        }, void 0, false, {
                                             fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                            lineNumber: 342,
+                                            lineNumber: 385,
                                             columnNumber: 19
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1079,7 +1127,7 @@ function AdminSolicitudesPage() {
                                                     className: `h-2 w-2 rounded-full ${getStatusDot(job.status)}`
                                                 }, void 0, false, {
                                                     fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                                    lineNumber: 355,
+                                                    lineNumber: 405,
                                                     columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1087,49 +1135,49 @@ function AdminSolicitudesPage() {
                                                     children: getStatusText(job.status)
                                                 }, void 0, false, {
                                                     fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                                    lineNumber: 356,
+                                                    lineNumber: 406,
                                                     columnNumber: 21
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                            lineNumber: 354,
+                                            lineNumber: 404,
                                             columnNumber: 19
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                    lineNumber: 315,
+                                    lineNumber: 358,
                                     columnNumber: 17
                                 }, this)
                             }, job.id, false, {
                                 fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                                lineNumber: 309,
+                                lineNumber: 352,
                                 columnNumber: 15
                             }, this))
                     }, void 0, false, {
                         fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                        lineNumber: 307,
+                        lineNumber: 350,
                         columnNumber: 11
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-                    lineNumber: 228,
+                    lineNumber: 264,
                     columnNumber: 9
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-            lineNumber: 133,
+            lineNumber: 144,
             columnNumber: 7
         }, this)
     }, void 0, false, {
         fileName: "[project]/Referal MVP/app/admin/solicitudes/page.tsx",
-        lineNumber: 132,
+        lineNumber: 143,
         columnNumber: 5
     }, this);
 }
-_s(AdminSolicitudesPage, "a2lwkOjtsouo4CMVSa3ngsR7hS8=", false, function() {
+_s(AdminSolicitudesPage, "AJgANs3uC6/gJDaEXFHQekd67uo=", false, function() {
     return [
         __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRouter"]
     ];

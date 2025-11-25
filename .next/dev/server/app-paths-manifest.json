@@ -1,4 +1,9 @@
 {
+  "/admin/solicitudes/page": "app/admin/solicitudes/page.js",
   "/api/auth/linkedin/callback/route": "app/api/auth/linkedin/callback/route.js",
+  "/api/auth/linkedin/route": "app/api/auth/linkedin/route.js",
+  "/api/auth/session/route": "app/api/auth/session/route.js",
+  "/api/jobs/all/route": "app/api/jobs/all/route.js",
+  "/page": "app/page.js",
   "/solicitante/login-simulado/page": "app/solicitante/login-simulado/page.js"
 }
