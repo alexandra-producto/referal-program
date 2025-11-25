@@ -178,6 +178,9 @@ export async function GET(request: NextRequest) {
       headline: profile?.headline || "N/A"
     });
 
+    // Si no hay current_job_title o current_company, redirigir a página de completar perfil
+    const needsProfileCompletion = !current_job_title || !current_company;
+
     // Procesar según el rol
     if (role === "admin") {
       // Validar whitelist
@@ -250,6 +253,11 @@ export async function GET(request: NextRequest) {
         path: "/",
       });
 
+      // Si falta información del perfil, redirigir a completar perfil
+      if (needsProfileCompletion) {
+        return NextResponse.redirect(new URL("/auth/complete-profile", request.url));
+      }
+      
       return NextResponse.redirect(new URL("/admin/solicitudes", request.url));
     }
 
@@ -301,6 +309,11 @@ export async function GET(request: NextRequest) {
         path: "/",
       });
 
+      // Si falta información del perfil, redirigir a completar perfil
+      if (needsProfileCompletion) {
+        return NextResponse.redirect(new URL("/auth/complete-profile", request.url));
+      }
+      
       return NextResponse.redirect(new URL("/solicitante/solicitudes", request.url));
     }
 
@@ -366,6 +379,11 @@ export async function GET(request: NextRequest) {
         path: "/",
       });
 
+      // Si falta información del perfil, redirigir a completar perfil
+      if (needsProfileCompletion) {
+        return NextResponse.redirect(new URL("/auth/complete-profile", request.url));
+      }
+      
       return NextResponse.redirect(new URL("/hyperconnector/jobs-home", request.url));
     }
 

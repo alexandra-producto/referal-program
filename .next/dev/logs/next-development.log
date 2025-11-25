@@ -30,3 +30,5 @@
 [00:00:20.841] Server  LOG     ✅ User actualizado: {}
 [00:00:20.841] Server  LOG     💾 Paso 2: Creando/actualizando candidate con user_id...
 [00:00:21.613] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:20:03.972] Server  LOG      ✓ Compiled in 3.6s
+[00:20:16.344] Server  LOG      ✓ Compiled in 231ms

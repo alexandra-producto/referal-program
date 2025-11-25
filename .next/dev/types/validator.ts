@@ -74,6 +74,15 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
   type __Unused = __Check
 }
 
+// Validate ../../../app/auth/complete-profile/page.tsx
+{
+  type __IsExpected<Specific extends AppPageConfig<"/auth/complete-profile">> = Specific
+  const handler = {} as typeof import("../../../app/auth/complete-profile/page.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
 // Validate ../../../app/hyperconnector/jobs-home/page.tsx
 {
   type __IsExpected<Specific extends AppPageConfig<"/hyperconnector/jobs-home">> = Specific
@@ -141,6 +150,15 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
 {
   type __IsExpected<Specific extends RouteHandlerConfig<"/api/admin/control-tower/stats">> = Specific
   const handler = {} as typeof import("../../../app/api/admin/control-tower/stats/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
+// Validate ../../../app/api/auth/complete-profile/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/auth/complete-profile">> = Specific
+  const handler = {} as typeof import("../../../app/api/auth/complete-profile/route.js")
   type __Check = __IsExpected<typeof handler>
   // @ts-ignore
   type __Unused = __Check
