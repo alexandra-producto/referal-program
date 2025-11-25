@@ -610,7 +610,7 @@ function CrearSolicitudPage() {
                                     className: "text-gray-800 font-medium",
                                     children: [
                                         "Hola ",
-                                        session?.fullName || "Usuario"
+                                        session?.fullName?.split(" ")[0] || "Usuario"
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/Referal MVP/app/solicitante/crear/page.tsx",

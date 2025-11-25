@@ -81,3 +81,11 @@ Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
 [00:02:58.323] Server  LOG      ✓ Compiled in 229ms
 [00:03:00.157] Server  LOG      ✓ Compiled in 131ms
 [00:03:04.345] Server  LOG      ✓ Compiled in 94ms
+[00:04:48.197] Server  WARN    Image with src "/images/product-latam-logo.png" is using quality "100" which is not configured in images.qualities [75]. Please update your config to [100, 75].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:04:48.554] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:04:48.716] Browser WARN    Image with src "/images/product-latam-logo.png" is using quality "100" which is not configured in images.qualities [75]. Please update your config to [100, 75].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:04:48.716] Browser WARN    Image with src "/images/product-latam-logo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[00:06:53.429] Server  LOG      ✓ Compiled in 178ms
+[00:06:55.052] Server  LOG      ✓ Compiled in 177ms

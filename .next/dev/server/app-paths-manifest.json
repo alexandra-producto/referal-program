@@ -8,5 +8,6 @@
   "/auth/complete-profile/page": "app/auth/complete-profile/page.js",
   "/page": "app/page.js",
   "/solicitante/crear/page": "app/solicitante/crear/page.js",
-  "/solicitante/login-simulado/page": "app/solicitante/login-simulado/page.js"
+  "/solicitante/login-simulado/page": "app/solicitante/login-simulado/page.js",
+  "/solicitante/solicitudes/page": "app/solicitante/solicitudes/page.js"
 }

@@ -203,7 +203,7 @@ export default function CrearSolicitudPage() {
           <div className="flex items-center gap-4">
             <div className="backdrop-blur-[130px] bg-white/40 border border-white/50 rounded-2xl px-4 py-2 shadow-lg">
               <p className="text-gray-800 font-medium">
-                Hola {session?.fullName || "Usuario"}
+                Hola {session?.fullName?.split(" ")[0] || "Usuario"}
               </p>
             </div>
           </div>

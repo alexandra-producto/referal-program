@@ -107,20 +107,20 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules
 ;
 const sizeMap = {
     sm: {
-        width: 120,
-        height: 54
+        width: 83,
+        height: 37
     },
     md: {
-        width: 192,
-        height: 86
+        width: 132,
+        height: 59
     },
     lg: {
-        width: 240,
-        height: 108
+        width: 166,
+        height: 75
     },
     xl: {
-        width: 320,
-        height: 144
+        width: 221,
+        height: 99
     }
 };
 function ProductLatamLogo({ className = "", width, height, priority = true, size = "lg" }) {
