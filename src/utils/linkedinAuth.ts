@@ -168,9 +168,37 @@ export async function getProfile(accessToken: string): Promise<LinkedInProfile |
     const profile = await response.json();
     console.log("✅ Profile completo obtenido:", {
       id: profile.id,
-      headline: profile.headline,
-      vanityName: profile.vanityName,
+      headline: profile.headline || "NO HEADLINE",
+      vanityName: profile.vanityName || "NO VANITYNAME",
+      hasHeadline: !!profile.headline,
+      hasVanityName: !!profile.vanityName,
     });
+    
+    // Si no hay headline, intentar obtenerlo desde otro endpoint
+    if (!profile.headline) {
+      console.warn("⚠️ Profile sin headline, intentando obtener desde endpoint alternativo...");
+      try {
+        const headlineOnlyResponse = await fetch(
+          "https://api.linkedin.com/v2/me?projection=(id,headline)",
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "X-Restli-Protocol-Version": "2.0.0",
+            },
+          }
+        );
+        
+        if (headlineOnlyResponse.ok) {
+          const headlineData = await headlineOnlyResponse.json();
+          if (headlineData.headline) {
+            console.log("✅ Headline obtenido desde endpoint alternativo:", headlineData.headline);
+            profile.headline = headlineData.headline;
+          }
+        }
+      } catch (altError) {
+        console.warn("⚠️ Error obteniendo headline desde endpoint alternativo:", altError);
+      }
+    }
     
     return profile;
   } catch (error) {

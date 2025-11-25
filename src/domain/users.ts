@@ -70,17 +70,41 @@ export async function createUser(userData: Partial<User>): Promise<User> {
  * Actualiza un usuario existente
  */
 export async function updateUser(id: string, updates: Partial<User>): Promise<User> {
+  // Asegurar que los campos null se actualicen correctamente
+  const updateData: any = {
+    ...updates,
+    updated_at: new Date().toISOString(),
+  };
+  
+  // Incluir explícitamente los campos que pueden ser null para que se actualicen
+  if ('current_job_title' in updates) {
+    updateData.current_job_title = updates.current_job_title ?? null;
+  }
+  if ('current_company' in updates) {
+    updateData.current_company = updates.current_company ?? null;
+  }
+  if ('linkedin_url' in updates) {
+    updateData.linkedin_url = updates.linkedin_url ?? null;
+  }
+  if ('profile_picture_url' in updates) {
+    updateData.profile_picture_url = updates.profile_picture_url ?? null;
+  }
+  
+  console.log("📝 Actualizando usuario:", { id, updateData });
+  
   const { data, error } = await supabase
     .from("users")
-    .update({
-      ...updates,
-      updated_at: new Date().toISOString(),
-    })
+    .update(updateData)
     .eq("id", id)
     .select()
     .single();
 
-  if (error) throw error;
+  if (error) {
+    console.error("❌ Error actualizando usuario:", error);
+    throw error;
+  }
+  
+  console.log("✅ Usuario actualizado:", data);
   return data;
 }
 

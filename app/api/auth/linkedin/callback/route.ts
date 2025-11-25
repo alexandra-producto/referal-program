@@ -127,13 +127,26 @@ export async function GET(request: NextRequest) {
     
     console.log("📋 Datos parseados:", { linkedinId, email, fullName, profilePictureUrl });
     
+    // Verificar si profile existe y tiene headline
+    if (!profile) {
+      console.warn("⚠️ Profile no obtenido de LinkedIn");
+    } else if (!profile.headline) {
+      console.warn("⚠️ Profile obtenido pero sin headline:", profile);
+    }
+    
     const { current_role, current_company } = parseHeadline(profile?.headline);
     const linkedinUrl = buildLinkedInUrl(profile?.vanityName);
     
     // Mapear current_role a current_job_title para la tabla users
     const current_job_title = current_role;
     
-    console.log("📋 Headline parseado:", { current_job_title, current_company, linkedinUrl });
+    console.log("📋 Headline parseado:", { 
+      headline: profile?.headline || "N/A",
+      current_job_title, 
+      current_company, 
+      linkedinUrl,
+      vanityName: profile?.vanityName || "N/A"
+    });
 
     // Procesar según el rol
     if (role === "admin") {
@@ -145,8 +158,7 @@ export async function GET(request: NextRequest) {
       }
 
       console.log("💾 Paso 1: Creando/actualizando user...");
-      // 1. Crear/actualizar USER primero
-      const user = await upsertUser({
+      console.log("📋 Datos para upsertUser:", {
         email,
         full_name: fullName,
         role: "admin",
@@ -155,8 +167,25 @@ export async function GET(request: NextRequest) {
         current_job_title,
         current_company,
         profile_picture_url: profilePictureUrl,
+      });
+      // 1. Crear/actualizar USER primero
+      const user = await upsertUser({
+        email,
+        full_name: fullName,
+        role: "admin",
+        linkedin_id: linkedinId,
+        linkedin_url: linkedinUrl,
+        current_job_title: current_job_title || null, // Asegurar que sea null si no hay valor
+        current_company: current_company || null, // Asegurar que sea null si no hay valor
+        profile_picture_url: profilePictureUrl,
         auth_provider: "linkedin",
         provider_user_id: linkedinId,
+      });
+      console.log("✅ User actualizado:", {
+        id: user.id,
+        current_job_title: user.current_job_title,
+        current_company: user.current_company,
+        linkedin_url: user.linkedin_url,
       });
 
       console.log("💾 Paso 2: Creando/actualizando candidate con user_id...");
