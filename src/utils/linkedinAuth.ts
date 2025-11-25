@@ -142,9 +142,11 @@ export async function getUserInfo(accessToken: string): Promise<LinkedInUserInfo
  * Usa el endpoint de positions para obtener el título y empresa actual
  */
 export async function getCurrentPosition(accessToken: string): Promise<{ title: string | null; companyName: string | null }> {
+  console.log("🔍 [getCurrentPosition] Iniciando búsqueda de posición actual...");
   try {
     // Intentar obtener posiciones usando el endpoint de positions
     // Nota: Este endpoint puede requerir permisos adicionales
+    console.log("🔍 [getCurrentPosition] Llamando a /v2/me?projection=(id,positions~)");
     const response = await fetch(
       "https://api.linkedin.com/v2/me?projection=(id,positions~)",
       {
@@ -155,9 +157,11 @@ export async function getCurrentPosition(accessToken: string): Promise<{ title: 
       }
     );
 
+    console.log("🔍 [getCurrentPosition] Response status:", response.status, response.statusText);
+
     if (!response.ok) {
       const errorText = await response.text();
-      console.warn("⚠️ Error obteniendo posiciones de LinkedIn:", response.status, errorText);
+      console.warn("⚠️ [getCurrentPosition] Error obteniendo posiciones de LinkedIn:", response.status, errorText);
       
       // Intentar con endpoint alternativo sin projection
       try {
