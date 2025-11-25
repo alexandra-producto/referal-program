@@ -1,34 +1,160 @@
-[00:00:02.315] Server  LOG      ✓ Ready in 1977ms
-[00:00:05.695] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:00:06.833] Server  LOG     [dotenv@17.2.3] injecting env (0) from .env.local -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
-[00:00:13.774] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:00:17.411] Server  LOG     🔍 Validando state: {}
-[00:00:17.413] Server  LOG     🔄 Intercambiando código por token...
-[00:00:17.959] Server  LOG     ✅ Token obtenido exitosamente
-[00:00:17.959] Server  LOG     🔑 ACCESS TOKEN PARA TEST (copiar a .env.local como TEST_LINKEDIN_ACCESS_TOKEN):
-[00:00:17.959] Server  LOG     AQWuhWh2xNG_KfHCsn7u6fVa7HYKY4tOQwcidG5yz6Nnyy3B5wanWJekWu5cP1kKJwJpRpxTxiFiI66OnoZ6g0_kjqYA4pRfnYmyP-QFj595PrWebReHAu1FyI1MqahzXRiTiXOtHr6N6hTRrrySSZbX9hdWv6ohCzJ9teFVnezQnep_YmIAPVUhETDnhz0VnY-5C3EK477fUKThGFq68pCQZbv1n_ZXxyuYyFvIgmokWUKKhAZ9x_ruKp0GP-c5_mUcPac4haM0VCa7pYcGMEYmd9O9_FNL56tumko92H1GlnVgLNEhwFo-D544eye7zPNvjgB_mfQpip-kuxizr3hOvLu8Zw
-[00:00:17.960] Server  LOG     🔄 Obteniendo información del usuario...
-[00:00:18.609] Server  LOG     ✅ UserInfo obtenido: {}
-[00:00:19.218] Server  WARN    ⚠️ Error obteniendo perfil de LinkedIn: 403 "{\"status\":403,\"serviceErrorCode\":100,\"code\":\"ACCESS_DENIED\",\"message\":\"Not enough permissions to access: me.GET.NO_VERSION\"}"
-[00:00:19.499] Server  LOG     ✅ Profile obtenido: "No"
-[00:00:19.500] Server  LOG     📋 Datos parseados: {}
-[00:00:19.500] Server  LOG     🔄 Obteniendo posición actual desde LinkedIn API...
-[00:00:19.501] Server  LOG     🔍 [getCurrentPosition] Iniciando búsqueda de posición actual...
-[00:00:19.501] Server  LOG     🔍 [getCurrentPosition] Llamando a /v2/me?projection=(id,positions~)
-[00:00:19.855] Server  LOG     🔍 [getCurrentPosition] Response status: 403 "Forbidden"
-[00:00:19.857] Server  WARN    ⚠️ [getCurrentPosition] Error obteniendo posiciones de LinkedIn: 403 "{\"status\":403,\"serviceErrorCode\":100,\"code\":\"ACCESS_DENIED\",\"message\":\"Not enough permissions to access: me.GET.NO_VERSION\"}"
-[00:00:20.134] Server  LOG     📋 Resultado de getCurrentPosition: {}
-[00:00:20.135] Server  LOG     ⚠️ No se obtuvo posición actual desde positions API, intentando parsear headline como fallback...
-[00:00:20.135] Server  LOG     📋 Profile headline: "NO HEADLINE"
-[00:00:20.135] Server  LOG     ⚠️ No headline provided
-[00:00:20.136] Server  LOG     📋 Resultado de parseHeadline: {}
-[00:00:20.136] Server  LOG     📋 Datos de posición obtenidos: {}
-[00:00:20.136] Server  LOG     💾 Paso 1: Creando/actualizando user...
-[00:00:20.137] Server  LOG     📋 Datos para upsertUser: {}
-[00:00:20.652] Server  LOG     📝 Actualizando usuario: {}
-[00:00:20.840] Server  LOG     ✅ Usuario actualizado: {}
-[00:00:20.841] Server  LOG     ✅ User actualizado: {}
-[00:00:20.841] Server  LOG     💾 Paso 2: Creando/actualizando candidate con user_id...
-[00:00:21.613] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:20:03.972] Server  LOG      ✓ Compiled in 3.6s
-[00:20:16.344] Server  LOG      ✓ Compiled in 231ms
+[00:00:02.127] Server  LOG      ✓ Ready in 1856ms
+[00:00:19.276] Server  LOG      ○ Compiling /admin/solicitudes ...
+[00:00:50.020] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:50.162] Browser ERROR   A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+%s%s https://react.dev/link/hydration-mismatch 
+
+  ...
+    <HotReload globalError={[...]} webSocket={WebSocket} staticIndicatorState={{pathname:null, ...}}>
+      <AppDevOverlayErrorBoundary globalError={[...]}>
+        <ReplaySsrOnlyErrors>
+        <DevRootHTTPAccessFallbackBoundary>
+          <HTTPAccessFallbackBoundary notFound={<NotAllowedRootHTTPFallbackError>}>
+            <HTTPAccessFallbackErrorBoundary pathname="/admin/sol..." notFound={<NotAllowedRootHTTPFallbackError>} ...>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <Head>
+                  <__next_root_layout_boundary__>
+                    <SegmentViewNode type="layout" pagePath="/Referal M...">
+                      <SegmentTrieNode>
+                      <link>
+                      <script>
+                      <RootLayout>
+                        <html
+                          lang="es"
+-                         className="js-storylane-extension"
+                        >
+                  ...
+
+[00:00:51.537] Server  LOG     [dotenv@17.2.3] injecting env (0) from .env.local -- tip: ⚙️  suppress all logs with { quiet: true }
+[00:00:53.288] Browser WARN    Image with src "/images/product-latam-logo.png" is using quality "100" which is not configured in images.qualities [75]. Please update your config to [100, 75].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:00:55.498] Browser WARN    Image with src "/images/product-latam-logo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[00:01:15.459] Server  WARN    Image with src "/images/product-latam-logo.png" is using quality "100" which is not configured in images.qualities [75]. Please update your config to [100, 75].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:01:16.129] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:01:16.296] Browser WARN    Image with src "/images/product-latam-logo.png" is using quality "100" which is not configured in images.qualities [75]. Please update your config to [100, 75].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:01:16.296] Browser WARN    Image with src "/images/product-latam-logo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[00:01:44.731] Server  LOG     🔍 Validando state: {}
+[00:01:44.734] Server  LOG     🔄 Intercambiando código por token...
+[00:01:45.403] Server  LOG     ✅ Token obtenido exitosamente
+[00:01:45.404] Server  LOG     🔑 ACCESS TOKEN PARA TEST (copiar a .env.local como TEST_LINKEDIN_ACCESS_TOKEN):
+[00:01:45.404] Server  LOG     AQW8nzWC1gCLh7LgWrOWF4Wmx-KxzXiGDXT-ICWnxPf5kzqNbmpiWWwunjQ4Fd4lzsmWNB4o_SqFCoAsdEQ0jqott8QB3_Z7KWwnril5zwq4uZXWWReeJUO28Ex6tc4aoRmj3Row7qMx_M062ombn1V_Y9HyNOTjBSMSCIem8arurIKZNzVT3NnxBprhy5As3DlWdGCxyzKXMS1Eheo-xePM5upM7Uf782RKLVYpVwEllTxfiZW5jHL00D31c5Bp9No1argJDJLm2Q_wHpnmkWWIcczUvzWSR_HHkbwDpfjbuqx69dm44_s09a7_ya9-_YLCiHlv0jwhIarCvEo9j-5zWfjGZg
+[00:01:45.405] Server  LOG     🔄 Obteniendo información del usuario...
+[00:01:46.095] Server  LOG     ✅ UserInfo obtenido (raw): "{\n  \"sub\": \"UtV6SCQhHs\",\n  \"email_verified\": true,\n  \"name\": \"Alexandra Rivera Duarte\",\n  \"locale\": {\n    \"country\": \"ES\",\n    \"language\": \"es\"\n  },\n  \"given_name\": \"Alexandra\",\n  \"family_name\": \"Rivera Duarte\",\n  \"email\": \"alexa00rivera@gmail.com\",\n  \"picture\": \"https://media.licdn.com/dms/image/v2/D4E03AQEPlV5S2PQfuA/profile-displayphoto-shrink_100_100/profile-displayphoto-shrink_100_100/0/1708991785424?e=1765411200&v=beta&t=78eV_-kI4aiOdKEcSpNB5Bah02IXypFQSuGX79-Gk1U\"\n}"
+[00:01:46.099] Server  LOG     ✅ UserInfo resumido: {}
+[00:01:46.660] Server  WARN    ⚠️ Error obteniendo perfil de LinkedIn: 403 "{\"status\":403,\"serviceErrorCode\":100,\"code\":\"ACCESS_DENIED\",\"message\":\"Not enough permissions to access: me.GET.NO_VERSION\"}"
+[00:01:46.968] Server  LOG     ✅ Profile obtenido: "No"
+[00:01:46.968] Server  LOG     ❌ Profile es null - no se pudo obtener
+[00:01:46.968] Server  LOG     📋 Datos parseados: {}
+[00:01:46.968] Server  LOG     🔄 Obteniendo posición actual desde LinkedIn API...
+[00:01:46.968] Server  LOG     🔍 [getCurrentPosition] Iniciando búsqueda de posición actual...
+[00:01:46.968] Server  LOG     🔍 [getCurrentPosition] Llamando a /v2/me?projection=(id,positions~)
+[00:01:47.287] Server  LOG     🔍 [getCurrentPosition] Response status: 403 "Forbidden"
+[00:01:47.291] Server  WARN    ⚠️ [getCurrentPosition] Error obteniendo posiciones de LinkedIn: 403 "{\"status\":403,\"serviceErrorCode\":100,\"code\":\"ACCESS_DENIED\",\"message\":\"Not enough permissions to access: me.GET.NO_VERSION\"}"
+[00:01:47.591] Server  LOG     📋 Resultado de getCurrentPosition: {}
+[00:01:47.592] Server  LOG     ⚠️ No se obtuvo posición actual desde positions API, intentando parsear headline como fallback...
+[00:01:47.592] Server  LOG     📋 Profile headline: "NO HEADLINE"
+[00:01:47.592] Server  LOG     ⚠️ No headline provided
+[00:01:47.592] Server  LOG     📋 Resultado de parseHeadline: {}
+[00:01:47.593] Server  LOG     📋 Datos de posición obtenidos: {}
+[00:01:47.593] Server  LOG     💾 Paso 1: Creando/actualizando user...
+[00:01:47.918] Server  LOG     📝 Actualizando usuario: {}
+[00:01:48.174] Server  LOG     ✅ Usuario actualizado: {}
+[00:01:48.175] Server  LOG     💾 Paso 2: Creando/actualizando candidate con user_id...
+[00:01:48.619] Server  LOG     💾 Paso 3: Creando/actualizando hyperconnector con user_id...
+[00:01:49.804] Server  LOG     🔄 Syncing relationships for hyperconnector: bceaa861-ad1f-4a6b-b400-b7dc6d59c85f
+[00:01:50.608] Server  LOG        ℹ️  No candidates found in candidate_connections for this hyperconnector
+[00:01:51.184] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:01:52.273] Browser WARN    Image with src "/images/product-latam-logo.png" is using quality "100" which is not configured in images.qualities [75]. Please update your config to [100, 75].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:01:52.273] Browser WARN    Image with src "/images/product-latam-logo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[00:02:24.944] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:02:24.944] Browser WARN    Image with src "/images/product-latam-logo.png" is using quality "100" which is not configured in images.qualities [75]. Please update your config to [100, 75].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:02:24.944] Browser WARN    Image with src "/images/product-latam-logo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[00:02:28.756] Server  LOG     🔍 Validando state: {}
+[00:02:28.758] Server  LOG     🔄 Intercambiando código por token...
+[00:02:29.229] Server  LOG     ✅ Token obtenido exitosamente
+[00:02:29.230] Server  LOG     🔑 ACCESS TOKEN PARA TEST (copiar a .env.local como TEST_LINKEDIN_ACCESS_TOKEN):
+[00:02:29.231] Server  LOG     AQXY3nSprQ5xawq666szY_N4QpzgvSViclRa24BhlD_OjHVrNwGQ849jhMBV5hjfxMh10tj8HYxLxLrApSwUURj5ZLjy_SVqtBVhgJBlMAvkm9YrT8gJgYhmft-Tb97krMXOH6pevYvvTJylDLdhb_mJ2KrfiBEQRDS09iP-zUZSOJZ4YwBd5e66160osI_wvG0zC-JA3VAVyXZQF4ldvhgzcs8zA2LGJZha6xDtd_5K9xdvV19GCbcfC8f4GBirFCVbdN8fpSE9W9-Iox6ED-VYAadgGsta7Aoa-23N3wPHo8NT8oDIghqZiRLJpl25J-00UAO7OfSYJ2bhX6BPiME_FIRxJg
+[00:02:29.232] Server  LOG     🔄 Obteniendo información del usuario...
+[00:02:29.905] Server  LOG     ✅ UserInfo obtenido (raw): "{\n  \"sub\": \"UtV6SCQhHs\",\n  \"email_verified\": true,\n  \"name\": \"Alexandra Rivera Duarte\",\n  \"locale\": {\n    \"country\": \"ES\",\n    \"language\": \"es\"\n  },\n  \"given_name\": \"Alexandra\",\n  \"family_name\": \"Rivera Duarte\",\n  \"email\": \"alexa00rivera@gmail.com\",\n  \"picture\": \"https://media.licdn.com/dms/image/v2/D4E03AQEPlV5S2PQfuA/profile-displayphoto-shrink_100_100/profile-displayphoto-shrink_100_100/0/1708991785424?e=1765411200&v=beta&t=78eV_-kI4aiOdKEcSpNB5Bah02IXypFQSuGX79-Gk1U\"\n}"
+[00:02:29.907] Server  LOG     ✅ UserInfo resumido: {}
+[00:02:30.508] Server  WARN    ⚠️ Error obteniendo perfil de LinkedIn: 403 "{\"status\":403,\"serviceErrorCode\":100,\"code\":\"ACCESS_DENIED\",\"message\":\"Not enough permissions to access: me.GET.NO_VERSION\"}"
+[00:02:30.841] Server  LOG     ✅ Profile obtenido: "No"
+[00:02:30.841] Server  LOG     ❌ Profile es null - no se pudo obtener
+[00:02:30.842] Server  LOG     📋 Datos parseados: {}
+[00:02:30.843] Server  LOG     🔄 Obteniendo posición actual desde LinkedIn API...
+[00:02:30.843] Server  LOG     🔍 [getCurrentPosition] Iniciando búsqueda de posición actual...
+[00:02:30.843] Server  LOG     🔍 [getCurrentPosition] Llamando a /v2/me?projection=(id,positions~)
+[00:02:31.132] Server  LOG     🔍 [getCurrentPosition] Response status: 403 "Forbidden"
+[00:02:31.134] Server  WARN    ⚠️ [getCurrentPosition] Error obteniendo posiciones de LinkedIn: 403 "{\"status\":403,\"serviceErrorCode\":100,\"code\":\"ACCESS_DENIED\",\"message\":\"Not enough permissions to access: me.GET.NO_VERSION\"}"
+[00:02:31.412] Server  LOG     📋 Resultado de getCurrentPosition: {}
+[00:02:31.413] Server  LOG     ⚠️ No se obtuvo posición actual desde positions API, intentando parsear headline como fallback...
+[00:02:31.413] Server  LOG     📋 Profile headline: "NO HEADLINE"
+[00:02:31.413] Server  LOG     ⚠️ No headline provided
+[00:02:31.413] Server  LOG     📋 Resultado de parseHeadline: {}
+[00:02:31.413] Server  LOG     📋 Datos de posición obtenidos: {}
+[00:02:31.413] Server  LOG     💾 Paso 1: Creando/actualizando user...
+[00:02:31.673] Server  LOG     📝 Actualizando usuario: {}
+[00:02:31.901] Server  LOG     ✅ Usuario actualizado: {}
+[00:02:31.902] Server  LOG     💾 Paso 2: Creando/actualizando candidate con user_id...
+[00:02:32.856] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:02:33.205] Browser WARN    Image with src "/images/product-latam-logo.png" is using quality "100" which is not configured in images.qualities [75]. Please update your config to [100, 75].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:02:33.205] Browser WARN    Image with src "/images/product-latam-logo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[00:02:48.096] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:02:48.224] Browser WARN    Image with src "/images/product-latam-logo.png" is using quality "100" which is not configured in images.qualities [75]. Please update your config to [100, 75].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:02:48.224] Browser WARN    Image with src "/images/product-latam-logo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[00:02:50.860] Server  LOG     🔍 Validando state: {}
+[00:02:50.863] Server  LOG     🔄 Intercambiando código por token...
+[00:02:51.404] Server  LOG     ✅ Token obtenido exitosamente
+[00:02:51.404] Server  LOG     🔑 ACCESS TOKEN PARA TEST (copiar a .env.local como TEST_LINKEDIN_ACCESS_TOKEN):
+[00:02:51.405] Server  LOG     AQW9NoRrETU3a56eiml7AFY3VrQgls80gZmRQfgA7ZiwVrsbHk5zZ49O7XBni8BmJHMkdoNnIyUYb1xUDj6CGyhVIYCk6KvNbJAkfx8rPZx_dZLDTb3nm_aExbL4LpIpRxMhVZwy_04bJzt0gTdEi-pNpcnPaDfxPzTxNapidPjkIBaLBJ4jN_89TouyRMjO1dA9mc_-L5rfOw0KGHXywiv7ju8yiljxtPa7p3EZfLb7kxzTcCZ4HIWJG0XrI5aEJBQQRbmOq3U3W08uXOGNlfALnK-rMv0HKYzbaDak8M6F5FQP5YmZB_YRWKAM5tQiuN1aD1fD0pvRGe7FN0ygMBaRExxYCg
+[00:02:51.405] Server  LOG     🔄 Obteniendo información del usuario...
+[00:02:52.016] Server  LOG     ✅ UserInfo obtenido (raw): "{\n  \"sub\": \"UtV6SCQhHs\",\n  \"email_verified\": true,\n  \"name\": \"Alexandra Rivera Duarte\",\n  \"locale\": {\n    \"country\": \"ES\",\n    \"language\": \"es\"\n  },\n  \"given_name\": \"Alexandra\",\n  \"family_name\": \"Rivera Duarte\",\n  \"email\": \"alexa00rivera@gmail.com\",\n  \"picture\": \"https://media.licdn.com/dms/image/v2/D4E03AQEPlV5S2PQfuA/profile-displayphoto-shrink_100_100/profile-displayphoto-shrink_100_100/0/1708991785424?e=1765411200&v=beta&t=78eV_-kI4aiOdKEcSpNB5Bah02IXypFQSuGX79-Gk1U\"\n}"
+[00:02:52.017] Server  LOG     ✅ UserInfo resumido: {}
+[00:02:52.807] Server  WARN    ⚠️ Error obteniendo perfil de LinkedIn: 403 "{\"status\":403,\"serviceErrorCode\":100,\"code\":\"ACCESS_DENIED\",\"message\":\"Not enough permissions to access: me.GET.NO_VERSION\"}"
+[00:02:53.130] Server  LOG     ✅ Profile obtenido: "No"
+[00:02:53.131] Server  LOG     ❌ Profile es null - no se pudo obtener
+[00:02:53.132] Server  LOG     📋 Datos parseados: {}
+[00:02:53.132] Server  LOG     🔄 Obteniendo posición actual desde LinkedIn API...
+[00:02:53.133] Server  LOG     🔍 [getCurrentPosition] Iniciando búsqueda de posición actual...
+[00:02:53.133] Server  LOG     🔍 [getCurrentPosition] Llamando a /v2/me?projection=(id,positions~)
+[00:02:53.450] Server  LOG     🔍 [getCurrentPosition] Response status: 403 "Forbidden"
+[00:02:53.455] Server  WARN    ⚠️ [getCurrentPosition] Error obteniendo posiciones de LinkedIn: 403 "{\"status\":403,\"serviceErrorCode\":100,\"code\":\"ACCESS_DENIED\",\"message\":\"Not enough permissions to access: me.GET.NO_VERSION\"}"
+[00:02:53.839] Server  LOG     📋 Resultado de getCurrentPosition: {}
+[00:02:53.840] Server  LOG     ⚠️ No se obtuvo posición actual desde positions API, intentando parsear headline como fallback...
+[00:02:53.840] Server  LOG     📋 Profile headline: "NO HEADLINE"
+[00:02:53.840] Server  LOG     ⚠️ No headline provided
+[00:02:53.840] Server  LOG     📋 Resultado de parseHeadline: {}
+[00:02:53.841] Server  LOG     📋 Datos de posición obtenidos: {}
+[00:02:53.845] Server  LOG     💾 Paso 1: Creando/actualizando user...
+[00:02:53.845] Server  LOG     📋 Datos para upsertUser: {}
+[00:02:54.238] Server  LOG     📝 Actualizando usuario: {}
+[00:02:54.401] Server  LOG     ✅ Usuario actualizado: {}
+[00:02:54.407] Server  LOG     ✅ User actualizado: {}
+[00:02:54.409] Server  LOG     💾 Paso 2: Creando/actualizando candidate con user_id...
+[00:02:55.205] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:02:55.566] Browser WARN    Image with src "/images/product-latam-logo.png" is using quality "100" which is not configured in images.qualities [75]. Please update your config to [100, 75].
+Read more: https://nextjs.org/docs/messages/next-image-unconfigured-qualities
+[00:02:55.566] Browser WARN    Image with src "/images/product-latam-logo.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[00:05:41.781] Server  LOG      ✓ Compiled in 2s
+[00:05:43.667] Server  LOG      ✓ Compiled in 357ms
+[00:05:48.023] Server  LOG      ✓ Compiled in 321ms
+[00:05:50.228] Server  LOG      ✓ Compiled in 96ms
+[00:05:55.864] Server  LOG      ✓ Compiled in 774ms
+[00:06:14.520] Server  LOG      ✓ Compiled in 352ms
+[00:06:17.074] Server  LOG      ✓ Compiled in 164ms

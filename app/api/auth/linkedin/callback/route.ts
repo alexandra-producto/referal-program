@@ -11,11 +11,12 @@ import {
   parseHeadline,
   buildLinkedInUrl,
 } from "@/src/utils/linkedinAuth";
-import { upsertUser, updateLastLogin } from "@/src/domain/users";
+import { upsertUser, updateLastLogin, findUserByLinkedInOrEmail } from "@/src/domain/users";
 import { upsertCandidate } from "@/src/domain/candidates";
 import { upsertHyperconnector } from "@/src/domain/hyperconnectors";
 import { createSession } from "@/src/utils/session";
 import { isAdminAuthorized } from "@/src/utils/adminWhitelist";
+import { supabase } from "@/src/db/supabaseClient";
 
 // Cargar variables de entorno
 if (!process.env.SESSION_SECRET) {
@@ -178,8 +179,44 @@ export async function GET(request: NextRequest) {
       headline: profile?.headline || "N/A"
     });
 
-    // Si no hay current_job_title o current_company, redirigir a página de completar perfil
-    const needsProfileCompletion = !current_job_title || !current_company;
+    // Verificar si el usuario ya existe en la BD y si tiene los datos completos
+    // Solo pedir completar perfil si es un usuario nuevo o si realmente faltan los datos
+    let needsProfileCompletion = !current_job_title || !current_company;
+    
+    // Si LinkedIn no proporcionó los datos, verificar si el usuario ya los tiene en la BD
+    if (needsProfileCompletion) {
+      const existingUser = await findUserByLinkedInOrEmail(linkedinId, email);
+      if (existingUser) {
+        // Si el usuario ya existe y tiene los datos, no necesita completar perfil
+        if (existingUser.current_company && existingUser.current_job_title) {
+          needsProfileCompletion = false;
+          // Usar los datos existentes de la BD
+          current_company = existingUser.current_company;
+          current_job_title = existingUser.current_job_title;
+          console.log("✅ Usuario existente con datos completos, usando datos de BD:", {
+            current_company,
+            current_job_title
+          });
+        } else {
+          // Verificar también en candidates
+          const { data: existingCandidate } = await supabase
+            .from("candidates")
+            .select("current_company, current_job_title")
+            .eq("email", email)
+            .maybeSingle();
+          
+          if (existingCandidate?.current_company && existingCandidate?.current_job_title) {
+            needsProfileCompletion = false;
+            current_company = existingCandidate.current_company;
+            current_job_title = existingCandidate.current_job_title;
+            console.log("✅ Candidate existente con datos completos, usando datos de BD:", {
+              current_company,
+              current_job_title
+            });
+          }
+        }
+      }
+    }
 
     // Procesar según el rol
     if (role === "admin") {

@@ -124,13 +124,13 @@ function CompleteProfileContent() {
         transition={{ duration: 0.3 }}
         className="w-full max-w-md"
       >
-        <Card className="backdrop-blur-[130px] bg-white/95 border-2 border-blue-200/50 rounded-3xl shadow-2xl p-8">
+        <Card className="backdrop-blur-[130px] bg-gradient-to-br from-gray-900/95 to-gray-800/95 border-2 border-gray-700/50 rounded-3xl shadow-2xl p-8">
           <div className="text-center mb-6">
             <ProductLatamLogo className="justify-center mb-4" />
-            <h1 className="text-2xl font-bold text-gray-800 mb-2">
+            <h1 className="text-2xl font-bold text-white mb-2">
               Completa tu Perfil
             </h1>
-            <p className="text-gray-600 text-sm">
+            <p className="text-gray-300 text-sm">
               Necesitamos algunos datos adicionales para personalizar tu experiencia
             </p>
           </div>
@@ -140,7 +140,7 @@ function CompleteProfileContent() {
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm"
+                className="flex items-center gap-2 p-3 bg-red-900/50 border border-red-700 rounded-xl text-red-200 text-sm"
               >
                 <AlertCircle className="h-4 w-4" />
                 <span>{error}</span>
@@ -148,32 +148,32 @@ function CompleteProfileContent() {
             )}
 
             <div className="space-y-2">
-              <label className="text-gray-700 font-medium text-sm flex items-center gap-2">
-                <Building className="h-4 w-4 text-blue-600" />
-                Empresa Actual <span className="text-red-500">*</span>
+              <label className="text-gray-200 font-medium text-sm flex items-center gap-2">
+                <Building className="h-4 w-4 text-blue-400" />
+                Empresa Actual <span className="text-red-400">*</span>
               </label>
               <Input
                 type="text"
                 value={currentCompany}
                 onChange={(e) => setCurrentCompany(e.target.value)}
                 placeholder="Ej: Product Latam"
-                className="h-12 rounded-xl border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                className="h-12 rounded-xl border-gray-600 bg-gray-800/50 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400"
                 required
                 disabled={loading}
               />
             </div>
 
             <div className="space-y-2">
-              <label className="text-gray-700 font-medium text-sm flex items-center gap-2">
-                <Briefcase className="h-4 w-4 text-blue-600" />
-                Cargo Actual <span className="text-red-500">*</span>
+              <label className="text-gray-200 font-medium text-sm flex items-center gap-2">
+                <Briefcase className="h-4 w-4 text-blue-400" />
+                Cargo Actual <span className="text-red-400">*</span>
               </label>
               <Input
                 type="text"
                 value={currentJobTitle}
                 onChange={(e) => setCurrentJobTitle(e.target.value)}
                 placeholder="Ej: CEO & Founder"
-                className="h-12 rounded-xl border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                className="h-12 rounded-xl border-gray-600 bg-gray-800/50 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400"
                 required
                 disabled={loading}
               />

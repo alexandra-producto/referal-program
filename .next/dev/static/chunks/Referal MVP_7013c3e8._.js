@@ -189,25 +189,52 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules
 var __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$image$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/Referal MVP/node_modules/next/image.js [app-client] (ecmascript)");
 ;
 ;
-function ProductLatamLogo({ className = "" }) {
+const sizeMap = {
+    sm: {
+        width: 120,
+        height: 54
+    },
+    md: {
+        width: 192,
+        height: 86
+    },
+    lg: {
+        width: 240,
+        height: 108
+    },
+    xl: {
+        width: 320,
+        height: 144
+    }
+};
+function ProductLatamLogo({ className = "", width, height, priority = true, size = "lg" }) {
+    // Usar size si no se especifican width/height
+    const dimensions = width && height ? {
+        width,
+        height
+    } : sizeMap[size];
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
         className: `flex items-center ${className}`,
         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$image$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
             src: "/images/product-latam-logo.png",
             alt: "Product Latam Logo",
-            width: 192,
-            height: 86,
+            width: dimensions.width,
+            height: dimensions.height,
             className: "object-contain",
-            priority: true,
-            unoptimized: false
+            priority: priority,
+            quality: 100,
+            style: {
+                maxWidth: '100%',
+                height: 'auto'
+            }
         }, void 0, false, {
             fileName: "[project]/Referal MVP/components/ProductLatamLogo.tsx",
-            lineNumber: 7,
+            lineNumber: 33,
             columnNumber: 7
         }, this)
     }, void 0, false, {
         fileName: "[project]/Referal MVP/components/ProductLatamLogo.tsx",
-        lineNumber: 6,
+        lineNumber: 32,
         columnNumber: 5
     }, this);
 }
