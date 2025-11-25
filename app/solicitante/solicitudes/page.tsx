@@ -490,6 +490,10 @@ export default function MisSolicitudesPage() {
                     })}
                   </div>
                 </>
+              ) : (
+                <div className="text-center py-12">
+                  <p className="text-gray-500">No se pudieron cargar los detalles</p>
+                </div>
               )}
             </div>
 
