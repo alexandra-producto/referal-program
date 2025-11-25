@@ -90,11 +90,12 @@ export async function GET(
     const jobIds = [...new Set(jobMatches.map((jm: any) => jm.job_id))];
 
     // Obtener detalles de los jobs
+    // Mostrar jobs activos (excluir solo los cerrados/cancelados)
     const { data: jobs, error: jobsError } = await supabase
       .from("jobs")
       .select("id, company_name, job_title, description, owner_candidate_id, owner_role_title, status")
       .in("id", jobIds)
-      .eq("status", "open");
+      .not("status", "in", "(\"Recomendación Contratada\",\"Recomendación Cancelada\")");
 
     if (jobsError) {
       console.error("❌ Error obteniendo jobs:", jobsError);

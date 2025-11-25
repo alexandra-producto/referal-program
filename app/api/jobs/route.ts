@@ -104,16 +104,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Obtener candidateId del body (en el futuro esto vendrá de la autenticación)
+    // Obtener candidateId del body (puede ser null para admins)
     const candidateId = body.candidateId;
-    if (!candidateId || typeof candidateId !== 'string') {
+    if (candidateId !== null && (!candidateId || typeof candidateId !== 'string')) {
       return NextResponse.json(
-        { error: 'candidateId is required in the request body' },
+        { error: 'candidateId must be a valid string or null' },
         { status: 400 }
       );
     }
 
-    // Crear el job
+    // Crear el job (si candidateId es null, el servicio debe manejarlo)
     const job = await createJobFromCandidate(candidateId, validation.data);
 
     return NextResponse.json(

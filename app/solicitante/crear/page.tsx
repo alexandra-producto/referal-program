@@ -34,11 +34,26 @@ export default function CrearSolicitudPage() {
     // Verificar autenticación
     async function checkAuth() {
       const currentSession = await authStore.getSession();
-      if (!currentSession || currentSession.role !== "solicitante" || !currentSession.candidateId) {
+      // Permitir acceso a solicitantes y admins
+      if (!currentSession) {
         router.push("/solicitante/login-simulado");
         return;
       }
-      setSession(currentSession);
+      
+      // Si es admin, permitir acceso (no necesita candidateId)
+      if (currentSession.role === "admin") {
+        setSession(currentSession);
+        return;
+      }
+      
+      // Si es solicitante, verificar que tenga candidateId
+      if (currentSession.role === "solicitante" && currentSession.candidateId) {
+        setSession(currentSession);
+        return;
+      }
+      
+      // Si no cumple ninguna condición, redirigir
+      router.push("/solicitante/login-simulado");
     }
     checkAuth();
   }, [router]);
@@ -46,8 +61,15 @@ export default function CrearSolicitudPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!session || !session.candidateId) {
+    if (!session) {
       alert("No estás autenticado");
+      return;
+    }
+    
+    // Si es admin, usar un candidateId por defecto o manejar de otra forma
+    // Por ahora, requerimos candidateId para crear jobs
+    if (session.role !== "admin" && !session.candidateId) {
+      alert("No estás autenticado como solicitante");
       return;
     }
 
@@ -76,7 +98,7 @@ export default function CrearSolicitudPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          candidateId: session.candidateId,
+          candidateId: session.role === "admin" ? null : session.candidateId,
           jobTitle: jobTitle.trim(),
           description: description.trim(),
           nonNegotiables: nonNegotiables.trim(),

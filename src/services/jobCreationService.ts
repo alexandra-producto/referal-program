@@ -30,33 +30,43 @@ async function getCandidateCurrentTitle(candidateId: string): Promise<string | n
 }
 
 /**
- * Crea un job desde un candidate logueado
+ * Crea un job desde un candidate logueado o desde un admin
  * 
- * @param candidateId - ID del candidate logueado
+ * @param candidateId - ID del candidate logueado (puede ser null para admins)
  * @param request - Datos del job desde la UI
  * @returns El job creado
  */
 export async function createJobFromCandidate(
-  candidateId: string,
+  candidateId: string | null,
   request: CreateJobRequest
 ) {
-  // 1. Buscar el candidate
-  const candidate = await getCandidateById(candidateId);
-  if (!candidate) {
-    throw new Error(`Candidate with id ${candidateId} not found`);
-  }
+  let companyName: string;
+  let ownerRoleTitle: string | null = null;
 
-  // 2. Obtener company_name del candidate
-  const companyName = candidate.current_company;
-  if (!companyName) {
-    throw new Error('Candidate must have a current_company to create a job');
-  }
+  // Si candidateId es null (admin), usar valores del request o por defecto
+  if (!candidateId) {
+    // Para admins, requerir company_name en el request o usar un valor por defecto
+    companyName = (request as any).companyName || 'Product Latam';
+    ownerRoleTitle = (request as any).ownerRoleTitle || null;
+  } else {
+    // 1. Buscar el candidate
+    const candidate = await getCandidateById(candidateId);
+    if (!candidate) {
+      throw new Error(`Candidate with id ${candidateId} not found`);
+    }
 
-  // 3. Obtener owner_role_title (intentar desde current_job_title o candidate_experience)
-  let ownerRoleTitle: string | null = candidate.current_job_title || null;
-  
-  if (!ownerRoleTitle) {
-    ownerRoleTitle = await getCandidateCurrentTitle(candidateId);
+    // 2. Obtener company_name del candidate
+    companyName = candidate.current_company || 'Product Latam';
+    if (!companyName) {
+      throw new Error('Candidate must have a current_company to create a job');
+    }
+
+    // 3. Obtener owner_role_title (intentar desde current_job_title o candidate_experience)
+    ownerRoleTitle = candidate.current_job_title || null;
+    
+    if (!ownerRoleTitle) {
+      ownerRoleTitle = await getCandidateCurrentTitle(candidateId);
+    }
   }
 
   // 4. Calcular remote_ok según la modalidad
@@ -75,7 +85,7 @@ export async function createJobFromCandidate(
     description: request.description,
     requirements_json: requirementsJson,
     status: 'open',
-    owner_candidate_id: candidateId,
+    owner_candidate_id: candidateId, // Puede ser null para admins
     owner_role_title: ownerRoleTitle,
   };
 
