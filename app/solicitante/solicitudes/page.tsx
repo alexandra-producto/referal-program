@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Building, Plus, LogOut, Eye, List, Grid } from "lucide-react";
+import { Building, Plus, LogOut, Eye, List, Grid, X, Briefcase, FileText, MapPin, Code } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ProductLatamLogo } from "@/components/ProductLatamLogo";
@@ -17,6 +17,9 @@ interface Job {
   status: string;
   created_at: string;
   recommendations_count: number;
+  requirements_json?: any;
+  modality?: string;
+  document_url?: string | null;
 }
 
 type ViewMode = "lista" | "tarjetas";
@@ -27,6 +30,8 @@ export default function MisSolicitudesPage() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>("lista");
+  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
+  const [loadingJobDetails, setLoadingJobDetails] = useState(false);
 
   useEffect(() => {
     // Verificar autenticación
@@ -66,6 +71,45 @@ export default function MisSolicitudesPage() {
   const truncateText = (text: string, maxLength: number) => {
     if (!text) return "";
     return text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
+  };
+
+  const handleViewDetails = async (jobId: string) => {
+    setLoadingJobDetails(true);
+    try {
+      const response = await fetch(`/api/jobs/${jobId}`);
+      if (!response.ok) {
+        throw new Error("Error al cargar los detalles");
+      }
+      const data = await response.json();
+      setSelectedJob(data.job);
+    } catch (error) {
+      console.error("Error fetching job details:", error);
+      alert("Error al cargar los detalles de la solicitud");
+    } finally {
+      setLoadingJobDetails(false);
+    }
+  };
+
+  const parseRequirements = (requirementsJson: any) => {
+    if (!requirementsJson) return null;
+    if (typeof requirementsJson === 'string') {
+      try {
+        return JSON.parse(requirementsJson);
+      } catch {
+        return null;
+      }
+    }
+    return requirementsJson;
+  };
+
+  const getModalityLabel = (modality: string | undefined) => {
+    if (!modality) return "No especificado";
+    const labels: Record<string, string> = {
+      remote: "Remoto",
+      hybrid: "Híbrido",
+      onsite: "Presencial"
+    };
+    return labels[modality] || modality;
   };
 
   if (loading) {
@@ -196,7 +240,10 @@ export default function MisSolicitudesPage() {
                       </td>
                       <td className="px-6 py-4">
                         <p className="text-gray-700">{truncateText(job.description || "", 80)}</p>
-                        <button className="text-gray-500 text-sm mt-1 flex items-center gap-1 hover:text-gray-700">
+                        <button 
+                          onClick={() => handleViewDetails(job.id)}
+                          className="text-gray-500 text-sm mt-1 flex items-center gap-1 hover:text-gray-700 transition-colors"
+                        >
                           <Eye className="h-3 w-3" />
                           Ver detalles
                         </button>
@@ -295,6 +342,153 @@ export default function MisSolicitudesPage() {
         )}
         </motion.div>
       </div>
+
+      {/* Modal de Detalles */}
+      {selectedJob && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="bg-white rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col"
+          >
+            {/* Header del Modal */}
+            <div className="bg-gradient-to-r from-teal-500 to-emerald-500 px-6 py-4 flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-white">Detalles de la Solicitud</h2>
+              <button
+                onClick={() => setSelectedJob(null)}
+                className="text-white hover:text-gray-200 transition-colors"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+
+            {/* Contenido del Modal */}
+            <div className="overflow-y-auto flex-1 p-6 space-y-6">
+              {loadingJobDetails ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-500"></div>
+                </div>
+              ) : (
+                <>
+                  {/* Título y Empresa */}
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Briefcase className="h-5 w-5 text-teal-600" />
+                      <h3 className="text-xl font-semibold text-gray-800">{selectedJob.job_title}</h3>
+                    </div>
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <Building className="h-4 w-4" />
+                      <span>{selectedJob.company_name}</span>
+                    </div>
+                  </div>
+
+                  {/* Modalidad */}
+                  {selectedJob.modality && (
+                    <div className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-teal-600" />
+                      <span className="text-gray-700">
+                        <strong>Modalidad:</strong> {getModalityLabel(selectedJob.modality)}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Descripción */}
+                  {selectedJob.description && (
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-teal-600" />
+                        <h4 className="font-semibold text-gray-800">Descripción del Rol</h4>
+                      </div>
+                      <p className="text-gray-700 whitespace-pre-wrap bg-gray-50 p-4 rounded-xl">
+                        {selectedJob.description}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Requirements JSON */}
+                  {selectedJob.requirements_json && (() => {
+                    const requirements = parseRequirements(selectedJob.requirements_json);
+                    if (!requirements) return null;
+                    
+                    return (
+                      <div className="space-y-4">
+                        {/* Skills Innegociables */}
+                        {requirements.non_negotiables_text && (
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                              <Code className="h-4 w-4 text-teal-600" />
+                              <h4 className="font-semibold text-gray-800">Skills Innegociables del Rol</h4>
+                            </div>
+                            <p className="text-gray-700 whitespace-pre-wrap bg-gray-50 p-4 rounded-xl">
+                              {requirements.non_negotiables_text}
+                            </p>
+                          </div>
+                        )}
+
+                        {/* Trayectoria Deseada */}
+                        {requirements.desired_trajectory_text && (
+                          <div className="space-y-2">
+                            <h4 className="font-semibold text-gray-800">Trayectoria Deseada</h4>
+                            <p className="text-gray-700 whitespace-pre-wrap bg-gray-50 p-4 rounded-xl">
+                              {requirements.desired_trajectory_text}
+                            </p>
+                          </div>
+                        )}
+
+                        {/* Background Técnico */}
+                        {requirements.needs_technical_background !== undefined && (
+                          <div className="space-y-2">
+                            <h4 className="font-semibold text-gray-800">Background Técnico Requerido</h4>
+                            <p className="text-gray-700 bg-gray-50 p-4 rounded-xl">
+                              {requirements.needs_technical_background ? "Sí" : "No"}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
+
+                  {/* Documento */}
+                  {selectedJob.document_url && (
+                    <div className="space-y-2">
+                      <h4 className="font-semibold text-gray-800">Documento Adjunto</h4>
+                      <a
+                        href={selectedJob.document_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-teal-600 hover:text-teal-700 underline flex items-center gap-2"
+                      >
+                        <FileText className="h-4 w-4" />
+                        Ver documento
+                      </a>
+                    </div>
+                  )}
+
+                  {/* Fecha de Creación */}
+                  <div className="text-sm text-gray-500 pt-4 border-t">
+                    Creado el: {new Date(selectedJob.created_at).toLocaleDateString('es-ES', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Footer del Modal */}
+            <div className="bg-gray-50 px-6 py-4 flex justify-end">
+              <Button
+                onClick={() => setSelectedJob(null)}
+                className="bg-teal-500 hover:bg-teal-600 text-white rounded-xl"
+              >
+                Cerrar
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }
