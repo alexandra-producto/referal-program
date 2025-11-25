@@ -32,6 +32,7 @@ export default function MisSolicitudesPage() {
   const [viewMode, setViewMode] = useState<ViewMode>("lista");
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [loadingJobDetails, setLoadingJobDetails] = useState(false);
+  const [formattedDate, setFormattedDate] = useState<string>("");
 
   useEffect(() => {
     // Verificar autenticación
@@ -90,6 +91,16 @@ export default function MisSolicitudesPage() {
       }
       
       setSelectedJob(data.job);
+      
+      // Formatear fecha solo en el cliente para evitar errores de hidratación
+      if (data.job.created_at) {
+        const date = new Date(data.job.created_at);
+        setFormattedDate(date.toLocaleDateString('es-ES', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        }));
+      }
     } catch (error: any) {
       console.error("Error fetching job details:", error);
       alert(`Error al cargar los detalles de la solicitud: ${error.message || "Error desconocido"}`);
@@ -482,13 +493,15 @@ export default function MisSolicitudesPage() {
                   )}
 
                   {/* Fecha de Creación */}
-                  <div className="text-sm text-gray-500 pt-4 border-t">
-                    Creado el: {new Date(selectedJob.created_at).toLocaleDateString('es-ES', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric'
-                    })}
-                  </div>
+                  {selectedJob.created_at && (
+                    <div className="text-sm text-gray-500 pt-4 border-t">
+                      Creado el: {formattedDate || new Date(selectedJob.created_at).toLocaleDateString('es-ES', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
+                    </div>
+                  )}
                 </>
               ) : (
                 <div className="text-center py-12">
