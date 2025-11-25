@@ -179,43 +179,54 @@ export async function GET(request: NextRequest) {
       headline: profile?.headline || "N/A"
     });
 
-    // Verificar si el usuario ya existe en la BD y si tiene los datos completos
-    // Solo pedir completar perfil si es un usuario nuevo o si realmente faltan los datos
-    let needsProfileCompletion = !current_job_title || !current_company;
+    // Verificar si el usuario ya existe en la BD
+    // Si el usuario YA EXISTE, NO mostrar el formulario (asumimos que ya tenemos los datos)
+    // Solo mostrar formulario a usuarios NUEVOS que no existen en la BD
+    const existingUser = await findUserByLinkedInOrEmail(linkedinId, email);
+    const isNewUser = !existingUser;
     
-    // Si LinkedIn no proporcionó los datos, verificar si el usuario ya los tiene en la BD
-    if (needsProfileCompletion) {
-      const existingUser = await findUserByLinkedInOrEmail(linkedinId, email);
-      if (existingUser) {
-        // Si el usuario ya existe y tiene los datos, no necesita completar perfil
-        if (existingUser.current_company && existingUser.current_job_title) {
-          needsProfileCompletion = false;
-          // Usar los datos existentes de la BD
-          current_company = existingUser.current_company;
-          current_job_title = existingUser.current_job_title;
-          console.log("✅ Usuario existente con datos completos, usando datos de BD:", {
-            current_company,
-            current_job_title
-          });
-        } else {
-          // Verificar también en candidates
-          const { data: existingCandidate } = await supabase
-            .from("candidates")
-            .select("current_company, current_job_title")
-            .eq("email", email)
-            .maybeSingle();
-          
-          if (existingCandidate?.current_company && existingCandidate?.current_job_title) {
-            needsProfileCompletion = false;
+    // Solo pedir completar perfil si es un usuario NUEVO y LinkedIn no proporcionó los datos
+    let needsProfileCompletion = isNewUser && (!current_job_title || !current_company);
+    
+    // Si el usuario ya existe, usar los datos de la BD si LinkedIn no los proporcionó
+    if (!isNewUser && (!current_job_title || !current_company)) {
+      // Usuario existente pero LinkedIn no proporcionó datos, usar datos de BD
+      if (existingUser.current_company) {
+        current_company = existingUser.current_company;
+      }
+      if (existingUser.current_job_title) {
+        current_job_title = existingUser.current_job_title;
+      }
+      
+      // Si aún faltan, verificar en candidates
+      if ((!current_company || !current_job_title) && existingUser.email) {
+        const { data: existingCandidate } = await supabase
+          .from("candidates")
+          .select("current_company, current_job_title")
+          .eq("email", existingUser.email)
+          .maybeSingle();
+        
+        if (existingCandidate) {
+          if (!current_company && existingCandidate.current_company) {
             current_company = existingCandidate.current_company;
+          }
+          if (!current_job_title && existingCandidate.current_job_title) {
             current_job_title = existingCandidate.current_job_title;
-            console.log("✅ Candidate existente con datos completos, usando datos de BD:", {
-              current_company,
-              current_job_title
-            });
           }
         }
       }
+      
+      console.log("✅ Usuario existente, usando datos de BD:", {
+        current_company: current_company || "null",
+        current_job_title: current_job_title || "null",
+        fromUser: !!existingUser.current_company || !!existingUser.current_job_title
+      });
+    }
+    
+    if (isNewUser) {
+      console.log("📝 Usuario nuevo detectado, needsProfileCompletion:", needsProfileCompletion);
+    } else {
+      console.log("✅ Usuario existente, NO mostrar formulario de completar perfil");
     }
 
     // Procesar según el rol
@@ -450,4 +461,5 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+
 
