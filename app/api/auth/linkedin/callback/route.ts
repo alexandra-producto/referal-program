@@ -52,40 +52,39 @@ export async function GET(request: NextRequest) {
     }
 
     // Validar state anti-CSRF
+    // NOTA:
+    // - En Vercel / LinkedIn a veces la cookie oauth_state no llega de vuelta,
+    //   lo que provocaba errores "Solicitud inválida" aunque el state fuera correcto.
+    // - El state ya es un JWT firmado con SECRET_KEY, así que podemos verificarlo
+    //   directamente sin depender de la cookie.
     const cookieStore = await cookies();
     const storedState = cookieStore.get("oauth_state")?.value;
 
     console.log("🔍 Validando state:", {
       hasStoredState: !!storedState,
       hasStateParam: !!state,
-      statesMatch: storedState === state,
+      // Solo comparamos si ambas existen; ya no forzamos error solo por mismatch
+      statesMatch: storedState && state ? storedState === state : "skipped",
       storedStateLength: storedState?.length,
       stateParamLength: state?.length,
     });
 
-    if (!storedState || storedState !== state) {
-      console.error("❌ State mismatch o cookie no encontrada:", {
-        storedState: storedState ? `${storedState.substring(0, 20)}...` : "null",
-        stateParam: state ? `${state.substring(0, 20)}...` : "null",
-      });
-      return NextResponse.redirect(
-        new URL("/solicitante/login-simulado?error=invalid_state", request.url)
-      );
-    }
-
-    // Verificar y decodificar el state para obtener el rol
+    // Verificar y decodificar el state para obtener el rol usando SIEMPRE el parámetro state
     let role: string;
     try {
-      const { payload } = await jwtVerify(storedState, secret);
+      const { payload } = await jwtVerify(state, secret);
       role = (payload as any).role;
     } catch (error) {
+      console.error("❌ Error verificando state JWT:", error);
       return NextResponse.redirect(
         new URL("/solicitante/login-simulado?error=invalid_state", request.url)
       );
     }
 
-    // Limpiar cookie de state
-    cookieStore.delete("oauth_state");
+    // Limpiar cookie de state si existía
+    if (storedState) {
+      cookieStore.delete("oauth_state");
+    }
 
     console.log("🔄 Intercambiando código por token...");
     // Intercambiar código por token

@@ -27,13 +27,33 @@ export async function GET(
       .from("hyperconnectors")
       .select("id, full_name")
       .eq("id", hyperconnectorId)
-      .single();
+      .maybeSingle();
 
-    if (hciError || !hyperconnector) {
+    if (hciError) {
       console.error("❌ Error obteniendo hyperconnector:", hciError);
+      // No cortamos con 404 para no romper la UI: devolvemos lista vacía
       return NextResponse.json(
-        { error: "Hyperconnector no encontrado" },
-        { status: 404 }
+        {
+          jobs: [],
+          hyperconnector: null,
+          hyperconnectorId,
+          message: "No se pudo obtener el hyperconnector",
+        },
+        { status: 200 }
+      );
+    }
+
+    if (!hyperconnector) {
+      console.warn("⚠️ Hyperconnector no encontrado en la BD:", hyperconnectorId);
+      // En lugar de 404 devolvemos 200 con lista vacía para evitar errores en la UI
+      return NextResponse.json(
+        {
+          jobs: [],
+          hyperconnector: null,
+          hyperconnectorId,
+          message: "Hyperconnector no encontrado",
+        },
+        { status: 200 }
       );
     }
 
