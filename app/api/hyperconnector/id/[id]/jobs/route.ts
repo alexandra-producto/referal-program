@@ -188,8 +188,13 @@ export async function GET(
     });
   } catch (error: any) {
     console.error("❌ Error en GET /api/hyperconnector/id/[id]/jobs:", error);
+    console.error("❌ Stack trace:", error.stack);
     return NextResponse.json(
-      { error: "Error interno del servidor" },
+      { 
+        error: "Error interno del servidor",
+        message: error.message || "Error desconocido al obtener jobs",
+        details: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      },
       { status: 500 }
     );
   }

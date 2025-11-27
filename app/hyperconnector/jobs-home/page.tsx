@@ -74,8 +74,22 @@ function HyperconnectorJobsHomeContent() {
 
           response = await fetch(`/api/hyperconnector/id/${session.hyperconnectorId}/jobs`);
           if (!response.ok) {
-            const errorData = await response.json();
-            setError(errorData.error || "Error al cargar los jobs");
+            // Intentar parsear el error, pero si falla, usar el status
+            let errorMessage = "Error al cargar los jobs";
+            try {
+              const errorData = await response.json();
+              errorMessage = errorData.error || errorData.message || errorMessage;
+            } catch (e) {
+              // Si la respuesta no es JSON, usar el status
+              errorMessage = `Error ${response.status}: ${response.statusText}`;
+            }
+            console.error("❌ Error al cargar jobs:", {
+              status: response.status,
+              statusText: response.statusText,
+              url: `/api/hyperconnector/id/${session.hyperconnectorId}/jobs`,
+              hyperconnectorId: session.hyperconnectorId
+            });
+            setError(errorMessage);
             return;
           }
           result = await response.json();
@@ -85,8 +99,8 @@ function HyperconnectorJobsHomeContent() {
         setHyperconnector(result.hyperconnector || null);
         setHyperconnectorId(result.hyperconnectorId || null);
       } catch (err: any) {
-        setError("Error al cargar los jobs");
-        console.error(err);
+        console.error("❌ Error en fetchJobs:", err);
+        setError(err.message || "Error al cargar los jobs. Por favor intenta de nuevo.");
       } finally {
         setLoading(false);
       }

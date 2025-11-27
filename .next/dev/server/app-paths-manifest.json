@@ -3,9 +3,16 @@
   "/admin/solicitudes/page": "app/admin/solicitudes/page.js",
   "/api/auth/linkedin/callback/route": "app/api/auth/linkedin/callback/route.js",
   "/api/auth/linkedin/route": "app/api/auth/linkedin/route.js",
+  "/api/auth/logout/route": "app/api/auth/logout/route.js",
   "/api/auth/session/route": "app/api/auth/session/route.js",
+  "/api/hyperconnector/generate-token/route": "app/api/hyperconnector/generate-token/route.js",
+  "/api/hyperconnector/id/[id]/jobs/route": "app/api/hyperconnector/id/[id]/jobs/route.js",
+  "/api/hyperconnector/token/[token]/jobs/route": "app/api/hyperconnector/token/[token]/jobs/route.js",
   "/api/jobs/[id]/recommendations/route": "app/api/jobs/[id]/recommendations/route.js",
   "/api/jobs/[id]/route": "app/api/jobs/[id]/route.js",
   "/api/jobs/all/route": "app/api/jobs/all/route.js",
+  "/api/recommend/[token]/route": "app/api/recommend/[token]/route.js",
+  "/hyperconnector/jobs-home/page": "app/hyperconnector/jobs-home/page.js",
+  "/recommend/[token]/page": "app/recommend/[token]/page.js",
   "/solicitante/login-simulado/page": "app/solicitante/login-simulado/page.js"
 }

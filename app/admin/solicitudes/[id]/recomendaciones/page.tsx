@@ -104,12 +104,30 @@ export default function RecomendacionesPage({
       // Obtener recomendaciones
       const recResponse = await fetch(`/api/jobs/${jobId}/recommendations`);
       if (!recResponse.ok) {
-        throw new Error("Error al cargar las recomendaciones");
+        // Intentar parsear el error
+        let errorMessage = "Error al cargar las recomendaciones";
+        try {
+          const errorData = await recResponse.json();
+          errorMessage = errorData.error || errorData.message || errorMessage;
+        } catch (e) {
+          errorMessage = `Error ${recResponse.status}: ${recResponse.statusText}`;
+        }
+        console.error("❌ Error al cargar recomendaciones:", {
+          status: recResponse.status,
+          statusText: recResponse.statusText,
+          url: `/api/jobs/${jobId}/recommendations`,
+          jobId
+        });
+        throw new Error(errorMessage);
       }
       const recData = await recResponse.json();
       setRecommendations(recData.recommendations || []);
-    } catch (error) {
-      console.error("Error fetching data:", error);
+    } catch (error: any) {
+      console.error("❌ Error fetching data:", error);
+      // Mostrar error al usuario si es crítico
+      if (error.message && error.message.includes("Error al cargar")) {
+        alert(`Error: ${error.message}`);
+      }
     } finally {
       setLoading(false);
     }

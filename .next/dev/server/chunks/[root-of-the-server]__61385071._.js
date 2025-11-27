@@ -78,18 +78,33 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules
 ;
 ;
 ;
-// Carga .env.local desde la raíz del proyecto
-__TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$dotenv$2f$lib$2f$main$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["default"].config({
-    path: (0, __TURBOPACK__imported__module__$5b$externals$5d2f$path__$5b$external$5d$__$28$path$2c$__cjs$29$__["resolve"])(process.cwd(), ".env.local")
-});
+// Carga .env.local desde la raíz del proyecto (solo en desarrollo local)
+// En producción (Vercel), las variables de entorno se cargan automáticamente
+if ("TURBOPACK compile-time truthy", 1) {
+    __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$dotenv$2f$lib$2f$main$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["default"].config({
+        path: (0, __TURBOPACK__imported__module__$5b$externals$5d2f$path__$5b$external$5d$__$28$path$2c$__cjs$29$__["resolve"])(process.cwd(), ".env.local")
+    });
+}
 const url = process.env.SUPABASE_URL;
 const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
 if (!url || !key) {
-    console.error("SUPABASE_URL:", url);
-    console.error("SUPABASE_SERVICE_ROLE_KEY:", key);
+    console.error("❌ [supabaseClient] SUPABASE_URL:", url ? "✅ Configurado" : "❌ No configurado");
+    console.error("❌ [supabaseClient] SUPABASE_SERVICE_ROLE_KEY:", key ? "✅ Configurado" : "❌ No configurado");
+    console.error("❌ [supabaseClient] NODE_ENV:", ("TURBOPACK compile-time value", "development"));
     throw new Error("❌ Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY.");
 }
-const supabase = (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f40$supabase$2f$supabase$2d$js$2f$dist$2f$module$2f$index$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__$3c$locals$3e$__["createClient"])(url, key);
+const supabase = (0, __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f40$supabase$2f$supabase$2d$js$2f$dist$2f$module$2f$index$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__$3c$locals$3e$__["createClient"])(url, key, {
+    auth: {
+        persistSession: false,
+        autoRefreshToken: false
+    },
+    // Asegurar que usamos el service role key correctamente
+    global: {
+        headers: {
+            'apikey': key
+        }
+    }
+});
 }),
 "[project]/Referal MVP/app/api/jobs/all/route.ts [app-route] (ecmascript)", ((__turbopack_context__) => {
 "use strict";

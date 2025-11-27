@@ -123,9 +123,11 @@ export async function GET(
     return NextResponse.json({ recommendations: recommendationsWithDetails });
   } catch (error: any) {
     console.error('❌ Error fetching recommendations:', error);
+    console.error('❌ Stack trace:', error.stack);
     return NextResponse.json(
       {
         error: 'Error fetching recommendations',
+        message: error.message || 'Error desconocido al obtener recomendaciones',
         details: process.env.NODE_ENV === 'development' ? error.message : undefined,
       },
       { status: 500 }
