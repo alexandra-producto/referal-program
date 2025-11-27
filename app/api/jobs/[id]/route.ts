@@ -14,6 +14,20 @@ export async function GET(
     const { id } = await params;
     console.log("📝 [GET /api/jobs/[id]] Params recibidos, id:", id);
 
+    // Ruta de prueba especial
+    if (id === "test") {
+      return NextResponse.json({
+        success: true,
+        message: "✅ Ruta dinámica /api/jobs/[id] está funcionando correctamente",
+        timestamp: new Date().toISOString(),
+        environment: process.env.NODE_ENV || "unknown",
+        route: "/api/jobs/[id]",
+        params: { id },
+        vercel: !!process.env.VERCEL,
+        vercelUrl: process.env.VERCEL_URL || "not set",
+      });
+    }
+
     const job = await getJobById(id);
 
     if (!job) {
