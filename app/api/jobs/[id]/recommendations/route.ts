@@ -13,17 +13,30 @@ export async function GET(
 ) {
   try {
     const { id: jobId } = await params;
+    console.log("🔍 [GET /api/jobs/[id]/recommendations] Job ID:", jobId);
 
     // Obtener recomendaciones
     const recommendations = await getRecommendationsForJob(jobId);
+    console.log("📊 Recomendaciones encontradas (raw):", recommendations?.length || 0);
 
     if (!recommendations || recommendations.length === 0) {
+      console.log("⚠️  No hay recomendaciones para este job");
       return NextResponse.json({ recommendations: [] });
     }
+
+    console.log("📋 Detalle de recomendaciones:", recommendations.map((r: any) => ({
+      id: r.id,
+      candidate_id: r.candidate_id,
+      hyperconnector_id: r.hyperconnector_id,
+      status: r.status
+    })));
 
     // Obtener IDs únicos de candidatos e hyperconnectors
     const candidateIds = [...new Set(recommendations.map((r: any) => r.candidate_id).filter(Boolean))];
     const hyperconnectorIds = [...new Set(recommendations.map((r: any) => r.hyperconnector_id).filter(Boolean))];
+    
+    console.log("👥 Candidate IDs encontrados:", candidateIds);
+    console.log("🔗 Hyperconnector IDs encontrados:", hyperconnectorIds);
     
     // Nota: Algunas recomendaciones pueden tener linkedin_url en lugar de candidate_id
 
@@ -88,6 +101,14 @@ export async function GET(
         linkedin_url: rec.linkedin_url || null,
       };
     });
+
+    console.log("✅ Recomendaciones con detalles:", recommendationsWithDetails.length);
+    console.log("📋 Resumen:", recommendationsWithDetails.map((r: any) => ({
+      id: r.id,
+      hasCandidate: !!r.candidate,
+      hasHyperconnector: !!r.hyperconnector,
+      status: r.status
+    })));
 
     return NextResponse.json({ recommendations: recommendationsWithDetails });
   } catch (error: any) {
