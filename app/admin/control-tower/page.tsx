@@ -125,17 +125,19 @@ export default function ControlTowerPage() {
             <Button
               onClick={handleBack}
               variant="outline"
-              className="gap-2 h-10 px-4 rounded-xl border border-gray-300 text-gray-700 bg-white/80 hover:bg-white active:bg-gray-100 transition-all duration-200"
+              className="gap-2 h-10 px-4 rounded-2xl border border-white text-white bg-blue-400 hover:bg-blue-500 active:bg-blue-600 transition-all duration-200"
             >
               <ArrowLeft className="h-4 w-4" />
               Volver
             </Button>
-            <h2 className="text-gray-800 text-lg font-medium">Admin</h2>
+            <div className="bg-purple-400 border border-white rounded-2xl px-5 py-2.5 shadow-md">
+              <p className="text-white font-medium">Admin</p>
+            </div>
           </div>
           <Button
             onClick={handleLogout}
             variant="outline"
-            className="gap-2 h-10 px-4 rounded-xl border border-gray-300 text-gray-700 bg-white/80 hover:bg-white active:bg-gray-100 transition-all duration-200"
+            className="gap-2 h-10 px-4 rounded-2xl border border-white text-white bg-indigo-400 hover:bg-indigo-500 active:bg-indigo-600 transition-all duration-200"
           >
             <LogOut className="h-4 w-4" />
             Cerrar Sesión

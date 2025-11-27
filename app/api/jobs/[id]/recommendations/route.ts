@@ -32,7 +32,7 @@ export async function GET(
     if (candidateIds.length > 0) {
       const { data: candidatesData } = await supabase
         .from('candidates')
-        .select('id, full_name, current_company, current_job_title, email, linkedin_url')
+        .select('id, full_name, current_company, current_job_title, email, linkedin_url, profile_picture_url')
         .in('id', candidateIds);
 
       if (candidatesData) {
@@ -47,7 +47,7 @@ export async function GET(
     if (hyperconnectorIds.length > 0) {
       const { data: hyperconnectorsData } = await supabase
         .from('hyperconnectors')
-        .select('id, full_name, email')
+        .select('id, full_name, email, current_company, current_job_title, linkedin_url, profile_picture_url')
         .in('id', hyperconnectorIds);
 
       if (hyperconnectorsData) {

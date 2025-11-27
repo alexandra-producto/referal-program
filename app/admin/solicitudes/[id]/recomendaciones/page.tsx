@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
+import React, { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { ArrowLeft, Building, MapPin, Send, CheckCircle2, HelpCircle } from "lucide-react";
+import { ArrowLeft, Building, MapPin, CheckCircle2, HelpCircle, Linkedin, ExternalLink, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ProductLatamLogo } from "@/components/ProductLatamLogo";
@@ -17,12 +17,17 @@ interface Candidate {
   current_job_title: string | null;
   email: string | null;
   linkedin_url: string | null;
+  profile_picture_url: string | null;
 }
 
 interface Hyperconnector {
   id: string;
   full_name: string;
   email: string | null;
+  current_company: string | null;
+  current_job_title: string | null;
+  linkedin_url: string | null;
+  profile_picture_url: string | null;
 }
 
 interface Recommendation {
@@ -57,12 +62,27 @@ export default function RecomendacionesPage({
   const [loading, setLoading] = useState(true);
   const [job, setJob] = useState<Job | null>(null);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [expandedRecs, setExpandedRecs] = useState<Set<string>>(new Set());
+
+  const toggleExpand = (recId: string) => {
+    setExpandedRecs((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(recId)) {
+        newSet.delete(recId);
+      } else {
+        newSet.add(recId);
+      }
+      return newSet;
+    });
+  };
 
   useEffect(() => {
     // Verificar autenticación
     async function checkAuth() {
       const session = await authStore.getSession();
-      if (!session || session.role !== "admin") {
+      // Permitir acceso a admin y al solicitante dueño del job
+      if (!session || (session.role !== "admin" && session.role !== "solicitante")) {
         router.push("/solicitante/login-simulado");
         return;
       }
@@ -92,6 +112,46 @@ export default function RecomendacionesPage({
       console.error("Error fetching data:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleUpdateStatus = async (recId: string, newStatus: string) => {
+    try {
+      setUpdatingId(recId);
+      console.log("🔄 Actualizando status de recomendación:", { recId, newStatus });
+      
+      const response = await fetch(`/api/recommendations/${recId}/status`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error("❌ Error en respuesta:", response.status, errorData);
+        throw new Error(errorData.error || `Error al actualizar el estado (${response.status})`);
+      }
+
+      const data = await response.json();
+      console.log("✅ Status actualizado:", data);
+      
+      if (!data.recommendation) {
+        throw new Error("No se recibió la recomendación actualizada");
+      }
+      
+      const updated: Recommendation = data.recommendation;
+
+      // Actualizar en memoria
+      setRecommendations((prev) =>
+        prev.map((rec) => (rec.id === recId ? { ...rec, status: updated.status } : rec))
+      );
+    } catch (error: any) {
+      console.error("❌ Error updating recommendation status:", error);
+      alert(error.message || "Error al actualizar el estado de la recomendación");
+    } finally {
+      setUpdatingId(null);
     }
   };
 
@@ -144,7 +204,7 @@ export default function RecomendacionesPage({
           <Button
             onClick={() => router.push("/admin/solicitudes")}
             variant="outline"
-            className="gap-2 h-10 px-4 rounded-xl border border-gray-300 text-gray-700 bg-white/80 hover:bg-white active:bg-gray-100 backdrop-blur-sm transition-all duration-200"
+            className="gap-2 h-10 px-4 rounded-2xl border border-white text-white bg-amber-400 hover:bg-amber-500 active:bg-amber-600 transition-all duration-200"
           >
             <ArrowLeft className="h-4 w-4" />
             Volver a Solicitudes
@@ -158,7 +218,10 @@ export default function RecomendacionesPage({
           transition={{ duration: 0.6, delay: 0.1 }}
           className="flex flex-col items-center space-y-6"
         >
-          <ProductLatamLogo className="justify-center" />
+          {/* Contenedor translúcido para el logo */}
+          <div className="px-12 py-8 rounded-3xl bg-gradient-to-br from-orange-200/40 via-red-200/40 to-amber-200/40 backdrop-blur-sm border border-orange-300/30 shadow-lg">
+            <ProductLatamLogo className="justify-center" />
+          </div>
 
           {/* Title with gradient */}
           <h1 className="text-5xl font-bold bg-gradient-to-r from-orange-500 via-red-500 to-orange-600 bg-clip-text text-transparent">
@@ -192,7 +255,7 @@ export default function RecomendacionesPage({
         <div className="flex items-center gap-2">
           <CheckCircle2 className="h-5 w-5 text-green-600" />
           <h2 className="text-gray-800 text-2xl font-bold">
-            {recommendations.length} Recomendaciones
+            {recommendations.length} {recommendations.length === 1 ? "Recomendación" : "Recomendaciones"}
           </h2>
         </div>
 
@@ -217,90 +280,243 @@ export default function RecomendacionesPage({
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: index * 0.1 }}
                 >
-                  <Card className="backdrop-blur-[130px] bg-white/40 border border-white/50 rounded-3xl shadow-xl p-6">
-                    {/* Candidate Header */}
-                    <div className="flex items-start gap-6 mb-6">
-                      {/* Avatar */}
-                      <div className="flex-shrink-0">
-                        {rec.candidate ? (
-                          <ImageWithFallback
-                            src={null}
-                            alt={rec.candidate.full_name}
-                            className="w-20 h-20 rounded-2xl object-cover ring-2 ring-orange-200 shadow-md"
-                          />
-                        ) : (
-                          <div className="w-20 h-20 rounded-2xl bg-orange-500 flex items-center justify-center text-white text-2xl font-bold">
-                            {rec.linkedin_url ? "L" : "?"}
+                  <Card className="backdrop-blur-[130px] bg-white/40 border border-white/50 rounded-3xl shadow-xl overflow-hidden">
+                    {/* Candidate Header - Clickable para expandir/colapsar */}
+                    <button
+                      onClick={() => toggleExpand(rec.id)}
+                      className="w-full p-6 hover:bg-white/20 transition-colors text-left"
+                    >
+                      <div className="flex items-start gap-6">
+                        {/* Avatar */}
+                        {rec.candidate?.profile_picture_url && (
+                          <div className="flex-shrink-0">
+                            <ImageWithFallback
+                              src={rec.candidate.profile_picture_url}
+                              alt={rec.candidate.full_name}
+                              className="w-20 h-20 rounded-2xl object-cover ring-2 ring-orange-200 shadow-md"
+                            />
                           </div>
                         )}
-                      </div>
 
-                    {/* Candidate Info */}
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between mb-3">
-                        <div>
-                          <h3 className="text-gray-800 text-2xl font-bold mb-1">
-                            {rec.candidate?.full_name || "Candidato de LinkedIn"}
-                          </h3>
-                          {rec.candidate?.current_job_title && (
-                            <p className="text-gray-700 text-lg mb-2">
-                              {rec.candidate.current_job_title}
-                              {rec.candidate.current_company && ` • ${rec.candidate.current_company}`}
-                            </p>
-                          )}
-                          {rec.linkedin_url && !rec.candidate && (
-                            <p className="text-gray-600 text-sm mb-2">
-                              LinkedIn: {rec.linkedin_url}
-                            </p>
+                        {/* Candidate Info */}
+                        <div className="flex-1">
+                          <div className="flex items-start justify-between mb-3">
+                            <div>
+                              <h3 className="text-gray-800 text-2xl font-bold mb-1">
+                                {rec.candidate?.full_name || "Candidato de LinkedIn"}
+                              </h3>
+                              {rec.candidate?.current_job_title && (
+                                <p className="text-gray-700 text-lg mb-2">
+                                  {rec.candidate.current_job_title}
+                                  {rec.candidate.current_company && ` • ${rec.candidate.current_company}`}
+                                </p>
+                              )}
+                              {rec.linkedin_url && !rec.candidate && (
+                                <p className="text-gray-600 text-sm mb-2">
+                                  LinkedIn: {rec.linkedin_url}
+                                </p>
+                              )}
+                            </div>
+                            {rec.match_score !== null && rec.match_score !== undefined && (
+                              <div className="flex items-center gap-2 bg-white rounded-xl px-4 py-2 border border-gray-200">
+                                <div
+                                  className={`h-3 w-3 rounded-full ${
+                                    rec.match_score >= 90
+                                      ? "bg-green-500"
+                                      : rec.match_score >= 75
+                                      ? "bg-yellow-500"
+                                      : "bg-orange-500"
+                                  }`}
+                                />
+                                <span className="text-gray-800 font-semibold">{Math.round(rec.match_score)}%</span>
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="flex flex-wrap items-center gap-4 text-gray-600 text-sm">
+                            {rec.candidate?.current_company && (
+                              <div className="flex items-center gap-2">
+                                <Building className="h-4 w-4" />
+                                <span>{rec.candidate.current_company}</span>
+                              </div>
+                            )}
+                            {rec.candidate?.email && (
+                              <div className="flex items-center gap-2">
+                                <span>{rec.candidate.email}</span>
+                              </div>
+                            )}
+                            {(rec.candidate?.linkedin_url || rec.linkedin_url) && (
+                              <a
+                                href={rec.candidate?.linkedin_url || rec.linkedin_url || "#"}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-2 text-blue-600 hover:text-blue-700 transition-colors"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <Linkedin className="h-4 w-4" />
+                                <span>LinkedIn</span>
+                                <ExternalLink className="h-3 w-3" />
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                        
+                        {/* Icono de expandir/colapsar */}
+                        <div className="flex-shrink-0">
+                          {expandedRecs.has(rec.id) ? (
+                            <ChevronUp className="h-5 w-5 text-gray-600" />
+                          ) : (
+                            <ChevronDown className="h-5 w-5 text-gray-600" />
                           )}
                         </div>
-                        {rec.match_score !== null && rec.match_score !== undefined && (
-                          <div className="flex items-center gap-2 bg-white rounded-xl px-4 py-2 border border-gray-200">
-                            <div
-                              className={`h-3 w-3 rounded-full ${
-                                rec.match_score >= 90
-                                  ? "bg-green-500"
-                                  : rec.match_score >= 75
-                                  ? "bg-yellow-500"
-                                  : "bg-orange-500"
-                              }`}
-                            />
-                            <span className="text-gray-800 font-semibold">{Math.round(rec.match_score)}%</span>
-                          </div>
-                        )}
                       </div>
+                    </button>
 
-                      <div className="flex flex-wrap items-center gap-4 text-gray-600 text-sm">
-                        {rec.candidate?.current_company && (
-                          <div className="flex items-center gap-2">
-                            <Building className="h-4 w-4" />
-                            <span>{rec.candidate.current_company}</span>
-                          </div>
-                        )}
-                        {rec.candidate?.email && (
-                          <div className="flex items-center gap-2">
-                            <span>{rec.candidate.email}</span>
-                          </div>
-                        )}
+                    {/* Recommendation Details - Solo visible si está expandido */}
+                    {expandedRecs.has(rec.id) && (
+                      <div className="border-t border-gray-200 pt-6 px-6 pb-6 space-y-4">
+                    {/* Stepper de estado */}
+                    <div className={`rounded-xl p-6 border shadow-sm ${
+                      rec.status === "rejected"
+                        ? "bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200"
+                        : "bg-gradient-to-br from-orange-100 via-red-100 to-amber-200 border-orange-200"
+                    }`}>
+                      <div className="flex items-center justify-between gap-4">
+                        {/* Steps 1-3 */}
+                        <div className="flex items-center gap-4 flex-1">
+                          {[
+                            { step: 1, label: "Pendiente", value: "pending" },
+                            { step: 2, label: "Revisión", value: "in_review" },
+                            { step: 3, label: "Contratado", value: "contracted" },
+                          ].map((stepItem, idx) => {
+                            const isRejected = rec.status === "rejected";
+                            const currentStep =
+                              rec.status === "contracted"
+                                ? 3
+                                : rec.status === "in_review"
+                                ? 2
+                                : rec.status === "pending"
+                                ? 1
+                                : 0;
+
+                            const isCompleted = currentStep > stepItem.step;
+                            const isActive = currentStep === stepItem.step && !isRejected;
+                            const isClickable = !isRejected && updatingId !== rec.id;
+
+                            const circleClasses = isRejected
+                              ? "bg-gray-300 border-2 border-gray-400 text-gray-500"
+                              : isCompleted || isActive
+                              ? "bg-gradient-to-r from-orange-500 via-red-500 to-orange-600 text-white shadow-lg border-2 border-transparent"
+                              : "bg-white border-2 border-gray-300 text-gray-500";
+
+                            return (
+                              <React.Fragment key={stepItem.step}>
+                                <button
+                                  type="button"
+                                  disabled={!isClickable}
+                                  onClick={() =>
+                                    handleUpdateStatus(rec.id, stepItem.value as any)
+                                  }
+                                  className="flex items-center gap-2 group disabled:cursor-not-allowed"
+                                >
+                                  <div
+                                    className={`w-12 h-12 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-200 ${circleClasses}`}
+                                  >
+                                    {stepItem.step}
+                                  </div>
+                                  <span
+                                    className={`text-sm font-semibold transition-colors ${
+                                      isRejected
+                                        ? "text-gray-500"
+                                        : isActive || isCompleted
+                                        ? "text-gray-900"
+                                        : "text-gray-600"
+                                    }`}
+                                  >
+                                    {stepItem.label}
+                                  </span>
+                                </button>
+
+                                {/* Conector entre pasos */}
+                                {idx < 2 && (
+                                  <div
+                                    className={`flex-1 h-1 rounded-full ${
+                                      isRejected
+                                        ? "bg-gray-300"
+                                        : currentStep > stepItem.step
+                                        ? "bg-emerald-400"
+                                        : "bg-gray-300"
+                                    }`}
+                                  />
+                                )}
+                              </React.Fragment>
+                            );
+                          })}
+                        </div>
+
+                        {/* Rechazado */}
+                        <button
+                          type="button"
+                          disabled={updatingId === rec.id}
+                          onClick={() => handleUpdateStatus(rec.id, "rejected")}
+                          className={`px-5 py-2.5 rounded-full text-sm font-semibold border-2 transition-all duration-200 ${
+                            rec.status === "rejected"
+                              ? "bg-gradient-to-r from-red-500 to-rose-500 text-white border-transparent shadow-lg"
+                              : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400"
+                          } disabled:opacity-60 disabled:cursor-not-allowed`}
+                        >
+                          Rechazado
+                        </button>
                       </div>
                     </div>
-                  </div>
-
-                  {/* Recommendation Details */}
-                  <div className="border-t border-gray-200 pt-6 space-y-4">
                     {/* Hyperconnector Info */}
                     {rec.hyperconnector && (
-                      <div className="flex items-center gap-3 mb-4">
-                        <div className="w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center text-white font-semibold">
-                          {getInitials(rec.hyperconnector.full_name)}
-                        </div>
-                        <div>
-                          <p className="text-gray-800 font-semibold">
-                            {rec.hyperconnector.full_name}
-                          </p>
-                          <p className="text-gray-600 text-sm">
-                            {formatDate(rec.created_at)}
-                          </p>
+                      <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-gray-200 mb-4">
+                        <div className="flex items-start gap-4">
+                          {rec.hyperconnector.profile_picture_url ? (
+                            <ImageWithFallback
+                              src={rec.hyperconnector.profile_picture_url}
+                              alt={rec.hyperconnector.full_name}
+                              className="w-12 h-12 rounded-full object-cover ring-2 ring-orange-200"
+                            />
+                          ) : (
+                            <div className="w-12 h-12 rounded-full bg-orange-500 flex items-center justify-center text-white font-semibold flex-shrink-0">
+                              {getInitials(rec.hyperconnector.full_name)}
+                            </div>
+                          )}
+                          <div className="flex-1">
+                            <p className="text-gray-800 font-semibold text-lg mb-1">
+                              {rec.hyperconnector.full_name}
+                            </p>
+                            {rec.hyperconnector.current_job_title && (
+                              <p className="text-gray-700 text-sm mb-1">
+                                {rec.hyperconnector.current_job_title}
+                                {rec.hyperconnector.current_company && ` • ${rec.hyperconnector.current_company}`}
+                              </p>
+                            )}
+                            {!rec.hyperconnector.current_job_title && rec.hyperconnector.current_company && (
+                              <p className="text-gray-700 text-sm mb-1">
+                                {rec.hyperconnector.current_company}
+                              </p>
+                            )}
+                            <div className="flex items-center gap-3 mt-2">
+                              <p className="text-gray-500 text-xs">
+                                Recomendado {formatDate(rec.created_at)}
+                              </p>
+                              {rec.hyperconnector.linkedin_url && (
+                                <a
+                                  href={rec.hyperconnector.linkedin_url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-center gap-1 text-blue-600 hover:text-blue-700 transition-colors text-xs"
+                                >
+                                  <Linkedin className="h-3 w-3" />
+                                  <span>LinkedIn</span>
+                                  <ExternalLink className="h-2.5 w-2.5" />
+                                </a>
+                              )}
+                            </div>
+                          </div>
                         </div>
                       </div>
                     )}
@@ -323,14 +539,8 @@ export default function RecomendacionesPage({
                       </div>
                     )}
 
-                    {/* Action Button */}
-                    <div className="flex justify-end">
-                      <Button className="bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white rounded-xl flex items-center gap-2 shadow-lg transition-all duration-200">
-                        <Send className="h-4 w-4" />
-                        Enviar
-                      </Button>
                     </div>
-                  </div>
+                  )}
                 </Card>
               </motion.div>
             ))}

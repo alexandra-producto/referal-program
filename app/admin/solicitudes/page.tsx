@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ProductLatamLogo } from "@/components/ProductLatamLogo";
 import { authStore } from "@/app/lib/authStore";
+import { getJobStatusConfig, getJobStatusLabel, getJobStatusDotColor } from "@/src/utils/jobStatus";
 
 interface OwnerCandidate {
   id: string;
@@ -90,39 +91,16 @@ export default function AdminSolicitudesPage() {
   };
 
   const getStatusColor = (status: string) => {
-    // Los estados vienen directamente de la BD
-    if (status === 'Recomendación Contratada') {
-      return 'bg-green-100 border-green-300 text-green-800';
-    } else if (status === 'Recomendaciones Recibidas') {
-      return 'bg-blue-100 border-blue-300 text-blue-800';
-    } else if (status === 'En Proceso Reclutamiento') {
-      return 'bg-purple-100 border-purple-300 text-purple-800';
-    } else if (status === 'Recomendaciones Rechazadas') {
-      return 'bg-red-100 border-red-300 text-red-800';
-    } else if (status === 'Esperando Recomendaciones') {
-      return 'bg-orange-100 border-orange-300 text-orange-800';
-    }
-    return 'bg-gray-100 border-gray-300 text-gray-800';
+    const { bgColor, borderColor, textColor } = getJobStatusConfig(status);
+    return `${bgColor} ${borderColor} ${textColor} border`;
   };
 
   const getStatusText = (status: string) => {
-    // Retornar el status tal como viene de la BD
-    return status || 'Desconocido';
+    return getJobStatusLabel(status);
   };
 
   const getStatusDot = (status: string) => {
-    if (status === 'Recomendación Contratada') {
-      return 'bg-green-500';
-    } else if (status === 'Recomendaciones Recibidas') {
-      return 'bg-blue-500';
-    } else if (status === 'En Proceso Reclutamiento') {
-      return 'bg-purple-500';
-    } else if (status === 'Recomendaciones Rechazadas') {
-      return 'bg-red-500';
-    } else if (status === 'Esperando Recomendaciones') {
-      return 'bg-orange-500';
-    }
-    return 'bg-gray-500';
+    return getJobStatusDotColor(status);
   };
 
   const truncateText = (text: string, maxLength: number) => {
@@ -152,14 +130,14 @@ export default function AdminSolicitudesPage() {
           className="flex items-center justify-between"
         >
           <div className="flex items-center gap-4">
-            <div className="backdrop-blur-[130px] bg-white/40 border border-white/50 rounded-2xl px-4 py-2 shadow-lg">
-              <p className="text-gray-800 font-medium">Hola {session?.fullName?.split(" ")[0] || "Admin"}</p>
+            <div className="bg-orange-400 border border-white rounded-2xl px-5 py-2.5 shadow-md">
+              <p className="text-white font-medium">Hola {session?.fullName?.split(" ")[0] || "Admin"}</p>
             </div>
           </div>
           <Button
             onClick={handleLogout}
             variant="outline"
-            className="gap-2 h-10 px-4 rounded-xl border border-gray-300 text-gray-700 bg-white/80 hover:bg-white active:bg-gray-100 transition-all duration-200 backdrop-blur-sm"
+            className="gap-2 h-10 px-4 rounded-2xl border border-white text-white bg-amber-400 hover:bg-amber-500 active:bg-amber-600 transition-all duration-200"
           >
             <LogOut className="h-4 w-4" />
             Cerrar Sesión

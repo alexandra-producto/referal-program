@@ -13,8 +13,20 @@ export async function getHyperconnectorById(id: string) {
 }
 
 export async function createHyperconnector(hci: any) {
-  const { data, error } = await supabase.from("hyperconnectors").insert(hci).select().single();
-  if (error) throw error;
+  console.log("📝 [createHyperconnector] Creando hyperconnector con datos:", hci);
+  const { data, error } = await supabase
+    .from("hyperconnectors")
+    .insert({
+      ...hci,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+    .select()
+    .single();
+  if (error) {
+    console.error("❌ [createHyperconnector] Error creando hyperconnector:", error);
+    throw error;
+  }
 
   // Trigger relationship sync (non-blocking)
   if (data?.id) {
@@ -57,40 +69,56 @@ export async function upsertHyperconnector(hyperconnectorData: {
   current_company?: string | null;
   profile_picture_url?: string | null;
 }): Promise<any> {
+  console.log("🔍 [upsertHyperconnector] Input:", hyperconnectorData);
+  // Normalizar datos mínimos
+  if (!hyperconnectorData.email && !hyperconnectorData.user_id && !hyperconnectorData.candidate_id) {
+    console.warn("⚠️ [upsertHyperconnector] Llamada sin identificadores suficientes (user_id/email/candidate_id).");
+  }
+
   // Buscar hyperconnector existente
   let existing = null;
 
   // Prioridad 1: Buscar por user_id (más confiable)
   if (hyperconnectorData.user_id) {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("hyperconnectors")
       .select("*")
       .eq("user_id", hyperconnectorData.user_id)
       .maybeSingle();
+    if (error) {
+      console.error("❌ [upsertHyperconnector] Error buscando por user_id:", error);
+    }
     existing = data;
   }
 
   // Prioridad 2: Buscar por email si no se encontró por user_id
   if (!existing && hyperconnectorData.email) {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("hyperconnectors")
       .select("*")
       .eq("email", hyperconnectorData.email)
       .maybeSingle();
+    if (error) {
+      console.error("❌ [upsertHyperconnector] Error buscando por email:", error);
+    }
     existing = data;
   }
 
   // Prioridad 3: Buscar por candidate_id si no se encontró por user_id ni email
   if (!existing && hyperconnectorData.candidate_id) {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("hyperconnectors")
       .select("*")
       .eq("candidate_id", hyperconnectorData.candidate_id)
       .maybeSingle();
+    if (error) {
+      console.error("❌ [upsertHyperconnector] Error buscando por candidate_id:", error);
+    }
     existing = data;
   }
 
   if (existing) {
+    console.log("ℹ️ [upsertHyperconnector] Encontrado existente, actualizando id:", existing.id);
     // Actualizar
     const { data, error } = await supabase
       .from("hyperconnectors")
@@ -102,9 +130,13 @@ export async function upsertHyperconnector(hyperconnectorData: {
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error("❌ [upsertHyperconnector] Error actualizando hyperconnector:", error);
+      throw error;
+    }
     return data;
   } else {
+    console.log("🆕 [upsertHyperconnector] No existe hyperconnector, creando nuevo...");
     // Crear nuevo
     return await createHyperconnector(hyperconnectorData);
   }

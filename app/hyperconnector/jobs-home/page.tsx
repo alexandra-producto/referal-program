@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { ProductLatamLogo } from "@/components/ProductLatamLogo";
 import { authStore } from "../../lib/authStore";
+import { getJobStatusConfig, getJobStatusLabel, getJobStatusDotColor } from "@/src/utils/jobStatus";
 
 interface OwnerCandidate {
   id: string;
@@ -27,6 +28,7 @@ interface Job {
   bestMatchScore: number | null;
   ownerCandidate: OwnerCandidate | null;
   myRecommendationsCount?: number;
+  status?: string;
 }
 
 interface Hyperconnector {
@@ -191,13 +193,13 @@ function HyperconnectorJobsHomeContent() {
           transition={{ duration: 0.6 }}
           className="flex items-center justify-between"
         >
-          <h2 className="text-gray-800 text-lg font-medium">
-            Hola {firstName}
-          </h2>
+          <div className="bg-blue-400 border border-white rounded-2xl px-5 py-2.5 shadow-md">
+            <p className="text-white font-medium">Hola {firstName}</p>
+          </div>
           <Button
             onClick={handleLogout}
             variant="outline"
-            className="gap-2 h-10 px-4 rounded-xl border border-gray-300 text-gray-700 bg-white/80 hover:bg-white"
+            className="gap-2 h-10 px-4 rounded-2xl border border-white text-white bg-indigo-400 hover:bg-indigo-500 active:bg-indigo-600 transition-all duration-200"
           >
             <LogOut className="h-4 w-4" />
             Cerrar Sesión
@@ -288,7 +290,12 @@ function HyperconnectorJobsHomeContent() {
                           <span className="text-gray-700">{companyName}</span>
                         </td>
                         <td className="py-4 px-4">
-                          {job.myRecommendationsCount && job.myRecommendationsCount > 0 ? (
+                          {job.status ? (
+                            <div className={`inline-flex items-center gap-2 px-3 py-2 rounded-xl border ${getJobStatusConfig(job.status).bgColor} ${getJobStatusConfig(job.status).borderColor} ${getJobStatusConfig(job.status).textColor}`}>
+                              <div className={`h-2 w-2 rounded-full ${getJobStatusDotColor(job.status)}`} />
+                              <span className="text-sm font-medium">{getJobStatusLabel(job.status)}</span>
+                            </div>
+                          ) : job.myRecommendationsCount && job.myRecommendationsCount > 0 ? (
                             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-green-200 to-green-300 border border-green-300/50">
                               <CheckCircle2 className="h-4 w-4 text-green-700" />
                               <span className="text-green-800 text-sm font-medium">

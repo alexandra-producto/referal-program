@@ -153,8 +153,8 @@ export default function MisSolicitudesPage() {
           className="flex items-center justify-between"
         >
           <div className="flex items-center gap-4">
-            <div className="backdrop-blur-[130px] bg-white/40 border border-white/50 rounded-2xl px-4 py-2 shadow-lg">
-              <p className="text-gray-800 font-medium">
+            <div className="bg-teal-400 border border-white rounded-2xl px-5 py-2.5 shadow-md">
+              <p className="text-white font-medium">
                 Hola {session?.fullName?.split(" ")[0] || "Usuario"}
               </p>
             </div>
@@ -162,7 +162,7 @@ export default function MisSolicitudesPage() {
           <Button
             onClick={handleLogout}
             variant="outline"
-            className="gap-2 h-10 px-4 rounded-xl border border-gray-300 text-gray-700 bg-white/80 hover:bg-white backdrop-blur-sm"
+            className="gap-2 h-10 px-4 rounded-2xl border border-white text-white bg-teal-400 hover:bg-teal-500 active:bg-teal-600 transition-all duration-200"
           >
             <LogOut className="h-4 w-4" />
             Cerrar Sesión
@@ -279,7 +279,8 @@ export default function MisSolicitudesPage() {
                           disabled={job.recommendations_count === 0}
                           onClick={() => {
                             if (job.recommendations_count > 0) {
-                              router.push(`/solicitante/solicitudes/${job.id}/recomendaciones`);
+                              // Reutilizar la vista de recomendaciones de admin (también accesible para solicitante)
+                              router.push(`/admin/solicitudes/${job.id}/recomendaciones`);
                             }
                           }}
                           className={`rounded-xl ${

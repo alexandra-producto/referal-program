@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { validateRecommendationLink, markRecommendationLinkAsUsed } from "@/src/domain/recommendationLinks";
 import { createRecommendation } from "@/src/domain/recommendations";
+import { updateJobStatusFromRecommendations } from "@/src/domain/jobs";
 
 /**
  * POST /api/recommend/[token]/submit
@@ -143,6 +144,11 @@ export async function POST(
           throw new Error(`Error al crear recomendación personalizada: ${customError.message || customError.details || "Error desconocido"}`);
         }
       }
+    }
+
+    // Actualizar el status del job en base a las recomendaciones creadas
+    if (jobId) {
+      await updateJobStatusFromRecommendations(jobId);
     }
 
     // Marcar el link como usado (opcional, puede fallar si la tabla no existe)

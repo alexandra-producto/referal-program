@@ -124,11 +124,9 @@ export async function GET(
       );
     }
     
-    // Filtrar jobs activos (excluir contratados y cancelados)
+    // Filtrar jobs activos (excluir contratados - hired)
     const jobs = (allJobs || []).filter(
-      (job: any) => 
-        job.status !== "Recomendación Contratada" && 
-        job.status !== "Recomendación Cancelada"
+      (job: any) => job.status !== "hired"
     );
 
     if (jobsError) {

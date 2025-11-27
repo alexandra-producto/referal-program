@@ -17,6 +17,7 @@ import { upsertHyperconnector } from "@/src/domain/hyperconnectors";
 import { createSession } from "@/src/utils/session";
 import { isAdminAuthorized } from "@/src/utils/adminWhitelist";
 import { supabase } from "@/src/db/supabaseClient";
+import { getAppUrl } from "@/src/utils/appUrl";
 
 // Cargar variables de entorno
 if (!process.env.SESSION_SECRET) {
@@ -25,6 +26,26 @@ if (!process.env.SESSION_SECRET) {
 
 const SECRET_KEY = process.env.SESSION_SECRET || process.env.RECOMMENDATION_SECRET || "fallback-secret-key";
 const secret = new TextEncoder().encode(SECRET_KEY);
+
+/**
+ * Helper para construir URLs de redirección de forma segura
+ */
+function buildRedirectUrl(path: string, fallbackUrl?: string): URL {
+  try {
+    // Intentar usar la URL de la request si está disponible
+    if (fallbackUrl) {
+      const baseUrl = new URL(fallbackUrl).origin;
+      return new URL(path, baseUrl);
+    }
+    // Usar getAppUrl como fallback
+    const appUrl = getAppUrl();
+    return new URL(path, appUrl);
+  } catch (error) {
+    // Si todo falla, usar localhost
+    console.warn("⚠️ Error construyendo URL de redirección, usando localhost:", error);
+    return new URL(path, "http://localhost:3000");
+  }
+}
 
 /**
  * GET /api/auth/linkedin/callback
@@ -41,13 +62,13 @@ export async function GET(request: NextRequest) {
     if (error) {
       console.error("Error de LinkedIn:", error);
       return NextResponse.redirect(
-        new URL("/solicitante/login-simulado?error=linkedin_auth_failed", request.url)
+        buildRedirectUrl("/solicitante/login-simulado?error=linkedin_auth_failed", request.url)
       );
     }
 
     if (!code || !state) {
       return NextResponse.redirect(
-        new URL("/solicitante/login-simulado?error=missing_params", request.url)
+        buildRedirectUrl("/solicitante/login-simulado?error=missing_params", request.url)
       );
     }
 
@@ -77,7 +98,7 @@ export async function GET(request: NextRequest) {
     } catch (error) {
       console.error("❌ Error verificando state JWT:", error);
       return NextResponse.redirect(
-        new URL("/solicitante/login-simulado?error=invalid_state", request.url)
+        buildRedirectUrl("/solicitante/login-simulado?error=invalid_state", request.url)
       );
     }
 
@@ -146,8 +167,17 @@ export async function GET(request: NextRequest) {
     
     // Obtener posición actual directamente de LinkedIn API
     console.log("🔄 Obteniendo posición actual desde LinkedIn API...");
-    const { title: positionTitle, companyName: positionCompany } = await getCurrentPosition(accessToken);
-    console.log("📋 Resultado de getCurrentPosition:", { positionTitle, positionCompany });
+    let positionTitle: string | null = null;
+    let positionCompany: string | null = null;
+    try {
+      const positionResult = await getCurrentPosition(accessToken);
+      positionTitle = positionResult.title;
+      positionCompany = positionResult.companyName;
+      console.log("📋 Resultado de getCurrentPosition:", { positionTitle, positionCompany });
+    } catch (positionError: any) {
+      console.warn("⚠️ Error obteniendo posición actual desde LinkedIn API:", positionError.message);
+      // Continuar sin posición actual, usaremos el fallback del headline
+    }
     
     // Si no hay posición actual, intentar parsear del headline como fallback
     let current_job_title = positionTitle;
@@ -233,7 +263,7 @@ export async function GET(request: NextRequest) {
       // Validar whitelist
       if (!isAdminAuthorized(email)) {
         return NextResponse.redirect(
-          new URL("/solicitante/login-simulado?error=unauthorized_admin", request.url)
+          buildRedirectUrl("/solicitante/login-simulado?error=unauthorized_admin", request.url)
         );
       }
 
@@ -302,10 +332,10 @@ export async function GET(request: NextRequest) {
 
       // Si falta información del perfil, redirigir a completar perfil
       if (needsProfileCompletion) {
-        return NextResponse.redirect(new URL("/auth/complete-profile", request.url));
+        return NextResponse.redirect(buildRedirectUrl("/auth/complete-profile", request.url));
       }
       
-      return NextResponse.redirect(new URL("/admin/solicitudes", request.url));
+      return NextResponse.redirect(buildRedirectUrl("/admin/solicitudes", request.url));
     }
 
     if (role === "solicitante") {
@@ -358,10 +388,10 @@ export async function GET(request: NextRequest) {
 
       // Si falta información del perfil, redirigir a completar perfil
       if (needsProfileCompletion) {
-        return NextResponse.redirect(new URL("/auth/complete-profile", request.url));
+        return NextResponse.redirect(buildRedirectUrl("/auth/complete-profile", request.url));
       }
       
-      return NextResponse.redirect(new URL("/solicitante/solicitudes", request.url));
+      return NextResponse.redirect(buildRedirectUrl("/solicitante/solicitudes", request.url));
     }
 
     if (role === "hyperconnector") {
@@ -428,24 +458,28 @@ export async function GET(request: NextRequest) {
 
       // Si falta información del perfil, redirigir a completar perfil
       if (needsProfileCompletion) {
-        return NextResponse.redirect(new URL("/auth/complete-profile", request.url));
+        return NextResponse.redirect(buildRedirectUrl("/auth/complete-profile", request.url));
       }
       
-      return NextResponse.redirect(new URL("/hyperconnector/jobs-home", request.url));
+      return NextResponse.redirect(buildRedirectUrl("/hyperconnector/jobs-home", request.url));
     }
 
     // Rol no reconocido
     return NextResponse.redirect(
-      new URL("/solicitante/login-simulado?error=invalid_role", request.url)
+      buildRedirectUrl("/solicitante/login-simulado?error=invalid_role", request.url)
     );
   } catch (error: any) {
     console.error("❌ Error en /api/auth/linkedin/callback:", error);
     console.error("Stack:", error.stack);
     
     // Limpiar cookies de sesión y state en caso de error
-    const cookieStore = await cookies();
-    cookieStore.delete("oauth_state");
-    cookieStore.delete("session");
+    try {
+      const cookieStore = await cookies();
+      cookieStore.delete("oauth_state");
+      cookieStore.delete("session");
+    } catch (cookieError) {
+      console.warn("⚠️ Error limpiando cookies:", cookieError);
+    }
     
     // Determinar el tipo de error para mostrar mensaje apropiado
     let errorCode = "auth_error";
@@ -455,9 +489,21 @@ export async function GET(request: NextRequest) {
       errorCode = "userinfo_error";
     }
     
-    return NextResponse.redirect(
-      new URL(`/solicitante/login-simulado?error=${errorCode}`, request.url)
-    );
+    try {
+      return NextResponse.redirect(
+        buildRedirectUrl(`/solicitante/login-simulado?error=${errorCode}`, request.url)
+      );
+    } catch (redirectError) {
+      // Si incluso la redirección falla, devolver una respuesta de error simple
+      console.error("❌ Error crítico en redirección:", redirectError);
+      return new NextResponse(
+        JSON.stringify({ error: "Error de autenticación. Por favor intenta de nuevo." }),
+        {
+          status: 500,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
   }
 }
 

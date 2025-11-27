@@ -84,7 +84,8 @@ export async function createJobFromCandidate(
     remote_ok: remoteOk,
     description: request.description,
     requirements_json: requirementsJson,
-    status: 'open',
+    // Estado inicial del job: aún no tiene recomendaciones
+    status: 'open_without_recommendations',
     owner_candidate_id: candidateId, // Puede ser null para admins
     owner_role_title: ownerRoleTitle,
   };

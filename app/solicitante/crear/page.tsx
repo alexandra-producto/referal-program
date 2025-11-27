@@ -201,8 +201,8 @@ export default function CrearSolicitudPage() {
           className="flex items-center justify-between"
         >
           <div className="flex items-center gap-4">
-            <div className="backdrop-blur-[130px] bg-white/40 border border-white/50 rounded-2xl px-4 py-2 shadow-lg">
-              <p className="text-gray-800 font-medium">
+            <div className="bg-teal-400 border border-white rounded-2xl px-5 py-2.5 shadow-md">
+              <p className="text-white font-medium">
                 Hola {session?.fullName?.split(" ")[0] || "Usuario"}
               </p>
             </div>
@@ -210,7 +210,7 @@ export default function CrearSolicitudPage() {
           <Button
             onClick={() => router.push("/solicitante/solicitudes")}
             variant="outline"
-            className="gap-2 h-10 px-4 rounded-xl border border-gray-300 text-gray-700 bg-white/80 hover:bg-white backdrop-blur-sm"
+            className="gap-2 h-10 px-4 rounded-2xl border border-white text-white bg-teal-400 hover:bg-teal-500 active:bg-teal-600 transition-all duration-200"
           >
             <ArrowLeft className="h-4 w-4" />
             Volver a Solicitudes
