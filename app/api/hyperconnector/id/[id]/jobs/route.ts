@@ -124,18 +124,10 @@ export async function GET(
       );
     }
     
-    // Filtrar jobs activos (excluir contratados - hired)
+    // Filtrar jobs activos (excluir contratados - hired y rechazados)
     const jobs = (allJobs || []).filter(
-      (job: any) => job.status !== "hired"
+      (job: any) => job.status !== "hired" && job.status !== "all_recommendations_rejected"
     );
-
-    if (jobsError) {
-      console.error("❌ Error obteniendo jobs:", jobsError);
-      return NextResponse.json(
-        { error: "Error al obtener jobs" },
-        { status: 500 }
-      );
-    }
 
     // Para cada job, obtener el mejor match score y contar candidatos elegibles
     const jobsWithDetails = await Promise.all(
