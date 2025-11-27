@@ -1,24 +1,33 @@
 import { supabase } from "../db/supabaseClient";
 
 export async function getRecommendationsForJob(jobId: string) {
-  console.log("🔍 [getRecommendationsForJob] Buscando recomendaciones para jobId:", jobId);
-  
-  const { data, error } = await supabase
-    .from("recommendations")
-    .select("*")
-    .eq("job_id", jobId);
+  try {
+    const { data, error } = await supabase
+      .from("recommendations")
+      .select("*")
+      .eq("job_id", jobId);
 
-  if (error) {
-    console.error("❌ [getRecommendationsForJob] Error obteniendo recomendaciones:", error);
+    if (error) {
+      console.error("❌ [getRecommendationsForJob] Error obteniendo recomendaciones:", {
+        jobId,
+        error: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint,
+      });
+      throw error;
+    }
+    
+    // Logging solo si hay datos o si estamos en desarrollo
+    if (process.env.NODE_ENV === "development") {
+      console.log("✅ [getRecommendationsForJob] Recomendaciones encontradas:", data?.length || 0, "para jobId:", jobId);
+    }
+    
+    return data || [];
+  } catch (error: any) {
+    console.error("❌ [getRecommendationsForJob] Error inesperado:", error);
     throw error;
   }
-  
-  console.log("✅ [getRecommendationsForJob] Recomendaciones encontradas:", data?.length || 0);
-  if (data && data.length > 0) {
-    console.log("📋 [getRecommendationsForJob] IDs de recomendaciones:", data.map((r: any) => r.id));
-  }
-  
-  return data;
 }
 
 export async function createRecommendation(payload: any) {

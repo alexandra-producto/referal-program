@@ -13,25 +13,13 @@ export async function GET(
 ) {
   try {
     const { id: jobId } = await params;
-    console.log("🔍 [GET /api/jobs/[id]/recommendations] Job ID:", jobId);
-    console.log("🔍 [GET /api/jobs/[id]/recommendations] NODE_ENV:", process.env.NODE_ENV);
-    console.log("🔍 [GET /api/jobs/[id]/recommendations] SUPABASE_URL:", process.env.SUPABASE_URL ? "✅ Configurado" : "❌ No configurado");
-
+    
     // Obtener recomendaciones
-    let recommendations;
-    try {
-      recommendations = await getRecommendationsForJob(jobId);
-      console.log("📊 Recomendaciones encontradas (raw):", recommendations?.length || 0);
-    } catch (error: any) {
-      console.error("❌ [GET /api/jobs/[id]/recommendations] Error en getRecommendationsForJob:", error);
-      console.error("❌ [GET /api/jobs/[id]/recommendations] Error details:", {
-        message: error.message,
-        code: error.code,
-        details: error.details,
-        hint: error.hint
-      });
-      throw error;
-    }
+    const recommendations = await getRecommendationsForJob(jobId);
+    
+    // Logging detallado para diagnóstico en producción
+    console.log("🔍 [GET /api/jobs/[id]/recommendations] Job ID:", jobId);
+    console.log("📊 Recomendaciones encontradas (raw):", recommendations?.length || 0);
 
     if (!recommendations || recommendations.length === 0) {
       console.log("⚠️  No hay recomendaciones para este job");
@@ -49,8 +37,11 @@ export async function GET(
     const candidateIds = [...new Set(recommendations.map((r: any) => r.candidate_id).filter(Boolean))];
     const hyperconnectorIds = [...new Set(recommendations.map((r: any) => r.hyperconnector_id).filter(Boolean))];
     
-    console.log("👥 Candidate IDs encontrados:", candidateIds);
-    console.log("🔗 Hyperconnector IDs encontrados:", hyperconnectorIds);
+    // Logging detallado solo si hay recomendaciones
+    if (recommendations.length > 0) {
+      console.log("👥 Candidate IDs encontrados:", candidateIds);
+      console.log("🔗 Hyperconnector IDs encontrados:", hyperconnectorIds);
+    }
     
     // Nota: Algunas recomendaciones pueden tener linkedin_url en lugar de candidate_id
 
@@ -116,13 +107,18 @@ export async function GET(
       };
     });
 
-    console.log("✅ Recomendaciones con detalles:", recommendationsWithDetails.length);
-    console.log("📋 Resumen:", recommendationsWithDetails.map((r: any) => ({
-      id: r.id,
-      hasCandidate: !!r.candidate,
-      hasHyperconnector: !!r.hyperconnector,
-      status: r.status
-    })));
+    // Logging final para diagnóstico
+    if (recommendationsWithDetails.length > 0) {
+      console.log("✅ Recomendaciones con detalles:", recommendationsWithDetails.length);
+      console.log("📋 Resumen:", recommendationsWithDetails.map((r: any) => ({
+        id: r.id,
+        hasCandidate: !!r.candidate,
+        hasHyperconnector: !!r.hyperconnector,
+        status: r.status
+      })));
+    } else {
+      console.log("⚠️  No se encontraron recomendaciones con detalles completos");
+    }
 
     return NextResponse.json({ recommendations: recommendationsWithDetails });
   } catch (error: any) {

@@ -13,18 +13,22 @@ const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!url || !key) {
   console.error("❌ [supabaseClient] SUPABASE_URL:", url ? "✅ Configurado" : "❌ No configurado");
-  console.error("❌ [supabaseClient] SUPABASE_SERVICE_ROLE_KEY:", key ? "✅ Configurado (primeros 10 chars: " + key.substring(0, 10) + "...)" : "❌ No configurado");
+  console.error("❌ [supabaseClient] SUPABASE_SERVICE_ROLE_KEY:", key ? "✅ Configurado" : "❌ No configurado");
   console.error("❌ [supabaseClient] NODE_ENV:", process.env.NODE_ENV);
   throw new Error("❌ Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY.");
 }
 
-console.log("✅ [supabaseClient] Cliente de Supabase inicializado correctamente");
-console.log("✅ [supabaseClient] URL:", url);
-console.log("✅ [supabaseClient] Key (primeros 10 chars):", key.substring(0, 10) + "...");
-
+// Crear cliente con SERVICE_ROLE_KEY para bypass RLS
+// El SERVICE_ROLE_KEY tiene permisos completos y bypass todas las políticas RLS
 export const supabase = createClient(url, key, {
   auth: {
     persistSession: false,
     autoRefreshToken: false,
+  },
+  // Asegurar que usamos el service role key correctamente
+  global: {
+    headers: {
+      'apikey': key,
+    },
   },
 });
