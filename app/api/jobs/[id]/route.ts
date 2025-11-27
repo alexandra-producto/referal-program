@@ -9,8 +9,10 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  console.log("🚀 [GET /api/jobs/[id]] Route handler ejecutado");
   try {
     const { id } = await params;
+    console.log("📝 [GET /api/jobs/[id]] Params recibidos, id:", id);
 
     const job = await getJobById(id);
 
