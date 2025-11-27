@@ -1,16 +1,11 @@
 {
+  "/admin/solicitudes/[id]/recomendaciones/page": "app/admin/solicitudes/[id]/recomendaciones/page.js",
   "/admin/solicitudes/page": "app/admin/solicitudes/page.js",
-  "/api/auth/complete-profile/route": "app/api/auth/complete-profile/route.js",
   "/api/auth/linkedin/callback/route": "app/api/auth/linkedin/callback/route.js",
   "/api/auth/linkedin/route": "app/api/auth/linkedin/route.js",
-  "/api/auth/logout/route": "app/api/auth/logout/route.js",
   "/api/auth/session/route": "app/api/auth/session/route.js",
+  "/api/jobs/[id]/recommendations/route": "app/api/jobs/[id]/recommendations/route.js",
+  "/api/jobs/[id]/route": "app/api/jobs/[id]/route.js",
   "/api/jobs/all/route": "app/api/jobs/all/route.js",
-  "/api/jobs/route": "app/api/jobs/route.js",
-  "/api/jobs/upload-document/route": "app/api/jobs/upload-document/route.js",
-  "/auth/complete-profile/page": "app/auth/complete-profile/page.js",
-  "/page": "app/page.js",
-  "/solicitante/crear/page": "app/solicitante/crear/page.js",
-  "/solicitante/login-simulado/page": "app/solicitante/login-simulado/page.js",
-  "/solicitante/solicitudes/page": "app/solicitante/solicitudes/page.js"
+  "/solicitante/login-simulado/page": "app/solicitante/login-simulado/page.js"
 }

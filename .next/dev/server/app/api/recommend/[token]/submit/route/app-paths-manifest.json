@@ -1,3 +1,0 @@
-{
-  "/api/recommend/[token]/submit/route": "app/api/recommend/[token]/submit/route.js"
-}

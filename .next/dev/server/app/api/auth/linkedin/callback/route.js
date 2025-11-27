@@ -1,5 +1,5 @@
 var R=require("../../../../../chunks/[turbopack]_runtime.js")("server/app/api/auth/linkedin/callback/route.js")
-R.c("server/chunks/Referal MVP_src_agents_f2096077._.js")
+R.c("server/chunks/Referal MVP_src_agents_51c583c0._.js")
 R.c("server/chunks/56593_next_61f709bc._.js")
 R.c("server/chunks/56593_@supabase_realtime-js_dist_module_35b25a6a._.js")
 R.c("server/chunks/56593_@supabase_storage-js_dist_module_542814f1._.js")

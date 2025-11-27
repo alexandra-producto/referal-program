@@ -114,13 +114,29 @@ async function GET(request, { params }) {
         }
         console.log("🔍 Obteniendo jobs para hyperconnector:", hyperconnectorId);
         // Obtener información del hyperconnector
-        const { data: hyperconnector, error: hciError } = await __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$src$2f$db$2f$supabaseClient$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["supabase"].from("hyperconnectors").select("id, full_name").eq("id", hyperconnectorId).single();
-        if (hciError || !hyperconnector) {
+        const { data: hyperconnector, error: hciError } = await __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$src$2f$db$2f$supabaseClient$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["supabase"].from("hyperconnectors").select("id, full_name").eq("id", hyperconnectorId).maybeSingle();
+        if (hciError) {
             console.error("❌ Error obteniendo hyperconnector:", hciError);
+            // No cortamos con 404 para no romper la UI: devolvemos lista vacía
             return __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["NextResponse"].json({
-                error: "Hyperconnector no encontrado"
+                jobs: [],
+                hyperconnector: null,
+                hyperconnectorId,
+                message: "No se pudo obtener el hyperconnector"
             }, {
-                status: 404
+                status: 200
+            });
+        }
+        if (!hyperconnector) {
+            console.warn("⚠️ Hyperconnector no encontrado en la BD:", hyperconnectorId);
+            // En lugar de 404 devolvemos 200 con lista vacía para evitar errores en la UI
+            return __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["NextResponse"].json({
+                jobs: [],
+                hyperconnector: null,
+                hyperconnectorId,
+                message: "Hyperconnector no encontrado"
+            }, {
+                status: 200
             });
         }
         // Obtener candidatos relacionados con el hyperconnector
@@ -166,7 +182,18 @@ async function GET(request, { params }) {
             ...new Set(jobMatches.map((jm)=>jm.job_id))
         ];
         // Obtener detalles de los jobs
-        const { data: jobs, error: jobsError } = await __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$src$2f$db$2f$supabaseClient$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["supabase"].from("jobs").select("id, company_name, job_title, description, owner_candidate_id, owner_role_title, status").in("id", jobIds).eq("status", "open");
+        // Mostrar jobs activos (excluir solo los cerrados/cancelados)
+        const { data: allJobs, error: jobsError } = await __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$src$2f$db$2f$supabaseClient$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["supabase"].from("jobs").select("id, company_name, job_title, description, owner_candidate_id, owner_role_title, status").in("id", jobIds);
+        if (jobsError) {
+            console.error("❌ Error obteniendo jobs:", jobsError);
+            return __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["NextResponse"].json({
+                error: "Error al obtener jobs"
+            }, {
+                status: 500
+            });
+        }
+        // Filtrar jobs activos (excluir contratados - hired)
+        const jobs = (allJobs || []).filter((job)=>job.status !== "hired");
         if (jobsError) {
             console.error("❌ Error obteniendo jobs:", jobsError);
             return __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$node_modules$2f$next$2f$server$2e$js__$5b$app$2d$route$5d$__$28$ecmascript$29$__["NextResponse"].json({
@@ -188,6 +215,9 @@ async function GET(request, { params }) {
                 const { data: owner } = await __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$src$2f$db$2f$supabaseClient$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["supabase"].from("candidates").select("id, full_name, current_company, email").eq("id", job.owner_candidate_id).maybeSingle();
                 ownerCandidate = owner;
             }
+            // Obtener conteo de recomendaciones del hyperconnector para este job
+            const { data: myRecommendations } = await __TURBOPACK__imported__module__$5b$project$5d2f$Referal__MVP$2f$src$2f$db$2f$supabaseClient$2e$ts__$5b$app$2d$route$5d$__$28$ecmascript$29$__["supabase"].from("recommendations").select("id").eq("job_id", job.id).eq("hyperconnector_id", hyperconnectorId);
+            const myRecommendationsCount = myRecommendations?.length || 0;
             return {
                 id: job.id,
                 company_name: job.company_name,
@@ -198,7 +228,8 @@ async function GET(request, { params }) {
                 owner_candidate_id: job.owner_candidate_id,
                 eligibleCandidatesCount,
                 bestMatchScore,
-                ownerCandidate
+                ownerCandidate,
+                myRecommendationsCount
             };
         }));
         console.log(`✅ Encontrados ${jobsWithDetails.length} jobs elegibles`);

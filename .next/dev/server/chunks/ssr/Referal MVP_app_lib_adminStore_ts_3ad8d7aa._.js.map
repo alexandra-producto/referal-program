@@ -1,6 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///Users/usuario/Referal%20MVP/app/lib/adminStore.ts"],"sourcesContent":["/**\n * Simple admin store using localStorage for simulated login\n */\n\nconst ADMIN_STORAGE_KEY = 'admin_auth';\n\nexport const adminStore = {\n  /**\n   * Check if admin is logged in\n   */\n  isAuthenticated(): boolean {\n    if (typeof window === 'undefined') return false;\n    return localStorage.getItem(ADMIN_STORAGE_KEY) === 'true';\n  },\n\n  /**\n   * Set admin as logged in\n   */\n  login(): void {\n    if (typeof window === 'undefined') return;\n    localStorage.setItem(ADMIN_STORAGE_KEY, 'true');\n  },\n\n  /**\n   * Clear admin session\n   */\n  logout(): void {\n    if (typeof window === 'undefined') return;\n    localStorage.removeItem(ADMIN_STORAGE_KEY);\n  },\n};\n\n"],"names":[],"mappings":"AAAA;;CAEC;;;;AAED,MAAM,oBAAoB;AAEnB,MAAM,aAAa;IACxB;;GAEC,GACD;QACE,wCAAmC,OAAO;;;IAE5C;IAEA;;GAEC,GACD;QACE,wCAAmC;;;IAErC;IAEA;;GAEC,GACD;QACE,wCAAmC;;;IAErC;AACF"}}]
-}

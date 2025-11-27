@@ -14,10 +14,24 @@ export async function GET(
   try {
     const { id: jobId } = await params;
     console.log("🔍 [GET /api/jobs/[id]/recommendations] Job ID:", jobId);
+    console.log("🔍 [GET /api/jobs/[id]/recommendations] NODE_ENV:", process.env.NODE_ENV);
+    console.log("🔍 [GET /api/jobs/[id]/recommendations] SUPABASE_URL:", process.env.SUPABASE_URL ? "✅ Configurado" : "❌ No configurado");
 
     // Obtener recomendaciones
-    const recommendations = await getRecommendationsForJob(jobId);
-    console.log("📊 Recomendaciones encontradas (raw):", recommendations?.length || 0);
+    let recommendations;
+    try {
+      recommendations = await getRecommendationsForJob(jobId);
+      console.log("📊 Recomendaciones encontradas (raw):", recommendations?.length || 0);
+    } catch (error: any) {
+      console.error("❌ [GET /api/jobs/[id]/recommendations] Error en getRecommendationsForJob:", error);
+      console.error("❌ [GET /api/jobs/[id]/recommendations] Error details:", {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint
+      });
+      throw error;
+    }
 
     if (!recommendations || recommendations.length === 0) {
       console.log("⚠️  No hay recomendaciones para este job");

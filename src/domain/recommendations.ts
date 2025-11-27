@@ -1,12 +1,23 @@
 import { supabase } from "../db/supabaseClient";
 
 export async function getRecommendationsForJob(jobId: string) {
+  console.log("🔍 [getRecommendationsForJob] Buscando recomendaciones para jobId:", jobId);
+  
   const { data, error } = await supabase
     .from("recommendations")
     .select("*")
     .eq("job_id", jobId);
 
-  if (error) throw error;
+  if (error) {
+    console.error("❌ [getRecommendationsForJob] Error obteniendo recomendaciones:", error);
+    throw error;
+  }
+  
+  console.log("✅ [getRecommendationsForJob] Recomendaciones encontradas:", data?.length || 0);
+  if (data && data.length > 0) {
+    console.log("📋 [getRecommendationsForJob] IDs de recomendaciones:", data.map((r: any) => r.id));
+  }
+  
   return data;
 }
 
