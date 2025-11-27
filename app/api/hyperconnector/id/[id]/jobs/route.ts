@@ -10,8 +10,10 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  console.log("🚀 [GET /api/hyperconnector/id/[id]/jobs] Route handler ejecutado");
   try {
     const { id: hyperconnectorId } = await params;
+    console.log("📝 [GET /api/hyperconnector/id/[id]/jobs] Params recibidos, hyperconnectorId:", hyperconnectorId);
 
     if (!hyperconnectorId) {
       return NextResponse.json(

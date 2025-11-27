@@ -11,8 +11,10 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  console.log("🚀 [GET /api/jobs/[id]/recommendations] Route handler ejecutado");
   try {
     const { id: jobId } = await params;
+    console.log("📝 [GET /api/jobs/[id]/recommendations] Params recibidos, jobId:", jobId);
     
     // Obtener recomendaciones
     const recommendations = await getRecommendationsForJob(jobId);
