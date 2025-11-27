@@ -77,32 +77,28 @@ export default function RecomendacionesPage({
     });
   };
 
-  useEffect(() => {
-    // Verificar autenticación
-    async function checkAuth() {
-      const session = await authStore.getSession();
-      // Permitir acceso a admin y al solicitante dueño del job
-      if (!session || (session.role !== "admin" && session.role !== "solicitante")) {
-        router.push("/solicitante/login-simulado");
-        return;
-      }
-
-      fetchData();
-    }
-    checkAuth();
-  }, [jobId, router]);
-
   const fetchData = async () => {
+    if (!jobId) {
+      console.error("❌ jobId no está definido");
+      setLoading(false);
+      return;
+    }
+
+    console.log("🔍 [fetchData] Iniciando fetch para jobId:", jobId);
     try {
       // Obtener job
+      console.log("📡 [fetchData] Llamando a /api/jobs/${jobId}");
       const jobResponse = await fetch(`/api/jobs/${jobId}`);
+      console.log("📡 [fetchData] Respuesta de job:", jobResponse.status, jobResponse.ok);
       if (jobResponse.ok) {
         const jobData = await jobResponse.json();
         setJob(jobData.job || jobData);
       }
 
       // Obtener recomendaciones
+      console.log("📡 [fetchData] Llamando a /api/jobs/${jobId}/recommendations");
       const recResponse = await fetch(`/api/jobs/${jobId}/recommendations`);
+      console.log("📡 [fetchData] Respuesta de recommendations:", recResponse.status, recResponse.ok);
       if (!recResponse.ok) {
         // Intentar parsear el error
         let errorMessage = "Error al cargar las recomendaciones";
@@ -121,6 +117,7 @@ export default function RecomendacionesPage({
         throw new Error(errorMessage);
       }
       const recData = await recResponse.json();
+      console.log("✅ [fetchData] Recomendaciones recibidas:", recData.recommendations?.length || 0);
       setRecommendations(recData.recommendations || []);
     } catch (error: any) {
       console.error("❌ Error fetching data:", error);
@@ -132,6 +129,26 @@ export default function RecomendacionesPage({
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    // Verificar autenticación
+    async function checkAuth() {
+      const session = await authStore.getSession();
+      // Permitir acceso a admin y al solicitante dueño del job
+      if (!session || (session.role !== "admin" && session.role !== "solicitante")) {
+        router.push("/solicitante/login-simulado");
+        return;
+      }
+
+      if (jobId) {
+        fetchData();
+      } else {
+        console.error("❌ jobId no está disponible en useEffect");
+        setLoading(false);
+      }
+    }
+    checkAuth();
+  }, [jobId, router]);
 
   const handleUpdateStatus = async (recId: string, newStatus: string) => {
     try {
