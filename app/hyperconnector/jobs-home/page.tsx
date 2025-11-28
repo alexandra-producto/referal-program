@@ -55,7 +55,7 @@ function HyperconnectorJobsHomeContent() {
 
         // Si hay token, usar el endpoint con token (desde WhatsApp)
         if (token) {
-          response = await fetch(`/api/hyperconnector/token/${token}/jobs`);
+          response = await fetch(`/api/hyperconnector/get-jobs-by-token?token=${token}`);
           if (!response.ok) {
             const errorData = await response.json();
             setError(errorData.error || "Error al cargar los jobs");
@@ -72,7 +72,7 @@ function HyperconnectorJobsHomeContent() {
             return;
           }
 
-          response = await fetch(`/api/hyperconnector/id/${session.hyperconnectorId}/jobs`);
+          response = await fetch(`/api/hyperconnector/get-jobs?id=${session.hyperconnectorId}`);
           if (!response.ok) {
             // Intentar parsear el error, pero si falla, usar el status
             let errorMessage = "Error al cargar los jobs";
@@ -86,7 +86,7 @@ function HyperconnectorJobsHomeContent() {
             console.error("❌ Error al cargar jobs:", {
               status: response.status,
               statusText: response.statusText,
-              url: `/api/hyperconnector/id/${session.hyperconnectorId}/jobs`,
+              url: `/api/hyperconnector/get-jobs?id=${session.hyperconnectorId}`,
               hyperconnectorId: session.hyperconnectorId
             });
             setError(errorMessage);

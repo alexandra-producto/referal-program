@@ -57,7 +57,7 @@ export const hyperconnectorStore = {
 
     // Fetch hyperconnector details from API
     try {
-      const response = await fetch(`/api/hyperconnector/id/${session.hyperconnectorId}/jobs`);
+      const response = await fetch(`/api/hyperconnector/get-jobs?id=${session.hyperconnectorId}`);
       if (!response.ok) {
         return null;
       }
