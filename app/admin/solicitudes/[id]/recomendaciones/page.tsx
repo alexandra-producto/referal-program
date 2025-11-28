@@ -87,8 +87,8 @@ export default function RecomendacionesPage({
     console.log("🔍 [fetchData] Iniciando fetch para jobId:", jobId);
     try {
       // Obtener job
-      console.log("📡 [fetchData] Llamando a /api/jobs/${jobId}");
-      const jobResponse = await fetch(`/api/jobs/${jobId}`);
+      console.log("📡 [fetchData] Llamando a /api/jobs/get?id=${jobId}");
+      const jobResponse = await fetch(`/api/jobs/get?id=${jobId}`);
       console.log("📡 [fetchData] Respuesta de job:", jobResponse.status, jobResponse.ok);
       if (jobResponse.ok) {
         const jobData = await jobResponse.json();
@@ -96,8 +96,8 @@ export default function RecomendacionesPage({
       }
 
       // Obtener recomendaciones
-      console.log("📡 [fetchData] Llamando a /api/jobs/${jobId}/recommendations");
-      const recResponse = await fetch(`/api/jobs/${jobId}/recommendations`);
+      console.log("📡 [fetchData] Llamando a /api/jobs/get-recommendations?jobId=${jobId}");
+      const recResponse = await fetch(`/api/jobs/get-recommendations?jobId=${jobId}`);
       console.log("📡 [fetchData] Respuesta de recommendations:", recResponse.status, recResponse.ok);
       if (!recResponse.ok) {
         // Intentar parsear el error
@@ -111,7 +111,7 @@ export default function RecomendacionesPage({
         console.error("❌ Error al cargar recomendaciones:", {
           status: recResponse.status,
           statusText: recResponse.statusText,
-          url: `/api/jobs/${jobId}/recommendations`,
+          url: `/api/jobs/get-recommendations?jobId=${jobId}`,
           jobId
         });
         throw new Error(errorMessage);

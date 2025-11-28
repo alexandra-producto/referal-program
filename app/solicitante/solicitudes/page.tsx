@@ -77,7 +77,7 @@ export default function MisSolicitudesPage() {
   const handleViewDetails = async (jobId: string) => {
     setLoadingJobDetails(true);
     try {
-      const response = await fetch(`/api/jobs/${jobId}`);
+      const response = await fetch(`/api/jobs/get?id=${jobId}`);
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         console.error("Error response:", response.status, errorData);
