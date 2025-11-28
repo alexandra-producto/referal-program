@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
 
     const { data: candidates, error: candidatesError } = await supabase
       .from("candidates")
-      .select("id, full_name, current_company, current_job_title, country, industry, profile_picture_url")
+      .select("id, full_name, current_company, current_job_title, country, industry, profile_picture_url, linkedin_url")
       .in("id", candidateIds);
 
     if (candidatesError) {
