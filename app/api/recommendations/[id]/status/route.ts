@@ -24,14 +24,48 @@ export async function PATCH(
   try {
     const { id } = await params;
     console.log("🔄 PATCH /api/recommendations/[id]/status - ID:", id);
+    console.log("🔍 Request URL:", request.url);
+    console.log("🔍 Request headers:", Object.fromEntries(request.headers.entries()));
+
+    // Verificar cookies disponibles
+    const cookieStore = await cookies();
+    const sessionCookie = cookieStore.get("session");
+    console.log("🔍 Cookie 'session' presente:", !!sessionCookie);
+    console.log("🔍 Cookie 'session' value (primeros 50 chars):", sessionCookie?.value?.substring(0, 50) || "NO HAY");
 
     // Verificar sesión y rol
     const session = await getSession();
-    console.log("🔍 Sesión:", session ? { role: session.role, userId: session.userId } : "null");
+    console.log("🔍 Sesión obtenida:", session ? { 
+      role: session.role, 
+      userId: session.userId,
+      email: session.email,
+      fullName: session.fullName
+    } : "null");
     
-    if (!session || (session.role !== "admin" && session.role !== "solicitante")) {
-      console.error("❌ No autorizado - Sesión:", session);
-      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    if (!session) {
+      console.error("❌ No hay sesión - Cookie presente:", !!sessionCookie);
+      console.error("❌ Detalles:", {
+        hasCookie: !!sessionCookie,
+        cookieLength: sessionCookie?.value?.length || 0,
+        cookieValue: sessionCookie?.value?.substring(0, 100) || "NO HAY"
+      });
+      return NextResponse.json({ 
+        error: "No autorizado - Sesión no encontrada",
+        details: "No se pudo obtener la sesión del usuario. Verifica que estés logueado."
+      }, { status: 401 });
+    }
+    
+    if (session.role !== "admin" && session.role !== "solicitante") {
+      console.error("❌ Rol no autorizado:", {
+        rolActual: session.role,
+        rolesPermitidos: ["admin", "solicitante"],
+        userId: session.userId,
+        email: session.email
+      });
+      return NextResponse.json({ 
+        error: "No autorizado - Rol no permitido",
+        details: `Rol '${session.role}' no tiene permisos para esta acción. Se requiere 'admin' o 'solicitante'.`
+      }, { status: 403 });
     }
 
     const body = await request.json();

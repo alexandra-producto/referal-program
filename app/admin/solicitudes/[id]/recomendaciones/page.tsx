@@ -160,6 +160,7 @@ export default function RecomendacionesPage({
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include", // Asegurar que las cookies se envíen
         body: JSON.stringify({ status: newStatus }),
       });
 
