@@ -90,7 +90,7 @@ export default function RecommendPage({
   useEffect(() => {
     async function fetchData() {
       try {
-        const response = await fetch(`/api/recommend/${token}`);
+        const response = await fetch(`/api/recommend/get?token=${token}`);
         if (!response.ok) {
           const errorData = await response.json();
           setError(errorData.error || "Error al cargar los datos");
@@ -190,7 +190,7 @@ export default function RecommendPage({
         linkedinUrl: selectedPersonId === "custom" ? linkedinUrl : null,
       });
 
-      const response = await fetch(`/api/recommend/${token}/submit`, {
+      const response = await fetch(`/api/recommend/submit?token=${token}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
