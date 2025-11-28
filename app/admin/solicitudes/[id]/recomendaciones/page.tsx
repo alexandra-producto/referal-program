@@ -155,7 +155,8 @@ export default function RecomendacionesPage({
       setUpdatingId(recId);
       console.log("🔄 Actualizando status de recomendación:", { recId, newStatus });
       
-      const response = await fetch(`/api/recommendations/${recId}/status`, {
+      // Usar ruta estática como workaround para Vercel
+      const response = await fetch(`/api/recommendations/update-status?id=${recId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
