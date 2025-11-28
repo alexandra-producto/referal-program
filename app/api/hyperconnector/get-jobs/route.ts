@@ -53,144 +53,129 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Obtener todos los jobs (sin filtrar por status)
-    const { data: allJobs, error: jobsError } = await supabase
-      .from("jobs")
-      .select("id, job_title, company_name, description, owner_role_title, owner_candidate_id, status, created_at")
-      .order("created_at", { ascending: false });
 
-    if (jobsError) {
-      console.error("❌ Error obteniendo jobs:", jobsError);
+    // Obtener candidatos relacionados con el hyperconnector
+    const { data: hyperconnectorCandidates, error: hciCandidatesError } = await supabase
+      .from("hyperconnector_candidates")
+      .select("candidate_id")
+      .eq("hyperconnector_id", hyperconnectorId);
+
+    if (hciCandidatesError) {
+      console.error("❌ Error obteniendo candidatos del hyperconnector:", hciCandidatesError);
       return NextResponse.json(
-        {
-          error: "Error al obtener jobs",
-          details: jobsError.message,
-        },
+        { error: "Error al obtener candidatos" },
         { status: 500 }
       );
     }
 
-    if (!allJobs || allJobs.length === 0) {
+    if (!hyperconnectorCandidates || hyperconnectorCandidates.length === 0) {
+      console.log("⚠️ Hyperconnector no tiene candidatos relacionados");
       return NextResponse.json({
         jobs: [],
         hyperconnector,
         hyperconnectorId,
+        message: "No hay candidatos relacionados con este hyperconnector",
       });
     }
 
-    // Filtrar jobs: excluir solo los que tienen status 'hired' o 'all_recommendations_rejected'
-    const activeJobs = allJobs.filter(
-      (job: any) => job.status !== "hired" && job.status !== "all_recommendations_rejected"
-    );
+    const candidateIds = hyperconnectorCandidates.map((hc: any) => hc.candidate_id);
 
-    // Obtener candidatos elegibles para este hyperconnector
-    const { data: eligibleCandidates, error: candidatesError } = await supabase
-      .from("hyperconnector_candidates")
-      .select("candidate_id, job_id")
-      .eq("hyperconnector_id", hyperconnectorId);
+    // Obtener jobs que tienen matches con estos candidatos
+    const { data: jobMatches, error: matchesError } = await supabase
+      .from("job_candidate_matches")
+      .select("job_id")
+      .in("candidate_id", candidateIds);
 
-    if (candidatesError) {
-      console.error("❌ Error obteniendo candidatos elegibles:", candidatesError);
+    if (matchesError) {
+      console.error("❌ Error obteniendo matches:", matchesError);
       return NextResponse.json(
-        {
-          error: "Error al obtener candidatos elegibles",
-          details: candidatesError.message,
-        },
+        { error: "Error al obtener matches" },
         { status: 500 }
       );
     }
 
-    // Crear un mapa de job_id -> candidatos elegibles
-    const candidatesByJob = new Map<string, string[]>();
-    (eligibleCandidates || []).forEach((ec: any) => {
-      if (!candidatesByJob.has(ec.job_id)) {
-        candidatesByJob.set(ec.job_id, []);
-      }
-      candidatesByJob.get(ec.job_id)!.push(ec.candidate_id);
-    });
-
-    // Obtener recomendaciones del hyperconnector para contar
-    const { data: recommendations, error: recError } = await supabase
-      .from("recommendations")
-      .select("id, job_id, candidate_id")
-      .eq("hyperconnector_id", hyperconnectorId);
-
-    if (recError) {
-      console.error("❌ Error obteniendo recomendaciones:", recError);
-    }
-
-    // Crear un mapa de job_id -> número de recomendaciones del hyperconnector
-    const recommendationsByJob = new Map<string, number>();
-    (recommendations || []).forEach((rec: any) => {
-      const count = recommendationsByJob.get(rec.job_id) || 0;
-      recommendationsByJob.set(rec.job_id, count + 1);
-    });
-
-    // Obtener match scores para cada job-candidate
-    const jobIds = activeJobs.map((j: any) => j.id);
-    const candidateIds = [...new Set((eligibleCandidates || []).map((ec: any) => ec.candidate_id))];
-
-    const matchScores = new Map<string, number>();
-    if (jobIds.length > 0 && candidateIds.length > 0) {
-      const { data: matches } = await supabase
-        .from("job_candidate_matches")
-        .select("job_id, candidate_id, match_score")
-        .in("job_id", jobIds)
-        .in("candidate_id", candidateIds);
-
-      if (matches) {
-        matches.forEach((m: any) => {
-          const key = `${m.job_id}-${m.candidate_id}`;
-          matchScores.set(key, m.match_score);
-        });
-      }
-    }
-
-    // Obtener información de los candidatos dueños de los jobs
-    const ownerCandidateIds = [...new Set(activeJobs.map((j: any) => j.owner_candidate_id).filter(Boolean))];
-    const ownerCandidates = new Map<string, any>();
-    if (ownerCandidateIds.length > 0) {
-      const { data: candidatesData } = await supabase
-        .from("candidates")
-        .select("id, full_name, current_company, email")
-        .in("id", ownerCandidateIds);
-
-      if (candidatesData) {
-        candidatesData.forEach((c: any) => {
-          ownerCandidates.set(c.id, c);
-        });
-      }
-    }
-
-    // Construir la respuesta
-    const jobsWithDetails = activeJobs.map((job: any) => {
-      const eligibleCandidatesForJob = candidatesByJob.get(job.id) || [];
-      const myRecommendationsCount = recommendationsByJob.get(job.id) || 0;
-
-      // Calcular el mejor match score para este job
-      let bestMatchScore: number | null = null;
-      eligibleCandidatesForJob.forEach((candidateId: string) => {
-        const key = `${job.id}-${candidateId}`;
-        const score = matchScores.get(key);
-        if (score !== undefined && (bestMatchScore === null || score > bestMatchScore)) {
-          bestMatchScore = score;
-        }
+    if (!jobMatches || jobMatches.length === 0) {
+      console.log("⚠️ No hay matches para estos candidatos");
+      return NextResponse.json({
+        jobs: [],
+        hyperconnector,
+        hyperconnectorId,
+        message: "No hay jobs con matches para los candidatos relacionados",
       });
+    }
 
-      return {
-        id: job.id,
-        company_name: job.company_name,
-        job_title: job.job_title,
-        description: job.description,
-        owner_role: job.owner_role_title || null,
-        owner_candidate_id: job.owner_candidate_id,
-        eligibleCandidatesCount: eligibleCandidatesForJob.length,
-        bestMatchScore,
-        ownerCandidate: job.owner_candidate_id ? ownerCandidates.get(job.owner_candidate_id) || null : null,
-        myRecommendationsCount,
-        status: job.status,
-      };
-    });
+    const jobIds = [...new Set(jobMatches.map((jm: any) => jm.job_id))];
+
+    // Obtener detalles de los jobs
+    const { data: jobsData, error: jobsError } = await supabase
+      .from("jobs")
+      .select("id, company_name, job_title, description, owner_candidate_id, owner_role_title, status, created_at")
+      .in("id", jobIds);
+    
+    if (jobsError) {
+      console.error("❌ Error obteniendo jobs:", jobsError);
+      return NextResponse.json(
+        { error: "Error al obtener jobs" },
+        { status: 500 }
+      );
+    }
+    
+    // Filtrar jobs activos (excluir contratados - hired y rechazados)
+    const activeJobs = (jobsData || []).filter(
+      (job: any) => job.status !== "hired" && job.status !== "all_recommendations_rejected"
+    );
+
+
+    // Para cada job, obtener el mejor match score y contar candidatos elegibles
+    const jobsWithDetails = await Promise.all(
+      activeJobs.map(async (job: any) => {
+        // Obtener matches para este job con candidatos del hyperconnector
+        const { data: matches } = await supabase
+          .from("job_candidate_matches")
+          .select("match_score, candidate_id")
+          .eq("job_id", job.id)
+          .in("candidate_id", candidateIds);
+
+        const matchScores = (matches || []).map((m: any) => m.match_score || 0);
+        const bestMatchScore = matchScores.length > 0 ? Math.max(...matchScores) : null;
+        const eligibleCandidatesCount = matches?.length || 0;
+
+
+        // Obtener información del owner candidate
+        let ownerCandidate = null;
+        if (job.owner_candidate_id) {
+          const { data: owner } = await supabase
+            .from("candidates")
+            .select("id, full_name, current_company, email")
+            .eq("id", job.owner_candidate_id)
+            .maybeSingle();
+          ownerCandidate = owner;
+        }
+
+        // Obtener conteo de recomendaciones del hyperconnector para este job
+        const { data: myRecommendations } = await supabase
+          .from("recommendations")
+          .select("id")
+          .eq("job_id", job.id)
+          .eq("hyperconnector_id", hyperconnectorId);
+
+        const myRecommendationsCount = myRecommendations?.length || 0;
+
+        return {
+          id: job.id,
+          company_name: job.company_name,
+          job_title: job.job_title,
+          role_title: job.job_title,
+          description: job.description,
+          owner_role: job.owner_role_title,
+          owner_candidate_id: job.owner_candidate_id,
+          eligibleCandidatesCount,
+          bestMatchScore,
+          ownerCandidate,
+          myRecommendationsCount,
+        };
+      })
+    );
 
     return NextResponse.json({
       jobs: jobsWithDetails,
