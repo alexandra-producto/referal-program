@@ -36,8 +36,11 @@ function buildRedirectUrl(path: string, requestUrl?: string): URL {
     // PRIORIDAD 1: Usar la URL del request actual (siempre tiene el dominio correcto)
     if (requestUrl) {
       const baseUrl = new URL(requestUrl).origin;
-      console.log(`🔗 Construyendo redirect URL desde request: ${baseUrl}${path}`);
-      return new URL(path, baseUrl);
+      const finalUrl = new URL(path, baseUrl);
+      console.log(`🔗 [buildRedirectUrl] Request URL recibida: ${requestUrl}`);
+      console.log(`🔗 [buildRedirectUrl] Base URL extraída: ${baseUrl}`);
+      console.log(`🔗 [buildRedirectUrl] URL final construida: ${finalUrl.toString()}`);
+      return finalUrl;
     }
     
     // PRIORIDAD 2: Intentar obtener del request actual si está disponible en el contexto
@@ -45,8 +48,10 @@ function buildRedirectUrl(path: string, requestUrl?: string): URL {
     
     // PRIORIDAD 3: Usar getAppUrl como último recurso
     const appUrl = getAppUrl();
-    console.log(`🔗 Construyendo redirect URL desde getAppUrl: ${appUrl}${path}`);
-    return new URL(path, appUrl);
+    const finalUrl = new URL(path, appUrl);
+    console.log(`⚠️ [buildRedirectUrl] No se proporcionó requestUrl, usando getAppUrl: ${appUrl}`);
+    console.log(`🔗 [buildRedirectUrl] URL final construida: ${finalUrl.toString()}`);
+    return finalUrl;
   } catch (error) {
     // Si todo falla, usar localhost
     console.warn("⚠️ Error construyendo URL de redirección, usando localhost:", error);
@@ -60,6 +65,12 @@ function buildRedirectUrl(path: string, requestUrl?: string): URL {
  */
 export async function GET(request: NextRequest) {
   try {
+    // Log del request URL para debugging
+    const requestOrigin = new URL(request.url).origin;
+    console.log(`🔍 [CALLBACK] Request URL: ${request.url}`);
+    console.log(`🔍 [CALLBACK] Request Origin: ${requestOrigin}`);
+    console.log(`🔍 [CALLBACK] VERCEL_URL env: ${process.env.VERCEL_URL || 'NO DEFINIDO'}`);
+    
     const searchParams = request.nextUrl.searchParams;
     const code = searchParams.get("code");
     const state = searchParams.get("state");
@@ -341,10 +352,14 @@ export async function GET(request: NextRequest) {
 
       // Si falta información del perfil, redirigir a completar perfil
       if (needsProfileCompletion) {
-        return NextResponse.redirect(buildRedirectUrl("/auth/complete-profile", request.url));
+        const redirectUrl = buildRedirectUrl("/auth/complete-profile", request.url);
+        console.log(`🔗 [ADMIN] Redirigiendo a completar perfil: ${redirectUrl.toString()}`);
+        return NextResponse.redirect(redirectUrl);
       }
       
-      return NextResponse.redirect(buildRedirectUrl("/admin/solicitudes", request.url));
+      const redirectUrl = buildRedirectUrl("/admin/solicitudes", request.url);
+      console.log(`🔗 [ADMIN] Redirigiendo a /admin/solicitudes: ${redirectUrl.toString()}`);
+      return NextResponse.redirect(redirectUrl);
     }
 
     if (role === "solicitante") {
@@ -397,10 +412,14 @@ export async function GET(request: NextRequest) {
 
       // Si falta información del perfil, redirigir a completar perfil
       if (needsProfileCompletion) {
-        return NextResponse.redirect(buildRedirectUrl("/auth/complete-profile", request.url));
+        const redirectUrl = buildRedirectUrl("/auth/complete-profile", request.url);
+        console.log(`🔗 [SOLICITANTE] Redirigiendo a completar perfil: ${redirectUrl.toString()}`);
+        return NextResponse.redirect(redirectUrl);
       }
       
-      return NextResponse.redirect(buildRedirectUrl("/solicitante/solicitudes", request.url));
+      const redirectUrl = buildRedirectUrl("/solicitante/solicitudes", request.url);
+      console.log(`🔗 [SOLICITANTE] Redirigiendo a /solicitante/solicitudes: ${redirectUrl.toString()}`);
+      return NextResponse.redirect(redirectUrl);
     }
 
     if (role === "hyperconnector") {
