@@ -116,7 +116,12 @@ Puedes tener diferentes variables de entorno para cada ambiente:
 - **Preview**: `ADMIN_EMAILS=tu-email@example.com` (solo para testing)
 - **Development**: `ADMIN_EMAILS=admin@referal.com` (local)
 
-Esto te permite probar con diferentes configuraciones sin afectar producción (excepto los datos en la base de datos).
+**Nota sobre LinkedIn OAuth:**
+- `LINKEDIN_CLIENT_ID` y `LINKEDIN_CLIENT_SECRET` pueden ser los mismos en ambos ambientes
+- `LINKEDIN_REDIRECT_URI` se construye automáticamente desde `VERCEL_URL` (no necesitas configurarla manualmente)
+- Solo asegúrate de agregar las URLs de callback en LinkedIn Developers (ver sección más abajo)
+
+Esto te permite probar con diferentes configuraciones sin afectar producción (excepto los datos en la base de datos si no has creado una separada).
 
 ## Verificar la Configuración
 
@@ -140,7 +145,7 @@ O simplemente mergea a tu branch de producción si configuraste la Opción 3.
 
 ### URLs para Agregar en LinkedIn Developers:
 
-Debes agregar las URLs de callback para ambos ambientes:
+Debes agregar las URLs de callback para ambos ambientes en [LinkedIn Developers](https://www.linkedin.com/developers/apps):
 
 1. **URL de Production:**
    ```
@@ -152,46 +157,239 @@ Debes agregar las URLs de callback para ambos ambientes:
    ```
    https://referal-program-[hash]-producto-alexs-projects.vercel.app/api/auth/linkedin/callback
    ```
-   (Cada preview tiene una URL única)
+   (Cada preview tiene una URL única con un hash diferente)
+
+### Pasos para Configurar:
+
+1. Ve a [LinkedIn Developers](https://www.linkedin.com/developers/apps)
+2. Selecciona tu aplicación
+3. Ve a **Auth** → **Redirect URLs**
+4. Agrega las siguientes URLs (puedes agregar múltiples):
+   - `https://referal-programa.vercel.app/api/auth/linkedin/callback` (Production)
+   - `https://referal-program-*-producto-alexs-projects.vercel.app/api/auth/linkedin/callback` (Preview - usa wildcard si LinkedIn lo permite)
+   - O agrega URLs específicas de previews que uses frecuentemente
 
 ### Solución Recomendada:
 
-- Agrega la URL de **production** (la principal)
-- Agrega algunas URLs de **preview** que uses frecuentemente
-- O mejor aún: configura un dominio personalizado para preview (ej: `preview.referal-programa.vercel.app`)
+- ✅ Agrega la URL de **production** (la principal) - **OBLIGATORIO**
+- ✅ Agrega algunas URLs de **preview** que uses frecuentemente
+- 💡 **Alternativa**: Si LinkedIn no permite wildcards, agrega las URLs de preview manualmente cuando las necesites
+- ⚠️ **Nota**: LinkedIn requiere que las URLs sean exactas, así que cada preview deployment necesitará su propia URL agregada
 
-LinkedIn permite múltiples redirect URLs, así que puedes agregar todas las que necesites.
+**Tip**: Si tienes muchos previews, considera usar un dominio personalizado para preview (ej: `preview.referal-programa.vercel.app`) que puedas configurar una sola vez en LinkedIn.
 
-## Crear Base de Datos Separada para Preview (Opcional pero Recomendado)
+## Crear Base de Datos Separada para Preview (Recomendado para Testing)
 
-Si quieres aislar completamente los datos de testing de los datos de producción:
+Si quieres aislar completamente los datos de testing de los datos de producción, sigue estos pasos:
 
-### Pasos para Crear Base de Datos de Preview:
+### Paso 1: Crear Nuevo Proyecto en Supabase
 
-1. **Crear Nuevo Proyecto en Supabase**
-   - Ve a [Supabase Dashboard](https://app.supabase.com)
-   - Click en "New Project"
-   - Nombre: `referal-program-preview` (o similar)
-   - Región: Misma que tu proyecto de producción
-   - Password: Genera una contraseña segura
-   - Espera a que se cree el proyecto (2-3 minutos)
+1. Ve a [Supabase Dashboard](https://app.supabase.com)
+2. Click en **"New Project"** (o el botón "+" en la esquina superior)
+3. Completa el formulario:
+   - **Name**: `referal-program-preview` (o el nombre que prefieras)
+   - **Database Password**: Genera una contraseña segura (guárdala en un lugar seguro)
+   - **Region**: Selecciona la misma región que tu proyecto de producción (para mejor latencia)
+   - **Pricing Plan**: Free tier es suficiente para testing
+4. Click en **"Create new project"**
+5. Espera 2-3 minutos mientras se crea el proyecto
 
-2. **Configurar Variables de Entorno en Vercel**
-   - Ve a **Settings → Environment Variables**
-   - Para cada variable de Supabase:
-     - **Production**: Mantén las credenciales de tu proyecto de producción
-     - **Preview**: Agrega las credenciales del nuevo proyecto de preview
-     - **Development**: Puedes usar las de preview o las de producción
+### Paso 2: Obtener Credenciales del Proyecto Preview
 
-3. **Copiar Schema de Producción a Preview**
-   - En Supabase Dashboard, ve a tu proyecto de **producción**
-   - Ve a **SQL Editor**
-   - Exporta o copia todas las tablas y funciones necesarias
-   - En el proyecto de **preview**, ejecuta el mismo SQL para crear las tablas
+Una vez creado el proyecto:
 
-4. **Configurar RLS (Row Level Security)**
-   - Asegúrate de que las políticas RLS estén configuradas igual en ambos proyectos
-   - O usa `SUPABASE_SERVICE_ROLE_KEY` que bypass RLS (como en producción)
+1. En el Dashboard del proyecto preview, ve a **Settings → API**
+2. Copia estos valores:
+   - **Project URL**: `https://xxxxx.supabase.co`
+   - **service_role key** (⚠️ SECRETO - no compartir): `eyJhbGci...`
+3. Guárdalos temporalmente (los necesitarás en el siguiente paso)
+
+### Paso 3: Exportar Schema de Producción
+
+**Opción A: Usar Supabase CLI (Recomendado)**
+
+Si tienes Supabase CLI instalado:
+
+```bash
+# Instalar Supabase CLI si no lo tienes
+npm install -g supabase
+
+# Login en Supabase
+supabase login
+
+# Link tu proyecto de producción
+supabase link --project-ref tu-project-ref-de-produccion
+
+# Exportar schema
+supabase db dump -f schema-production.sql
+
+# Cambiar al proyecto de preview
+supabase link --project-ref tu-project-ref-de-preview
+
+# Aplicar schema
+supabase db reset --db-url "postgresql://postgres:[PASSWORD]@db.xxxxx.supabase.co:5432/postgres"
+```
+
+**Opción B: Exportar desde SQL Editor (Más Simple)**
+
+1. En tu proyecto de **producción**, ve a **SQL Editor**
+2. Ejecuta esta query para obtener todas las tablas:
+
+```sql
+-- Obtener lista de todas las tablas
+SELECT 
+    table_name,
+    'CREATE TABLE ' || table_name || ' (' || 
+    string_agg(
+        column_name || ' ' || data_type || 
+        CASE 
+            WHEN character_maximum_length IS NOT NULL 
+            THEN '(' || character_maximum_length || ')'
+            ELSE ''
+        END ||
+        CASE WHEN is_nullable = 'NO' THEN ' NOT NULL' ELSE '' END ||
+        CASE WHEN column_default IS NOT NULL THEN ' DEFAULT ' || column_default ELSE '' END,
+        ', '
+    ) || ');'
+FROM information_schema.columns
+WHERE table_schema = 'public'
+GROUP BY table_name
+ORDER BY table_name;
+```
+
+3. O mejor aún, usa la función de exportar schema:
+   - Ve a **Database → Schema Visualizer** o
+   - Ve a **SQL Editor → New Query** y ejecuta:
+
+```sql
+-- Exportar estructura de tablas principales
+-- (Ajusta según tus tablas específicas)
+```
+
+**Tablas Principales que Necesitas Copiar:**
+
+Basado en el código actual, estas son las tablas principales:
+
+- `users` - Usuarios del sistema
+- `candidates` - Candidatos
+- `hyperconnectors` - Hyperconnectors
+- `jobs` - Vacantes/Posiciones
+- `recommendations` - Recomendaciones
+- `job_candidate_matches` - Matches entre jobs y candidatos
+- `candidate_experience` - Experiencia laboral de candidatos
+- `hyperconnector_candidates` - Relación hyperconnector-candidato
+- `recommendation_links` - Links de recomendación (opcional)
+
+### Paso 4: Crear Schema en Preview
+
+1. En tu proyecto de **preview**, ve a **SQL Editor**
+2. Crea un nuevo query
+3. Pega el SQL exportado de producción (o crea las tablas manualmente)
+4. Ejecuta el query
+
+**Ejemplo de Schema Mínimo (Ajusta según tus necesidades):**
+
+```sql
+-- Ejemplo: Tabla users
+CREATE TABLE IF NOT EXISTS users (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  email TEXT UNIQUE NOT NULL,
+  full_name TEXT,
+  linkedin_id TEXT,
+  linkedin_url TEXT,
+  role TEXT NOT NULL,
+  current_job_title TEXT,
+  current_company TEXT,
+  profile_picture_url TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Ejemplo: Tabla candidates
+CREATE TABLE IF NOT EXISTS candidates (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES users(id),
+  full_name TEXT NOT NULL,
+  email TEXT UNIQUE,
+  current_job_title TEXT,
+  current_company TEXT,
+  country TEXT,
+  industry TEXT,
+  linkedin_url TEXT,
+  profile_picture_url TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Continúa con las demás tablas...
+```
+
+**💡 Tip**: Si tienes muchas tablas, considera usar un script SQL completo o la opción de Supabase CLI.
+
+### Paso 5: Configurar Variables de Entorno en Vercel
+
+1. Ve a tu proyecto en Vercel Dashboard
+2. Ve a **Settings → Environment Variables**
+3. Para cada variable de Supabase, configura así:
+
+   **Para `SUPABASE_URL`:**
+   - Click en la variable existente o crea una nueva
+   - **Production**: Mantén `https://tu-proyecto-produccion.supabase.co`
+   - **Preview**: Agrega `https://tu-proyecto-preview.supabase.co`
+   - **Development**: Puedes usar la de preview o producción
+   - Click en **"Save"**
+
+   **Para `SUPABASE_SERVICE_ROLE_KEY`:**
+   - Click en la variable existente o crea una nueva
+   - **Production**: Mantén tu key de producción
+   - **Preview**: Agrega la key de preview (la que copiaste en el Paso 2)
+   - **Development**: Puedes usar la de preview o producción
+   - Click en **"Save"**
+
+4. Verifica que ambas variables tengan los checkboxes correctos marcados:
+   - ✅ Production
+   - ✅ Preview
+   - ✅ Development (opcional)
+
+### Paso 6: Configurar RLS (Row Level Security)
+
+**Opción A: Usar Service Role Key (Más Simple - Recomendado para Testing)**
+
+Si usas `SUPABASE_SERVICE_ROLE_KEY` en tu código (como actualmente), no necesitas configurar RLS porque el service role key bypass todas las políticas RLS. Esto es perfecto para testing.
+
+**Opción B: Copiar Políticas RLS (Si las tienes)**
+
+Si tienes políticas RLS en producción y quieres replicarlas:
+
+1. En producción, ejecuta:
+
+```sql
+-- Obtener todas las políticas RLS
+SELECT 
+    schemaname,
+    tablename,
+    policyname,
+    permissive,
+    roles,
+    cmd,
+    qual,
+    with_check
+FROM pg_policies
+WHERE schemaname = 'public';
+```
+
+2. Copia las políticas y ejecútalas en preview
+
+### Paso 7: Verificar la Configuración
+
+1. Haz un push a un branch que no sea `main` (ej: `git checkout -b test-preview && git push`)
+2. Ve a **Deployments** en Vercel
+3. Verifica que se creó un preview deployment
+4. Abre el preview y prueba hacer login
+5. Verifica en Supabase Dashboard del proyecto **preview** que se crearon registros nuevos
+6. Verifica en Supabase Dashboard del proyecto **producción** que NO se crearon registros nuevos
+
+✅ Si todo funciona, ¡tu preview está usando su propia base de datos!
 
 ### Ventajas de Base de Datos Separada:
 
@@ -232,12 +430,41 @@ Si quieres aislar completamente los datos de testing de los datos de producción
 2. **Testing** → Prueba en preview antes de mergear (⚠️ datos se guardan en la misma DB)
 3. **Producción** → Promueve manualmente o mergea a `main` con PR
 
-### Próximos Pasos (Opcional):
+### Próximos Pasos:
 
-- [ ] Crear proyecto Supabase separado para Preview
-- [ ] Configurar variables de entorno diferentes para Preview
+**Si NO tienes base de datos separada (Configuración Actual):**
+- [x] ✅ Preview deployments habilitados
+- [x] ✅ Variables de entorno configuradas (mismas credenciales de Supabase)
+- [x] ✅ LinkedIn OAuth URLs agregadas
+- [ ] ⚠️ **Considerar**: Crear base de datos separada para testing más seguro
+
+**Si SÍ quieres crear base de datos separada:**
+- [ ] Crear proyecto Supabase separado para Preview (ver sección "Crear Base de Datos Separada")
+- [ ] Configurar variables de entorno diferentes para Preview en Vercel
 - [ ] Copiar schema de producción a preview
-- [ ] Probar que Preview use su propia base de datos
+- [ ] Verificar que Preview use su propia base de datos (hacer login y verificar en Supabase)
+
+### Checklist de Verificación Final:
+
+1. **Preview Deployments:**
+   - [ ] Hacer push a un branch que no sea `main`
+   - [ ] Verificar que se crea un preview deployment en Vercel
+   - [ ] Verificar que el preview funciona correctamente
+
+2. **Variables de Entorno:**
+   - [ ] `SUPABASE_URL` configurada para Production y Preview
+   - [ ] `SUPABASE_SERVICE_ROLE_KEY` configurada para Production y Preview
+   - [ ] `LINKEDIN_CLIENT_ID` y `LINKEDIN_CLIENT_SECRET` configuradas
+   - [ ] `ADMIN_EMAILS` configurada (puede ser diferente por ambiente)
+
+3. **LinkedIn OAuth:**
+   - [ ] URL de production agregada en LinkedIn Developers
+   - [ ] URLs de preview agregadas (o plan para agregarlas cuando las necesites)
+
+4. **Base de Datos (si creaste una separada):**
+   - [ ] Schema copiado a preview
+   - [ ] Variables de entorno apuntando a preview en Vercel
+   - [ ] Verificado que preview usa su propia base de datos
 
 Esto te da flexibilidad para probar sin riesgo y control sobre cuándo va a producción.
 
