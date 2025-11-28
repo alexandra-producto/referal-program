@@ -342,12 +342,20 @@ export async function GET(request: NextRequest) {
       });
 
       // Guardar sesión en cookie
+      // En Vercel (preview y production), usar secure: true y sameSite: "lax"
+      const isVercel = !!process.env.VERCEL;
+      const isProduction = process.env.NODE_ENV === "production";
       cookieStore.set("session", sessionToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
+        secure: isVercel || isProduction, // true en Vercel (preview y production)
+        sameSite: "lax", // "lax" permite que las cookies se envíen en requests del mismo sitio
         maxAge: 7 * 24 * 60 * 60, // 7 días
         path: "/",
+      });
+      console.log("🍪 Cookie de sesión configurada:", {
+        secure: isVercel || isProduction,
+        sameSite: "lax",
+        domain: "no especificado (usará dominio del request)",
       });
 
       // Si falta información del perfil, redirigir a completar perfil
@@ -402,12 +410,20 @@ export async function GET(request: NextRequest) {
       });
 
       // Guardar sesión en cookie
+      // En Vercel (preview y production), usar secure: true y sameSite: "lax"
+      const isVercel = !!process.env.VERCEL;
+      const isProduction = process.env.NODE_ENV === "production";
       cookieStore.set("session", sessionToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
+        secure: isVercel || isProduction, // true en Vercel (preview y production)
+        sameSite: "lax", // "lax" permite que las cookies se envíen en requests del mismo sitio
         maxAge: 7 * 24 * 60 * 60, // 7 días
         path: "/",
+      });
+      console.log("🍪 Cookie de sesión configurada:", {
+        secure: isVercel || isProduction,
+        sameSite: "lax",
+        domain: "no especificado (usará dominio del request)",
       });
 
       // Si falta información del perfil, redirigir a completar perfil
@@ -476,12 +492,20 @@ export async function GET(request: NextRequest) {
       });
 
       // Guardar sesión en cookie
+      // En Vercel (preview y production), usar secure: true y sameSite: "lax"
+      const isVercel = !!process.env.VERCEL;
+      const isProduction = process.env.NODE_ENV === "production";
       cookieStore.set("session", sessionToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
+        secure: isVercel || isProduction, // true en Vercel (preview y production)
+        sameSite: "lax", // "lax" permite que las cookies se envíen en requests del mismo sitio
         maxAge: 7 * 24 * 60 * 60, // 7 días
         path: "/",
+      });
+      console.log("🍪 Cookie de sesión configurada:", {
+        secure: isVercel || isProduction,
+        sameSite: "lax",
+        domain: "no especificado (usará dominio del request)",
       });
 
       // Si falta información del perfil, redirigir a completar perfil
