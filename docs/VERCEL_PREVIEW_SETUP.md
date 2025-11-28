@@ -145,38 +145,73 @@ O simplemente mergea a tu branch de producción si configuraste la Opción 3.
 
 ### URLs para Agregar en LinkedIn Developers:
 
+**⚠️ IMPORTANTE**: LinkedIn requiere que TODAS las URLs de callback estén registradas exactamente. Si falta alguna, verás el error: "The redirect_uri does not match the registered value".
+
 Debes agregar las URLs de callback para ambos ambientes en [LinkedIn Developers](https://www.linkedin.com/developers/apps):
 
-1. **URL de Production:**
+1. **URL de Production (OBLIGATORIA):**
    ```
    https://referal-programa.vercel.app/api/auth/linkedin/callback
    ```
    (O tu dominio personalizado si lo tienes configurado)
 
-2. **URLs de Preview:**
+2. **URL de Preview (NECESARIA para testing):**
+   ```
+   https://preview-referal-program.vercel.app/api/auth/linkedin/callback
+   ```
+   (Esta es la URL del dominio personalizado de preview)
+
+3. **URLs de Preview con Hash (OPCIONAL, si usas previews automáticos):**
    ```
    https://referal-program-[hash]-producto-alexs-projects.vercel.app/api/auth/linkedin/callback
    ```
-   (Cada preview tiene una URL única con un hash diferente)
+   (Cada preview automático tiene una URL única con un hash diferente)
 
-### Pasos para Configurar:
+4. **URL de Localhost (OPCIONAL, para desarrollo local):**
+   ```
+   http://localhost:3000/api/auth/linkedin/callback
+   ```
+
+### Pasos para Configurar en LinkedIn Developers:
 
 1. Ve a [LinkedIn Developers](https://www.linkedin.com/developers/apps)
 2. Selecciona tu aplicación
 3. Ve a **Auth** → **Redirect URLs**
-4. Agrega las siguientes URLs (puedes agregar múltiples):
-   - `https://referal-programa.vercel.app/api/auth/linkedin/callback` (Production)
-   - `https://referal-program-*-producto-alexs-projects.vercel.app/api/auth/linkedin/callback` (Preview - usa wildcard si LinkedIn lo permite)
-   - O agrega URLs específicas de previews que uses frecuentemente
+4. Click en **"Add redirect URL"** o el botón **"+"**
+5. Agrega las siguientes URLs **UNA POR UNA** (LinkedIn permite múltiples):
+
+   **URL 1 - Production:**
+   ```
+   https://referal-programa.vercel.app/api/auth/linkedin/callback
+   ```
+
+   **URL 2 - Preview (dominio personalizado):**
+   ```
+   https://preview-referal-program.vercel.app/api/auth/linkedin/callback
+   ```
+
+   **URL 3 - Localhost (opcional):**
+   ```
+   http://localhost:3000/api/auth/linkedin/callback
+   ```
+
+6. Click en **"Update"** o **"Save"** después de agregar cada URL
+
+### ⚠️ Notas Importantes:
+
+- **LinkedIn NO permite wildcards**: No puedes usar `https://referal-program-*-producto-alexs-projects.vercel.app/api/auth/linkedin/callback`
+- **Las URLs deben ser EXACTAS**: Incluye el protocolo (`https://` o `http://`), el dominio completo, y la ruta completa
+- **Cada URL debe agregarse individualmente**: No puedes agregar múltiples URLs en un solo campo
+- **Mínimo necesario**: Al menos Production y Preview (dominio personalizado)
 
 ### Solución Recomendada:
 
-- ✅ Agrega la URL de **production** (la principal) - **OBLIGATORIO**
-- ✅ Agrega algunas URLs de **preview** que uses frecuentemente
-- 💡 **Alternativa**: Si LinkedIn no permite wildcards, agrega las URLs de preview manualmente cuando las necesites
-- ⚠️ **Nota**: LinkedIn requiere que las URLs sean exactas, así que cada preview deployment necesitará su propia URL agregada
+- ✅ **OBLIGATORIO**: Agrega la URL de **production**
+- ✅ **NECESARIO**: Agrega la URL de **preview** (dominio personalizado)
+- ✅ **OPCIONAL**: Agrega localhost si desarrollas localmente
+- ⚠️ **NO RECOMENDADO**: Agregar URLs de previews automáticos (cada uno tiene un hash diferente y sería muy tedioso)
 
-**Tip**: Si tienes muchos previews, considera usar un dominio personalizado para preview (ej: `preview.referal-programa.vercel.app`) que puedas configurar una sola vez en LinkedIn.
+**Tip**: Si usas un dominio personalizado para preview (`preview-referal-program.vercel.app`), solo necesitas agregar esa URL una vez y funcionará para todos los deployments de preview.
 
 ## Crear Base de Datos Separada para Preview (Recomendado para Testing)
 
