@@ -486,10 +486,14 @@ export async function GET(request: NextRequest) {
 
       // Si falta información del perfil, redirigir a completar perfil
       if (needsProfileCompletion) {
-        return NextResponse.redirect(buildRedirectUrl("/auth/complete-profile", request.url));
+        const redirectUrl = buildRedirectUrl("/auth/complete-profile", request.url);
+        console.log(`🔗 [HYPERCONNECTOR] Redirigiendo a completar perfil: ${redirectUrl.toString()}`);
+        return NextResponse.redirect(redirectUrl);
       }
       
-      return NextResponse.redirect(buildRedirectUrl("/hyperconnector/jobs-home", request.url));
+      const redirectUrl = buildRedirectUrl("/hyperconnector/jobs-home", request.url);
+      console.log(`🔗 [HYPERCONNECTOR] Redirigiendo a /hyperconnector/jobs-home: ${redirectUrl.toString()}`);
+      return NextResponse.redirect(redirectUrl);
     }
 
     // Rol no reconocido
