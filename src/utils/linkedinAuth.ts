@@ -21,17 +21,24 @@ function getLinkedInClientSecret(): string {
   return value;
 }
 
-function getLinkedInRedirectUri(): string {
+function getLinkedInRedirectUri(baseUrl?: string): string {
   // Si está configurado explícitamente, usarlo
   if (process.env.LINKEDIN_REDIRECT_URI) {
     return process.env.LINKEDIN_REDIRECT_URI;
   }
   
-  // Si estamos en Vercel, construir la URL automáticamente
+  // PRIORIDAD 1: Usar la baseUrl proporcionada (del request actual)
+  if (baseUrl) {
+    const redirectUri = `${baseUrl}/api/auth/linkedin/callback`;
+    console.log(`🔗 LinkedIn Redirect URI (desde request): ${redirectUri}`);
+    return redirectUri;
+  }
+  
+  // PRIORIDAD 2: Si estamos en Vercel, construir la URL automáticamente
   const appUrl = getAppUrl();
   const redirectUri = `${appUrl}/api/auth/linkedin/callback`;
   
-  console.log(`🔗 LinkedIn Redirect URI: ${redirectUri}`);
+  console.log(`🔗 LinkedIn Redirect URI (desde getAppUrl): ${redirectUri}`);
   return redirectUri;
 }
 
@@ -71,10 +78,13 @@ export interface LinkedInPosition {
 
 /**
  * Genera la URL de autorización de LinkedIn
+ * @param state - JWT state token para CSRF protection
+ * @param role - Rol del usuario (admin, hyperconnector, solicitante)
+ * @param baseUrl - URL base opcional (del request actual) para mantener el dominio correcto en preview/production
  */
-export function getLinkedInAuthUrl(state: string, role: string): string {
+export function getLinkedInAuthUrl(state: string, role: string, baseUrl?: string): string {
   const clientId = getLinkedInClientId();
-  const redirectUri = getLinkedInRedirectUri();
+  const redirectUri = getLinkedInRedirectUri(baseUrl);
 
   const params = new URLSearchParams({
     response_type: "code",
@@ -90,11 +100,13 @@ export function getLinkedInAuthUrl(state: string, role: string): string {
 
 /**
  * Intercambia el código de autorización por un access token
+ * @param code - Código de autorización de LinkedIn
+ * @param baseUrl - URL base opcional (del request actual) para mantener el dominio correcto en preview/production
  */
-export async function exchangeCodeForToken(code: string): Promise<string> {
+export async function exchangeCodeForToken(code: string, baseUrl?: string): Promise<string> {
   const clientId = getLinkedInClientId();
   const clientSecret = getLinkedInClientSecret();
-  const redirectUri = getLinkedInRedirectUri();
+  const redirectUri = getLinkedInRedirectUri(baseUrl);
 
   const response = await fetch("https://www.linkedin.com/oauth/v2/accessToken", {
     method: "POST",

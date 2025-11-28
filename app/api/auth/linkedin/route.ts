@@ -45,7 +45,12 @@ export async function GET(request: NextRequest) {
     });
 
     // Redirigir a LinkedIn
-    const authUrl = getLinkedInAuthUrl(state, role);
+    // Usar la URL del request actual para mantener el dominio correcto (preview/production)
+    const baseUrl = new URL(request.url).origin;
+    const authUrl = getLinkedInAuthUrl(state, role, baseUrl);
+
+    console.log(`🔗 Iniciando OAuth desde: ${baseUrl}`);
+    console.log(`🔗 LinkedIn Auth URL: ${authUrl}`);
 
     return NextResponse.redirect(authUrl);
   } catch (error: any) {
