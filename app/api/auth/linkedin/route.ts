@@ -47,6 +47,10 @@ export async function GET(request: NextRequest) {
     // Redirigir a LinkedIn
     // Usar la URL del request actual para mantener el dominio correcto (preview/production)
     const baseUrl = new URL(request.url).origin;
+    console.log(`🔍 [LINKEDIN AUTH] Request URL: ${request.url}`);
+    console.log(`🔍 [LINKEDIN AUTH] Base URL extraída: ${baseUrl}`);
+    console.log(`🔍 [LINKEDIN AUTH] VERCEL_URL env: ${process.env.VERCEL_URL || 'NO DEFINIDO'}`);
+    
     const authUrl = getLinkedInAuthUrl(state, role, baseUrl);
 
     console.log(`🔗 Iniciando OAuth desde: ${baseUrl}`);

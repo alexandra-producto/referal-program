@@ -22,23 +22,26 @@ function getLinkedInClientSecret(): string {
 }
 
 function getLinkedInRedirectUri(baseUrl?: string): string {
-  // Si está configurado explícitamente, usarlo
-  if (process.env.LINKEDIN_REDIRECT_URI) {
-    return process.env.LINKEDIN_REDIRECT_URI;
-  }
-  
-  // PRIORIDAD 1: Usar la baseUrl proporcionada (del request actual)
+  // PRIORIDAD 1: Usar la baseUrl proporcionada (del request actual) - SIEMPRE priorizar esto
   if (baseUrl) {
     const redirectUri = `${baseUrl}/api/auth/linkedin/callback`;
-    console.log(`🔗 LinkedIn Redirect URI (desde request): ${redirectUri}`);
+    console.log(`🔗 [getLinkedInRedirectUri] baseUrl proporcionada: ${baseUrl}`);
+    console.log(`🔗 [getLinkedInRedirectUri] Redirect URI construida: ${redirectUri}`);
     return redirectUri;
   }
   
-  // PRIORIDAD 2: Si estamos en Vercel, construir la URL automáticamente
+  // PRIORIDAD 2: Si está configurado explícitamente, usarlo (solo si no hay baseUrl)
+  if (process.env.LINKEDIN_REDIRECT_URI) {
+    console.log(`⚠️ [getLinkedInRedirectUri] Usando LINKEDIN_REDIRECT_URI de env: ${process.env.LINKEDIN_REDIRECT_URI}`);
+    return process.env.LINKEDIN_REDIRECT_URI;
+  }
+  
+  // PRIORIDAD 3: Si estamos en Vercel, construir la URL automáticamente
   const appUrl = getAppUrl();
   const redirectUri = `${appUrl}/api/auth/linkedin/callback`;
   
-  console.log(`🔗 LinkedIn Redirect URI (desde getAppUrl): ${redirectUri}`);
+  console.log(`⚠️ [getLinkedInRedirectUri] No hay baseUrl ni LINKEDIN_REDIRECT_URI, usando getAppUrl: ${appUrl}`);
+  console.log(`🔗 [getLinkedInRedirectUri] Redirect URI construida: ${redirectUri}`);
   return redirectUri;
 }
 
