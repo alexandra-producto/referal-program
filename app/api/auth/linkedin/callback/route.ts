@@ -29,16 +29,23 @@ const secret = new TextEncoder().encode(SECRET_KEY);
 
 /**
  * Helper para construir URLs de redirección de forma segura
+ * PRIORIZA siempre la URL del request actual para mantener el mismo dominio (preview/production)
  */
-function buildRedirectUrl(path: string, fallbackUrl?: string): URL {
+function buildRedirectUrl(path: string, requestUrl?: string): URL {
   try {
-    // Intentar usar la URL de la request si está disponible
-    if (fallbackUrl) {
-      const baseUrl = new URL(fallbackUrl).origin;
+    // PRIORIDAD 1: Usar la URL del request actual (siempre tiene el dominio correcto)
+    if (requestUrl) {
+      const baseUrl = new URL(requestUrl).origin;
+      console.log(`🔗 Construyendo redirect URL desde request: ${baseUrl}${path}`);
       return new URL(path, baseUrl);
     }
-    // Usar getAppUrl como fallback
+    
+    // PRIORIDAD 2: Intentar obtener del request actual si está disponible en el contexto
+    // (Esto es un fallback, pero debería llegar siempre requestUrl)
+    
+    // PRIORIDAD 3: Usar getAppUrl como último recurso
     const appUrl = getAppUrl();
+    console.log(`🔗 Construyendo redirect URL desde getAppUrl: ${appUrl}${path}`);
     return new URL(path, appUrl);
   } catch (error) {
     // Si todo falla, usar localhost
