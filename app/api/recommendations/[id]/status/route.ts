@@ -25,13 +25,34 @@ export async function PATCH(
     const { id } = await params;
     console.log("🔄 PATCH /api/recommendations/[id]/status - ID:", id);
 
+    // Verificar cookies disponibles
+    const cookieStore = await cookies();
+    const sessionCookie = cookieStore.get("session");
+    console.log("🔍 Cookie 'session' presente:", !!sessionCookie);
+    console.log("🔍 Cookie 'session' value length:", sessionCookie?.value?.length || 0);
+
     // Verificar sesión y rol
     const session = await getSession();
-    console.log("🔍 Sesión:", session ? { role: session.role, userId: session.userId } : "null");
+    console.log("🔍 Sesión obtenida:", session ? { 
+      role: session.role, 
+      userId: session.userId,
+      email: session.email 
+    } : "null");
     
-    if (!session || (session.role !== "admin" && session.role !== "solicitante")) {
-      console.error("❌ No autorizado - Sesión:", session);
-      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    if (!session) {
+      console.error("❌ No hay sesión - Cookie presente:", !!sessionCookie);
+      return NextResponse.json({ 
+        error: "No autorizado - Sesión no encontrada",
+        details: "No se pudo obtener la sesión del usuario"
+      }, { status: 401 });
+    }
+    
+    if (session.role !== "admin" && session.role !== "solicitante") {
+      console.error("❌ Rol no autorizado - Rol:", session.role, "Permitidos: admin, solicitante");
+      return NextResponse.json({ 
+        error: "No autorizado - Rol no permitido",
+        details: `Rol '${session.role}' no tiene permisos. Se requiere 'admin' o 'solicitante'`
+      }, { status: 403 });
     }
 
     const body = await request.json();
