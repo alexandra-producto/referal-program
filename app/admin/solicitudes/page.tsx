@@ -43,29 +43,52 @@ export default function AdminSolicitudesPage() {
   useEffect(() => {
     // Verificar autenticación
     async function checkAuth() {
-      const currentSession = await authStore.getSession();
-      if (!currentSession || currentSession.role !== "admin") {
-        router.push("/login");
-        return;
+      try {
+        console.log("🔍 [Admin Solicitudes] Verificando autenticación...");
+        const currentSession = await authStore.getSession();
+        console.log("🔍 [Admin Solicitudes] Sesión obtenida:", currentSession ? { role: currentSession.role, userId: currentSession.userId } : "null");
+        
+        if (!currentSession || currentSession.role !== "admin") {
+          console.warn("⚠️ [Admin Solicitudes] No autorizado, redirigiendo a login");
+          router.push("/login");
+          return;
+        }
+        
+        console.log("✅ [Admin Solicitudes] Autenticación exitosa");
+        setSession(currentSession);
+        await fetchJobs();
+      } catch (error) {
+        console.error("❌ [Admin Solicitudes] Error en checkAuth:", error);
+        setLoading(false);
       }
-      setSession(currentSession);
-
-      fetchJobs();
     }
     checkAuth();
   }, [router]);
 
   const fetchJobs = async () => {
     try {
-      const response = await fetch("/api/jobs/all");
+      console.log("📡 [Admin Solicitudes] Iniciando fetch de jobs...");
+      const response = await fetch("/api/jobs/all", {
+        credentials: "include", // Asegurar que las cookies se envíen
+      });
+      
+      console.log("📡 [Admin Solicitudes] Respuesta recibida:", response.status, response.ok);
+      
       if (!response.ok) {
-        throw new Error("Error al cargar las solicitudes");
+        const errorData = await response.json().catch(() => ({}));
+        console.error("❌ [Admin Solicitudes] Error en respuesta:", response.status, errorData);
+        throw new Error(errorData.error || `Error al cargar las solicitudes (${response.status})`);
       }
+      
       const data = await response.json();
+      console.log("✅ [Admin Solicitudes] Jobs obtenidos:", data.jobs?.length || 0);
       setJobs(data.jobs || []);
     } catch (error) {
-      console.error("Error fetching jobs:", error);
+      console.error("❌ [Admin Solicitudes] Error fetching jobs:", error);
+      // Mostrar error al usuario pero no bloquear la UI
+      setJobs([]);
     } finally {
+      console.log("✅ [Admin Solicitudes] Finalizando loading");
       setLoading(false);
     }
   };
