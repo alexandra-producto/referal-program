@@ -45,11 +45,42 @@ export async function GET(request: NextRequest) {
     });
 
     // Redirigir a LinkedIn
-    // Usar el origin de la request para mantener el dominio personalizado
-    const baseUrl = request.url ? new URL(request.url).origin : undefined;
+    // CRÍTICO: LinkedIn usará el redirect_uri que le pasemos para redirigir de vuelta
+    // Necesitamos usar el dominio personalizado (referrals.product-latam.com) en lugar de Vercel
+    // Extraer el origin de la request para mantener el dominio personalizado
+    let baseUrl: string | undefined;
+    try {
+      if (request.url) {
+        const requestUrl = new URL(request.url);
+        // Si no es localhost, usar el dominio de la request (puede ser dominio personalizado)
+        if (!requestUrl.hostname.includes("localhost") && !requestUrl.hostname.includes("127.0.0.1")) {
+          baseUrl = requestUrl.origin;
+          console.log("🔗 Usando dominio de la request:", baseUrl);
+        }
+      }
+    } catch (error) {
+      console.warn("⚠️ Error parseando request.url:", error);
+    }
+    
+    // Si no tenemos baseUrl de la request, intentar usar APP_URL o VERCEL_URL
+    if (!baseUrl) {
+      // Priorizar APP_URL si está configurado (debería ser el dominio personalizado)
+      if (process.env.APP_URL) {
+        baseUrl = process.env.APP_URL;
+        console.log("🔗 Usando APP_URL:", baseUrl);
+      } else if (process.env.VERCEL_URL) {
+        // Fallback a VERCEL_URL solo si no hay APP_URL
+        baseUrl = `https://${process.env.VERCEL_URL}`;
+        console.log("🔗 Usando VERCEL_URL:", baseUrl);
+      }
+    }
+    
     const authUrl = getLinkedInAuthUrl(state, role, baseUrl);
 
     console.log("🔗 Iniciando OAuth desde:", baseUrl || "default");
+    console.log("🔗 Request URL completa:", request.url);
+    console.log("🔗 Request origin:", request.url ? new URL(request.url).origin : "N/A");
+    console.log("🔗 Base URL usado para redirect_uri:", baseUrl || "N/A");
     console.log("🔗 LinkedIn Auth URL:", authUrl);
 
     return NextResponse.redirect(authUrl);

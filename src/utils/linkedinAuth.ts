@@ -22,17 +22,51 @@ function getLinkedInClientSecret(): string {
 }
 
 function getLinkedInRedirectUri(baseUrl?: string): string {
-  // Si está configurado explícitamente, usarlo
+  // PRIORIDAD 1: Si tenemos un baseUrl de la request (dominio personalizado), usarlo
+  // Esto asegura que usemos el dominio personalizado incluso si LINKEDIN_REDIRECT_URI está configurado
+  if (baseUrl) {
+    try {
+      // Si baseUrl ya es una URL completa, extraer el origin
+      let origin = baseUrl;
+      if (baseUrl.includes("://")) {
+        const url = new URL(baseUrl);
+        origin = url.origin;
+      } else {
+        // Si no tiene protocolo, agregarlo
+        origin = baseUrl.startsWith("http") ? baseUrl : `https://${baseUrl}`;
+      }
+      
+      // Si no es localhost ni vercel.app, usar el dominio de la request (dominio personalizado)
+      if (!origin.includes("localhost") && !origin.includes("127.0.0.1") && !origin.includes("vercel.app")) {
+        const redirectUri = `${origin}/api/auth/linkedin/callback`;
+        console.log(`🔗 LinkedIn Redirect URI (desde baseUrl - dominio personalizado): ${redirectUri}`);
+        return redirectUri;
+      }
+    } catch (error) {
+      console.warn("⚠️ Error parseando baseUrl en getLinkedInRedirectUri:", error);
+    }
+  }
+  
+  // PRIORIDAD 2: Si está configurado explícitamente APP_URL (dominio personalizado), usarlo
+  // APP_URL debería ser el dominio personalizado (referrals.product-latam.com)
+  if (process.env.APP_URL) {
+    const redirectUri = `${process.env.APP_URL}/api/auth/linkedin/callback`;
+    console.log(`🔗 LinkedIn Redirect URI (desde APP_URL - dominio personalizado): ${redirectUri}`);
+    return redirectUri;
+  }
+  
+  // PRIORIDAD 3: Si está configurado LINKEDIN_REDIRECT_URI, usarlo
+  // NOTA: Esta variable puede estar configurada con el dominio personalizado
   if (process.env.LINKEDIN_REDIRECT_URI) {
+    console.log(`🔗 LinkedIn Redirect URI (desde LINKEDIN_REDIRECT_URI): ${process.env.LINKEDIN_REDIRECT_URI}`);
     return process.env.LINKEDIN_REDIRECT_URI;
   }
   
-  // Si tenemos un baseUrl (de la request), usarlo para construir la URI
-  // Esto asegura que usemos el dominio personalizado si está disponible
-  const appUrl = baseUrl ? getAppUrl(baseUrl) : getAppUrl();
+  // PRIORIDAD 4: Fallback a getAppUrl() (puede usar VERCEL_URL)
+  const appUrl = getAppUrl();
   const redirectUri = `${appUrl}/api/auth/linkedin/callback`;
   
-  console.log(`🔗 LinkedIn Redirect URI: ${redirectUri}`);
+  console.log(`🔗 LinkedIn Redirect URI (fallback - puede ser Vercel): ${redirectUri}`);
   return redirectUri;
 }
 
