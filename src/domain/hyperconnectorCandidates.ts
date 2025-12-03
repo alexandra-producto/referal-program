@@ -89,8 +89,8 @@ async function processCandidates(links: any[], jobId: string) {
 
   // IMPORTANTE: Solo devolver candidatos que están TANTO en hyperconnector_candidates
   // COMO en job_candidate_matches (intersección de ambas tablas)
-  // Y que tengan un match_score >= 70% (mínimo requerido)
-  const MIN_MATCH_SCORE = 70;
+  // Y que tengan un match_score >= 60% (mínimo requerido)
+  const MIN_MATCH_SCORE = 60;
   const filteredCandidates = matches.length > 0
     ? (candidates || []).filter((c) => {
         const score = matchByCandidateId.get(c.id);

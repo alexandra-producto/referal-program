@@ -27,17 +27,44 @@ export function buildHciWhatsappMessage(
   recommendUrl: string,
   owner?: OwnerInfo | null
 ) {
+  // Obtener solo el primer nombre del hyperconnector
+  const hciFirstName = hci.full_name.split(' ')[0];
+  
   // Obtener nombre del owner o usar "Un miembro de la comunidad"
   const ownerName = owner?.full_name || "Un miembro de la comunidad";
   
-  // Obtener non_negotiables desde requirements_json o desde el array directo
+  // Obtener must_have_skills desde requirements_json
   let nonNegotiablesText = "";
-  if (job.requirements_json && typeof job.requirements_json === 'object' && 'non_negotiables_text' in job.requirements_json) {
-    nonNegotiablesText = job.requirements_json.non_negotiables_text || "";
-  } else if (job.non_negotiables && Array.isArray(job.non_negotiables) && job.non_negotiables.length > 0) {
-    nonNegotiablesText = job.non_negotiables.join("\n");
-  } else if (job.non_negotiables && typeof job.non_negotiables === 'string') {
-    nonNegotiablesText = job.non_negotiables;
+  if (job.requirements_json && typeof job.requirements_json === 'object') {
+    // Prioridad 1: must_have_skills (nuevo formato)
+    if ('must_have_skills' in job.requirements_json && Array.isArray(job.requirements_json.must_have_skills)) {
+      const skills = job.requirements_json.must_have_skills;
+      if (skills.length > 0) {
+        // Formatear skills de manera legible
+        nonNegotiablesText = skills
+          .map((skill: string) => {
+            // Convertir snake_case a título legible
+            return skill
+              .split('_')
+              .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
+              .join(' ');
+          })
+          .join(', ');
+      }
+    }
+    // Fallback: non_negotiables_text (formato antiguo)
+    if (!nonNegotiablesText && 'non_negotiables_text' in job.requirements_json) {
+      nonNegotiablesText = job.requirements_json.non_negotiables_text || "";
+    }
+  }
+  
+  // Fallback adicional: non_negotiables directo
+  if (!nonNegotiablesText) {
+    if (job.non_negotiables && Array.isArray(job.non_negotiables) && job.non_negotiables.length > 0) {
+      nonNegotiablesText = job.non_negotiables.join("\n");
+    } else if (job.non_negotiables && typeof job.non_negotiables === 'string') {
+      nonNegotiablesText = job.non_negotiables;
+    }
   }
 
   // Formatear lista de candidatos con "coincidieron en {donde coincidieron laboralmente}"
@@ -60,13 +87,13 @@ export function buildHciWhatsappMessage(
     ? "conoces a algunos miembros de la comunidad" 
     : "conoces a alguien";
 
-  return `Hola ${hci.full_name}
+  return `Hola ${hciFirstName}
 
 ${ownerName} está buscando a esa persona para su rol ${job.role_title}
 
 Nada de checklists ni CVs eternos — aquí se trata de quién es la persona, cómo piensa y qué tan bien navega problemas reales.
 
-Lo único que es no negociable:
+Los únicos skills que no son negociables:
 
 ${nonNegotiablesText || "No especificado"}
 
@@ -74,7 +101,7 @@ Vimos que ${textoConoces} que podría encajar perfecto con este reto:
 
 ${listaCandidatos}
 
-¿Quieres recomendar a alguien para este reto?
+Nos encantaría que nos ayudaras a recomendar alguno de estos perfiles
 
-Entra aquí para ver de qué va la oportunidad y elegir a quién recomendar: ${recommendUrl}`.trim();
+Entra aquí para hacer tu recomendación: ${recommendUrl}`.trim();
 }

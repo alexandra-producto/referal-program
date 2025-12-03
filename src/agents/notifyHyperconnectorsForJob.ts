@@ -56,8 +56,8 @@ export async function notifyHyperconnectorsForJob(
 
     console.log(`   ✅ Encontrados ${matches.length} candidatos matcheados`);
     
-    // Filtrar solo matches con score >= 70% (mínimo requerido)
-    const MIN_MATCH_SCORE = 70;
+    // Filtrar solo matches con score >= 60% (mínimo requerido)
+    const MIN_MATCH_SCORE = 60;
     const matchesWithScore = matches.filter((m: any) => (m.match_score || 0) >= MIN_MATCH_SCORE);
     console.log(`   📊 Matches con score >= ${MIN_MATCH_SCORE}%: ${matchesWithScore.length}`);
     
@@ -66,7 +66,7 @@ export async function notifyHyperconnectorsForJob(
       return { notified: 0, errors: 0 };
     }
 
-    // 3. Obtener todos los candidatos únicos que matchean (solo con score >= 70%)
+    // 3. Obtener todos los candidatos únicos que matchean (solo con score >= 60%)
     const candidateIds = [...new Set(matchesWithScore.map((m: any) => m.candidate_id))];
     console.log(`   👥 Candidatos únicos matcheados: ${candidateIds.length}`);
 
