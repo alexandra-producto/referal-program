@@ -136,7 +136,7 @@ export default function RecomendacionesPage({
       const session = await authStore.getSession();
       // Permitir acceso a admin y al solicitante dueño del job
       if (!session || (session.role !== "admin" && session.role !== "solicitante")) {
-        router.push("/solicitante/login-simulado");
+        router.push("/login");
         return;
       }
 

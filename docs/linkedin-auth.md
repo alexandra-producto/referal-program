@@ -15,7 +15,7 @@ Este documento describe la implementación completa de autenticación con Linked
          │ 1. Click "Continuar como [Rol]"
          ▼
 ┌─────────────────────────────────────┐
-│  /solicitante/login-simulado        │
+│  /login                            │
 │  (Página de Login)                  │
 └────────┬────────────────────────────┘
          │
@@ -285,7 +285,7 @@ useEffect(() => {
   async function checkAuth() {
     const session = await authStore.getSession();
     if (!session || session.role !== "solicitante" || !session.candidateId) {
-      router.push("/solicitante/login-simulado");
+      router.push("/login");
       return;
     }
     // Continuar con la lógica de la página
@@ -358,7 +358,7 @@ useEffect(() => {
 
 - [ ] Click en "Cerrar Sesión" desde cualquier página
 - [ ] Cookie `session` se elimina
-- [ ] Redirige a `/solicitante/login-simulado`
+- [ ] Redirige a `/login`
 - [ ] Intentar acceder a página protegida → redirige a login
 
 ### ✅ Protección de Rutas
@@ -393,7 +393,7 @@ useEffect(() => {
    ```
 
 4. **Probar:**
-   - Ir a `http://localhost:3000/solicitante/login-simulado`
+   - Ir a `http://localhost:3000/login`
    - Click en cualquier botón de login
    - Seguir el flujo de LinkedIn
 
@@ -424,6 +424,6 @@ useEffect(() => {
   - `src/domain/hyperconnectors.ts` - CRUD de hyperconnectors
 
 - **Frontend:**
-  - `app/solicitante/login-simulado/page.tsx` - Página de login
+  - `app/login/page.tsx` - Página de login
   - `app/lib/authStore.ts` - Store de autenticación (usa sesiones reales)
 

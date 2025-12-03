@@ -62,13 +62,13 @@ export async function GET(request: NextRequest) {
     if (error) {
       console.error("Error de LinkedIn:", error);
       return NextResponse.redirect(
-        buildRedirectUrl("/solicitante/login-simulado?error=linkedin_auth_failed", request.url)
+        buildRedirectUrl("/login?error=linkedin_auth_failed", request.url)
       );
     }
 
     if (!code || !state) {
       return NextResponse.redirect(
-        buildRedirectUrl("/solicitante/login-simulado?error=missing_params", request.url)
+        buildRedirectUrl("/login?error=missing_params", request.url)
       );
     }
 
@@ -98,7 +98,7 @@ export async function GET(request: NextRequest) {
     } catch (error) {
       console.error("❌ Error verificando state JWT:", error);
       return NextResponse.redirect(
-        buildRedirectUrl("/solicitante/login-simulado?error=invalid_state", request.url)
+        buildRedirectUrl("/login?error=invalid_state", request.url)
       );
     }
 
@@ -263,7 +263,7 @@ export async function GET(request: NextRequest) {
       // Validar whitelist
       if (!isAdminAuthorized(email)) {
         return NextResponse.redirect(
-          buildRedirectUrl("/solicitante/login-simulado?error=unauthorized_admin", request.url)
+          buildRedirectUrl("/login?error=unauthorized_admin", request.url)
         );
       }
 
@@ -466,7 +466,7 @@ export async function GET(request: NextRequest) {
 
     // Rol no reconocido
     return NextResponse.redirect(
-      buildRedirectUrl("/solicitante/login-simulado?error=invalid_role", request.url)
+      buildRedirectUrl("/login?error=invalid_role", request.url)
     );
   } catch (error: any) {
     console.error("❌ Error en /api/auth/linkedin/callback:", error);
@@ -491,7 +491,7 @@ export async function GET(request: NextRequest) {
     
     try {
       return NextResponse.redirect(
-        buildRedirectUrl(`/solicitante/login-simulado?error=${errorCode}`, request.url)
+        buildRedirectUrl(`/login?error=${errorCode}`, request.url)
       );
     } catch (redirectError) {
       // Si incluso la redirección falla, devolver una respuesta de error simple

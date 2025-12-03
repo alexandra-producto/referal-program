@@ -24,7 +24,7 @@ function CompleteProfileContent() {
     async function checkSessionAndLoadData() {
       const currentSession = await authStore.getSession();
       if (!currentSession) {
-        router.push("/solicitante/login-simulado");
+        router.push("/login");
         return;
       }
       setSession(currentSession);

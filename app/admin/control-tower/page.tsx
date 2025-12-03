@@ -31,7 +31,7 @@ export default function ControlTowerPage() {
     async function checkAuth() {
       const session = await authStore.getSession();
       if (!session || session.role !== "admin") {
-        router.push("/solicitante/login-simulado");
+        router.push("/login");
         return;
       }
 

@@ -39,7 +39,7 @@ export default function MisSolicitudesPage() {
     async function checkAuth() {
       const currentSession = await authStore.getSession();
       if (!currentSession || currentSession.role !== "solicitante" || !currentSession.candidateId) {
-        router.push("/solicitante/login-simulado");
+        router.push("/login");
         return;
       }
 

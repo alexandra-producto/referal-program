@@ -68,7 +68,7 @@ function HyperconnectorJobsHomeContent() {
           if (!session || session.role !== "hyperconnector" || !session.hyperconnectorId) {
             setError("No estás autenticado. Por favor inicia sesión.");
             setLoading(false);
-            router.push("/solicitante/login-simulado");
+            router.push("/login");
             return;
           }
 

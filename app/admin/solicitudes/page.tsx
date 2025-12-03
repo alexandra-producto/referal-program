@@ -45,7 +45,7 @@ export default function AdminSolicitudesPage() {
     async function checkAuth() {
       const currentSession = await authStore.getSession();
       if (!currentSession || currentSession.role !== "admin") {
-        router.push("/solicitante/login-simulado");
+        router.push("/login");
         return;
       }
       setSession(currentSession);

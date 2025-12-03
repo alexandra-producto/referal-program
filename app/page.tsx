@@ -8,7 +8,7 @@ export default function HomePage() {
 
   useEffect(() => {
     // Redirigir automáticamente a la página de login
-    router.push("/solicitante/login-simulado");
+    router.push("/login");
   }, [router]);
 
   return (

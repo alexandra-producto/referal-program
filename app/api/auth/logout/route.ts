@@ -11,7 +11,7 @@ async function handleLogout() {
   
   // Redirigir directamente a nuestra página de login
   const appUrl = getAppUrl();
-  return NextResponse.redirect(new URL("/solicitante/login-simulado", appUrl));
+  return NextResponse.redirect(new URL("/login", appUrl));
 }
 
 /**
@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
     console.error("Error cerrando sesión:", error);
     // Si hay error, al menos redirigir al login
     const appUrl = getAppUrl();
-    return NextResponse.redirect(new URL("/solicitante/login-simulado", appUrl));
+    return NextResponse.redirect(new URL("/login", appUrl));
   }
 }
 
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     console.error("Error cerrando sesión:", error);
     // Si hay error, al menos redirigir al login
     const appUrl = getAppUrl();
-    return NextResponse.redirect(new URL("/solicitante/login-simulado", appUrl));
+    return NextResponse.redirect(new URL("/login", appUrl));
   }
 }
 

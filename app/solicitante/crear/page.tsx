@@ -36,7 +36,7 @@ export default function CrearSolicitudPage() {
       const currentSession = await authStore.getSession();
       // Permitir acceso a solicitantes y admins
       if (!currentSession) {
-        router.push("/solicitante/login-simulado");
+        router.push("/login");
         return;
       }
       
@@ -53,7 +53,7 @@ export default function CrearSolicitudPage() {
       }
       
       // Si no cumple ninguna condición, redirigir
-      router.push("/solicitante/login-simulado");
+      router.push("/login");
     }
     checkAuth();
   }, [router]);

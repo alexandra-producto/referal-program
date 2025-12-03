@@ -46,7 +46,7 @@ Si quieres mantener protección solo para previews pero no para producción:
 Después de deshabilitar la protección:
 
 1. Abre una ventana de incógnito
-2. Ve a tu URL: `https://referal-program-git-main-producto-alexs-projects.vercel.app/solicitante/login-simulado`
+2. Ve a tu URL: `https://referal-program-git-main-producto-alexs-projects.vercel.app/login`
 3. Deberías poder acceder directamente sin que se pida login
 
 ## Nota Importante
