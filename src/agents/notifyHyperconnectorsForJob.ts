@@ -55,11 +55,19 @@ export async function notifyHyperconnectorsForJob(
     }
 
     console.log(`   ✅ Encontrados ${matches.length} candidatos matcheados`);
-    const matchesWithScore = matches.filter((m: any) => m.match_score > 0);
-    console.log(`   📊 Matches con score > 0: ${matchesWithScore.length}`);
+    
+    // Filtrar solo matches con score >= 70% (mínimo requerido)
+    const MIN_MATCH_SCORE = 70;
+    const matchesWithScore = matches.filter((m: any) => (m.match_score || 0) >= MIN_MATCH_SCORE);
+    console.log(`   📊 Matches con score >= ${MIN_MATCH_SCORE}%: ${matchesWithScore.length}`);
+    
+    if (matchesWithScore.length === 0) {
+      console.log(`   ℹ️  No hay matches con score >= ${MIN_MATCH_SCORE}%, no se enviarán notificaciones`);
+      return { notified: 0, errors: 0 };
+    }
 
-    // 3. Obtener todos los candidatos únicos que matchean
-    const candidateIds = [...new Set(matches.map((m: any) => m.candidate_id))];
+    // 3. Obtener todos los candidatos únicos que matchean (solo con score >= 70%)
+    const candidateIds = [...new Set(matchesWithScore.map((m: any) => m.candidate_id))];
     console.log(`   👥 Candidatos únicos matcheados: ${candidateIds.length}`);
 
     // 4. Para cada candidato, buscar qué hyperconnectors lo tienen en su red

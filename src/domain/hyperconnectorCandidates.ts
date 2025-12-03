@@ -89,9 +89,13 @@ async function processCandidates(links: any[], jobId: string) {
 
   // IMPORTANTE: Solo devolver candidatos que están TANTO en hyperconnector_candidates
   // COMO en job_candidate_matches (intersección de ambas tablas)
-  // Si no hay matches, no devolver ningún candidato (requerimos match obligatorio)
+  // Y que tengan un match_score >= 70% (mínimo requerido)
+  const MIN_MATCH_SCORE = 70;
   const filteredCandidates = matches.length > 0
-    ? (candidates || []).filter((c) => matchByCandidateId.has(c.id))
+    ? (candidates || []).filter((c) => {
+        const score = matchByCandidateId.get(c.id);
+        return score !== undefined && score >= MIN_MATCH_SCORE;
+      })
     : []; // No devolver candidatos si no hay matches
 
   return filteredCandidates
