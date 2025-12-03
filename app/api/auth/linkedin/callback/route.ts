@@ -109,9 +109,11 @@ export async function GET(request: NextRequest) {
 
     console.log("🔄 Intercambiando código por token...");
     // Intercambiar código por token
+    // Usar el origin de la request para mantener el dominio personalizado
+    const baseUrl = request.url ? new URL(request.url).origin : undefined;
     let accessToken: string;
     try {
-      accessToken = await exchangeCodeForToken(code);
+      accessToken = await exchangeCodeForToken(code, baseUrl);
       console.log("✅ Token obtenido exitosamente");
       // TEMPORAL: Log del token para testing (eliminar después de obtener el token)
       if (process.env.NODE_ENV === "development") {

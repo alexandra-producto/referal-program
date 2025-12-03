@@ -4,13 +4,15 @@ import { getAppUrl } from "@/src/utils/appUrl";
 
 /**
  * Función compartida para cerrar sesión
+ * @param requestUrl - URL opcional de la request para mantener el dominio personalizado
  */
-async function handleLogout() {
+async function handleLogout(requestUrl?: string) {
   // Eliminar la cookie de sesión local
   await deleteSession();
   
   // Redirigir directamente a nuestra página de login
-  const appUrl = getAppUrl();
+  // Usar el dominio de la request si está disponible (para dominios personalizados)
+  const appUrl = getAppUrl(requestUrl);
   return NextResponse.redirect(new URL("/login", appUrl));
 }
 
@@ -20,11 +22,11 @@ async function handleLogout() {
  */
 export async function GET(request: NextRequest) {
   try {
-    return await handleLogout();
+    return await handleLogout(request.url);
   } catch (error: any) {
     console.error("Error cerrando sesión:", error);
     // Si hay error, al menos redirigir al login
-    const appUrl = getAppUrl();
+    const appUrl = getAppUrl(request.url);
     return NextResponse.redirect(new URL("/login", appUrl));
   }
 }
@@ -35,11 +37,11 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    return await handleLogout();
+    return await handleLogout(request.url);
   } catch (error: any) {
     console.error("Error cerrando sesión:", error);
     // Si hay error, al menos redirigir al login
-    const appUrl = getAppUrl();
+    const appUrl = getAppUrl(request.url);
     return NextResponse.redirect(new URL("/login", appUrl));
   }
 }
