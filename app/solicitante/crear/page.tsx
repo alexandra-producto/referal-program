@@ -26,6 +26,7 @@ export default function CrearSolicitudPage() {
   const [desiredTrajectory, setDesiredTrajectory] = useState("");
   const [technicalBackgroundNeeded, setTechnicalBackgroundNeeded] = useState(false);
   const [modality, setModality] = useState<Modality | "">("");
+  const [startDate, setStartDate] = useState("");
   const [documentFile, setDocumentFile] = useState<File | null>(null);
   const [documentUrl, setDocumentUrl] = useState<string | null>(null);
   const [uploadingDocument, setUploadingDocument] = useState(false);
@@ -104,6 +105,7 @@ export default function CrearSolicitudPage() {
           desiredTrajectory: desiredTrajectory.trim(),
           technicalBackgroundNeeded,
           modality,
+          startDate: startDate || null, // Fecha de inicio (opcional)
           documentUrl: documentUrl, // Incluir URL del documento si existe
         }),
       });
@@ -438,6 +440,24 @@ export default function CrearSolicitudPage() {
                     <option value="hybrid">Híbrido</option>
                     <option value="onsite">Presencial</option>
                   </select>
+                </div>
+
+                {/* Fecha de inicio */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Briefcase className="h-5 w-5 text-gray-700" />
+                    <h2 className="text-gray-800 font-semibold text-lg">Fecha de inicio</h2>
+                  </div>
+                  <Input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="bg-white border-gray-300 rounded-xl h-12 text-gray-900"
+                  />
+                  <div className="flex items-start gap-2 text-gray-600 text-sm">
+                    <span className="text-blue-500">ℹ️</span>
+                    <p>Fecha esperada de inicio para este rol (opcional)</p>
+                  </div>
                 </div>
               </div>
             </div>

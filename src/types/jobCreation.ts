@@ -8,6 +8,7 @@ export interface CreateJobRequest {
   desiredTrajectory: string;
   technicalBackgroundNeeded: boolean;
   modality: 'remote' | 'hybrid' | 'onsite';
+  startDate?: string | null; // Fecha de inicio del trabajo (opcional, formato YYYY-MM-DD)
   documentUrl?: string | null; // URL del documento PDF (opcional)
 }
 
@@ -29,7 +30,7 @@ export function validateCreateJobRequest(body: any): { valid: boolean; error?: s
     return { valid: false, error: 'Request body is required' };
   }
 
-  const { jobTitle, description, nonNegotiables, desiredTrajectory, technicalBackgroundNeeded, modality, documentUrl } = body;
+  const { jobTitle, description, nonNegotiables, desiredTrajectory, technicalBackgroundNeeded, modality, startDate, documentUrl } = body;
 
   // Validar campos requeridos
   if (!jobTitle || typeof jobTitle !== 'string' || jobTitle.trim().length === 0) {
@@ -65,6 +66,7 @@ export function validateCreateJobRequest(body: any): { valid: boolean; error?: s
       desiredTrajectory: desiredTrajectory.trim(),
       technicalBackgroundNeeded,
       modality,
+      startDate: startDate || null, // Opcional, puede ser null
       documentUrl: documentUrl || null, // Opcional, puede ser null
     },
   };
