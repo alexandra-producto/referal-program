@@ -56,8 +56,9 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const { status } = body as { status?: RecommendationStatus };
+    const { status, rejection_reason } = body as { status?: RecommendationStatus; rejection_reason?: string };
     console.log("📋 Status recibido:", status);
+    console.log("📋 Rejection reason recibido:", rejection_reason);
 
     if (!status || !ALLOWED_STATUSES.includes(status)) {
       console.error("❌ Status inválido:", status, "Permitidos:", ALLOWED_STATUSES);
@@ -71,11 +72,29 @@ export async function PATCH(
       );
     }
 
+    // Si el status es "rejected", se requiere una razón
+    if (status === "rejected" && (!rejection_reason || rejection_reason.trim() === "")) {
+      console.error("❌ Rejection reason requerido para status 'rejected'");
+      return NextResponse.json(
+        {
+          error: "Se requiere una razón de rechazo cuando el status es 'rejected'",
+          details: "El campo 'rejection_reason' es obligatorio para rechazar una recomendación",
+        },
+        { status: 400 }
+      );
+    }
+
     console.log("💾 Actualizando recomendación...");
-    // Actualizar recomendación (solo el status, updated_at se maneja automáticamente si existe)
-    const updated = await updateRecommendation(id, {
-      status,
-    });
+    // Actualizar recomendación (status y rejection_reason si aplica)
+    const updateData: any = { status };
+    if (status === "rejected" && rejection_reason) {
+      updateData.rejection_reason = rejection_reason.trim();
+    } else if (status !== "rejected") {
+      // Si no es rejected, limpiar la razón de rechazo
+      updateData.rejection_reason = null;
+    }
+    
+    const updated = await updateRecommendation(id, updateData);
 
     if (!updated) {
       console.error("❌ No se pudo actualizar la recomendación");

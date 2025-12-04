@@ -9,6 +9,17 @@ import { Card } from "@/components/ui/card";
 import { ProductLatamLogo } from "@/components/ProductLatamLogo";
 import { authStore } from "@/app/lib/authStore";
 import { ImageWithFallback } from "@/components/ImageWithFallback";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Textarea } from "@/components/ui/textarea";
 
 interface Candidate {
   id: string;
@@ -43,6 +54,7 @@ interface Recommendation {
   hyperconnector: Hyperconnector | null;
   linkedin_url?: string | null;
   match_score: number | null; // Match score de job_candidate_matches
+  rejection_reason?: string | null; // Razón del rechazo
 }
 
 interface Job {
@@ -64,6 +76,9 @@ export default function RecomendacionesPage({
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [expandedRecs, setExpandedRecs] = useState<Set<string>>(new Set());
+  const [rejectionDialogOpen, setRejectionDialogOpen] = useState(false);
+  const [pendingRejection, setPendingRejection] = useState<{ recId: string } | null>(null);
+  const [rejectionReason, setRejectionReason] = useState("");
 
   const toggleExpand = (recId: string) => {
     setExpandedRecs((prev) => {
@@ -150,23 +165,26 @@ export default function RecomendacionesPage({
     checkAuth();
   }, [jobId, router]);
 
-  const handleUpdateStatus = async (recId: string, newStatus: string) => {
+  const handleUpdateStatus = async (recId: string, newStatus: string, rejectionReason?: string) => {
     try {
       setUpdatingId(recId);
-      console.log("🔄 Actualizando status de recomendación:", { recId, newStatus });
+      console.log("🔄 Actualizando status de recomendación:", { recId, newStatus, rejectionReason });
       
       const response = await fetch(`/api/recommendations/${recId}/status`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify({ 
+          status: newStatus,
+          ...(newStatus === "rejected" && rejectionReason ? { rejection_reason: rejectionReason } : {})
+        }),
       });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         console.error("❌ Error en respuesta:", response.status, errorData);
-        throw new Error(errorData.error || `Error al actualizar el estado (${response.status})`);
+        throw new Error(errorData.error || errorData.details || `Error al actualizar el estado (${response.status})`);
       }
 
       const data = await response.json();
@@ -180,7 +198,7 @@ export default function RecomendacionesPage({
 
       // Actualizar en memoria
       setRecommendations((prev) =>
-        prev.map((rec) => (rec.id === recId ? { ...rec, status: updated.status } : rec))
+        prev.map((rec) => (rec.id === recId ? { ...rec, status: updated.status, rejection_reason: updated.rejection_reason } : rec))
       );
     } catch (error: any) {
       console.error("❌ Error updating recommendation status:", error);
@@ -188,6 +206,32 @@ export default function RecomendacionesPage({
     } finally {
       setUpdatingId(null);
     }
+  };
+
+  const handleRejectClick = (recId: string) => {
+    setPendingRejection({ recId });
+    setRejectionReason("");
+    setRejectionDialogOpen(true);
+  };
+
+  const handleRejectConfirm = () => {
+    if (!pendingRejection) return;
+    
+    if (!rejectionReason.trim()) {
+      alert("Por favor, proporciona una razón para el rechazo");
+      return;
+    }
+
+    handleUpdateStatus(pendingRejection.recId, "rejected", rejectionReason.trim());
+    setRejectionDialogOpen(false);
+    setPendingRejection(null);
+    setRejectionReason("");
+  };
+
+  const handleRejectCancel = () => {
+    setRejectionDialogOpen(false);
+    setPendingRejection(null);
+    setRejectionReason("");
   };
 
   const formatDate = (dateString: string) => {
@@ -493,7 +537,7 @@ export default function RecomendacionesPage({
                         <button
                           type="button"
                           disabled={updatingId === rec.id}
-                          onClick={() => handleUpdateStatus(rec.id, "rejected")}
+                          onClick={() => handleRejectClick(rec.id)}
                           className={`px-5 py-2.5 rounded-full text-sm font-semibold border-2 transition-all duration-200 ${
                             rec.status === "rejected"
                               ? "bg-gradient-to-r from-red-500 to-rose-500 text-white border-transparent shadow-lg"
@@ -594,6 +638,37 @@ export default function RecomendacionesPage({
           <HelpCircle className="h-5 w-5" />
         </Button>
       </div>
+
+      {/* Dialog para razón de rechazo */}
+      <AlertDialog open={rejectionDialogOpen} onOpenChange={setRejectionDialogOpen}>
+        <AlertDialogContent className="max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Razón del rechazo</AlertDialogTitle>
+            <AlertDialogDescription>
+              Por favor, proporciona una razón para rechazar esta recomendación. Esta información ayudará a mejorar el proceso.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="py-4">
+            <Textarea
+              placeholder="Ej: El perfil no cumple con los requisitos técnicos necesarios..."
+              value={rejectionReason}
+              onChange={(e) => setRejectionReason(e.target.value)}
+              className="min-h-[120px] resize-none"
+              autoFocus
+            />
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleRejectCancel}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleRejectConfirm}
+              className="bg-red-500 hover:bg-red-600 text-white"
+              disabled={!rejectionReason.trim()}
+            >
+              Rechazar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
