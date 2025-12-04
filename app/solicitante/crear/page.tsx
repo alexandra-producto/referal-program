@@ -454,32 +454,6 @@ export default function CrearSolicitudPage() {
                       </Button>
                     </div>
                   )}
-                      <div>
-                        <p className="text-gray-700 font-medium text-sm">Click para subir o arrastra el archivo</p>
-                        <p className="text-gray-500 text-xs mt-1">PDF (MAX. 10MB)</p>
-                      </div>
-                    </label>
-                  </div>
-                  {documentUrl && (
-                    <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded-xl p-3">
-                      <div className="flex items-center gap-2">
-                        <FileText className="h-4 w-4 text-green-600" />
-                        <span className="text-green-800 font-medium text-xs">Documento subido correctamente</span>
-                      </div>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setDocumentFile(null);
-                          setDocumentUrl(null);
-                        }}
-                        className="h-7 w-7 p-0 text-green-600 hover:text-green-700 hover:bg-green-100"
-                      >
-                        <X className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  )}
                   <div className="flex items-start gap-2 text-gray-600 text-xs">
                     <span className="text-blue-500">ℹ️</span>
                     <p>Puedes subir un documento PDF con información adicional sobre el rol (JD, descripción detallada, etc.)</p>
