@@ -298,68 +298,6 @@ export default function CrearSolicitudPage() {
               </div>
             </div>
 
-            {/* Subir Documento */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <Upload className="h-5 w-5 text-gray-700" />
-                <h2 className="text-gray-800 font-semibold text-xl">Documento del Rol (Opcional)</h2>
-              </div>
-              
-              {!documentUrl ? (
-                <div className="space-y-2">
-                  <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-xl cursor-pointer bg-white hover:bg-gray-50 transition-colors">
-                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                      <Upload className="w-8 h-8 mb-2 text-gray-500" />
-                      <p className="mb-2 text-sm text-gray-500">
-                        <span className="font-semibold">Click para subir</span> o arrastra el archivo
-                      </p>
-                      <p className="text-xs text-gray-500">PDF (MAX. 10MB)</p>
-                    </div>
-                    <input
-                      type="file"
-                      className="hidden"
-                      accept="application/pdf"
-                      onChange={handleFileChange}
-                      disabled={uploadingDocument}
-                    />
-                  </label>
-                  {uploadingDocument && (
-                    <div className="flex items-center gap-2 text-blue-600 text-sm">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                      Subiendo documento...
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="flex items-center justify-between p-4 bg-green-50 border-2 border-green-200 rounded-xl">
-                  <div className="flex items-center gap-3">
-                    <FileText className="h-6 w-6 text-green-600" />
-                    <div>
-                      <p className="text-green-800 font-semibold">
-                        {documentFile?.name || "Documento subido"}
-                      </p>
-                      <p className="text-green-600 text-sm">
-                        {documentFile ? `${(documentFile.size / 1024 / 1024).toFixed(2)} MB` : "Listo"}
-                      </p>
-                    </div>
-                  </div>
-                  <Button
-                    type="button"
-                    onClick={handleRemoveDocument}
-                    variant="outline"
-                    size="icon"
-                    className="h-8 w-8 rounded-full border-red-300 text-red-600 hover:bg-red-50"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              )}
-              <div className="flex items-start gap-2 text-gray-600 text-sm">
-                <span className="text-blue-500">ℹ️</span>
-                <p>Puedes subir un documento PDF con información adicional sobre el rol (JD, descripción detallada, etc.)</p>
-              </div>
-            </div>
-
             {/* Two Column Layout */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* Left Column */}
@@ -399,6 +337,24 @@ export default function CrearSolicitudPage() {
                   <div className="flex items-start gap-2 text-gray-600 text-sm ml-8">
                     <span className="text-blue-500">ℹ️</span>
                     <p>Úsalo solo si realmente cambia el tipo de candidato.</p>
+                  </div>
+                </div>
+
+                {/* Fecha de inicio */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Briefcase className="h-5 w-5 text-gray-700" />
+                    <h2 className="text-gray-800 font-semibold text-lg">Fecha de inicio</h2>
+                  </div>
+                  <Input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="bg-white border-gray-300 rounded-xl h-12 text-gray-900"
+                  />
+                  <div className="flex items-start gap-2 text-gray-600 text-sm">
+                    <span className="text-blue-500">ℹ️</span>
+                    <p>Fecha esperada de inicio para este rol (opcional)</p>
                   </div>
                 </div>
               </div>
@@ -442,21 +398,91 @@ export default function CrearSolicitudPage() {
                   </select>
                 </div>
 
-                {/* Fecha de inicio */}
+                {/* Documento del Rol (Opcional) */}
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
-                    <Briefcase className="h-5 w-5 text-gray-700" />
-                    <h2 className="text-gray-800 font-semibold text-lg">Fecha de inicio</h2>
+                    <Upload className="h-5 w-5 text-gray-700" />
+                    <h2 className="text-gray-800 font-semibold text-lg">Documento del Rol (Opcional)</h2>
                   </div>
-                  <Input
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    className="bg-white border-gray-300 rounded-xl h-12 text-gray-900"
-                  />
-                  <div className="flex items-start gap-2 text-gray-600 text-sm">
+                  
+                  {!documentUrl ? (
+                    <div className="space-y-2">
+                      <label className="flex flex-col items-center justify-center w-full h-28 border-2 border-gray-300 border-dashed rounded-xl cursor-pointer bg-white hover:bg-gray-50 transition-colors">
+                        <div className="flex flex-col items-center justify-center pt-4 pb-4">
+                          <Upload className="w-6 h-6 mb-2 text-gray-500" />
+                          <p className="mb-1 text-xs text-gray-500">
+                            <span className="font-semibold">Click para subir</span> o arrastra
+                          </p>
+                          <p className="text-xs text-gray-500">PDF (MAX. 10MB)</p>
+                        </div>
+                        <input
+                          type="file"
+                          className="hidden"
+                          accept="application/pdf"
+                          onChange={handleFileChange}
+                          disabled={uploadingDocument}
+                        />
+                      </label>
+                      {uploadingDocument && (
+                        <div className="flex items-center gap-2 text-blue-600 text-xs">
+                          <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600"></div>
+                          Subiendo documento...
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between p-3 bg-green-50 border-2 border-green-200 rounded-xl">
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5 text-green-600" />
+                        <div>
+                          <p className="text-green-800 font-semibold text-sm">
+                            {documentFile?.name || "Documento subido"}
+                          </p>
+                          <p className="text-green-600 text-xs">
+                            {documentFile ? `${(documentFile.size / 1024 / 1024).toFixed(2)} MB` : "Listo"}
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        type="button"
+                        onClick={handleRemoveDocument}
+                        variant="outline"
+                        size="icon"
+                        className="h-7 w-7 rounded-full border-red-300 text-red-600 hover:bg-red-50"
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  )}
+                      <div>
+                        <p className="text-gray-700 font-medium text-sm">Click para subir o arrastra el archivo</p>
+                        <p className="text-gray-500 text-xs mt-1">PDF (MAX. 10MB)</p>
+                      </div>
+                    </label>
+                  </div>
+                  {documentUrl && (
+                    <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded-xl p-3">
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-green-600" />
+                        <span className="text-green-800 font-medium text-xs">Documento subido correctamente</span>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setDocumentFile(null);
+                          setDocumentUrl(null);
+                        }}
+                        className="h-7 w-7 p-0 text-green-600 hover:text-green-700 hover:bg-green-100"
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  )}
+                  <div className="flex items-start gap-2 text-gray-600 text-xs">
                     <span className="text-blue-500">ℹ️</span>
-                    <p>Fecha esperada de inicio para este rol (opcional)</p>
+                    <p>Puedes subir un documento PDF con información adicional sobre el rol (JD, descripción detallada, etc.)</p>
                   </div>
                 </div>
               </div>
