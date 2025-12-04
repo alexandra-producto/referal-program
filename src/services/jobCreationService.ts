@@ -90,6 +90,11 @@ export async function createJobFromCandidate(
     owner_role_title: ownerRoleTitle,
   };
 
+  // Agregar start_date si existe
+  if (request.startDate) {
+    jobData.start_date = request.startDate;
+  }
+
   // Agregar document_url si existe
   if (request.documentUrl) {
     jobData.document_url = request.documentUrl;

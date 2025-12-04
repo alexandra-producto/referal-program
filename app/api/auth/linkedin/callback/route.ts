@@ -29,17 +29,29 @@ const secret = new TextEncoder().encode(SECRET_KEY);
 
 /**
  * Helper para construir URLs de redirección de forma segura
+ * PRIORIZA siempre la URL del request actual para mantener el mismo dominio (preview/production)
  */
-function buildRedirectUrl(path: string, fallbackUrl?: string): URL {
+function buildRedirectUrl(path: string, requestUrl?: string): URL {
   try {
-    // Intentar usar la URL de la request si está disponible
-    if (fallbackUrl) {
-      const baseUrl = new URL(fallbackUrl).origin;
-      return new URL(path, baseUrl);
+    // PRIORIDAD 1: Usar la URL del request actual (siempre tiene el dominio correcto)
+    if (requestUrl) {
+      const baseUrl = new URL(requestUrl).origin;
+      const finalUrl = new URL(path, baseUrl);
+      console.log(`🔗 [buildRedirectUrl] Request URL recibida: ${requestUrl}`);
+      console.log(`🔗 [buildRedirectUrl] Base URL extraída: ${baseUrl}`);
+      console.log(`🔗 [buildRedirectUrl] URL final construida: ${finalUrl.toString()}`);
+      return finalUrl;
     }
-    // Usar getAppUrl como fallback
+    
+    // PRIORIDAD 2: Intentar obtener del request actual si está disponible en el contexto
+    // (Esto es un fallback, pero debería llegar siempre requestUrl)
+    
+    // PRIORIDAD 3: Usar getAppUrl como último recurso
     const appUrl = getAppUrl();
-    return new URL(path, appUrl);
+    const finalUrl = new URL(path, appUrl);
+    console.log(`⚠️ [buildRedirectUrl] No se proporcionó requestUrl, usando getAppUrl: ${appUrl}`);
+    console.log(`🔗 [buildRedirectUrl] URL final construida: ${finalUrl.toString()}`);
+    return finalUrl;
   } catch (error) {
     // Si todo falla, usar localhost
     console.warn("⚠️ Error construyendo URL de redirección, usando localhost:", error);
@@ -53,6 +65,12 @@ function buildRedirectUrl(path: string, fallbackUrl?: string): URL {
  */
 export async function GET(request: NextRequest) {
   try {
+    // Log del request URL para debugging
+    const requestOrigin = new URL(request.url).origin;
+    console.log(`🔍 [CALLBACK] Request URL: ${request.url}`);
+    console.log(`🔍 [CALLBACK] Request Origin: ${requestOrigin}`);
+    console.log(`🔍 [CALLBACK] VERCEL_URL env: ${process.env.VERCEL_URL || 'NO DEFINIDO'}`);
+    
     const searchParams = request.nextUrl.searchParams;
     const code = searchParams.get("code");
     const state = searchParams.get("state");
@@ -62,13 +80,13 @@ export async function GET(request: NextRequest) {
     if (error) {
       console.error("Error de LinkedIn:", error);
       return NextResponse.redirect(
-        buildRedirectUrl("/login?error=linkedin_auth_failed", request.url)
+        buildRedirectUrl("/solicitante/login-simulado?error=linkedin_auth_failed", request.url)
       );
     }
 
     if (!code || !state) {
       return NextResponse.redirect(
-        buildRedirectUrl("/login?error=missing_params", request.url)
+        buildRedirectUrl("/solicitante/login-simulado?error=missing_params", request.url)
       );
     }
 
@@ -98,7 +116,7 @@ export async function GET(request: NextRequest) {
     } catch (error) {
       console.error("❌ Error verificando state JWT:", error);
       return NextResponse.redirect(
-        buildRedirectUrl("/login?error=invalid_state", request.url)
+        buildRedirectUrl("/solicitante/login-simulado?error=invalid_state", request.url)
       );
     }
 
@@ -109,8 +127,8 @@ export async function GET(request: NextRequest) {
 
     console.log("🔄 Intercambiando código por token...");
     // Intercambiar código por token
-    // Usar el origin de la request para mantener el dominio personalizado
-    const baseUrl = request.url ? new URL(request.url).origin : undefined;
+    // Usar la URL del request actual para mantener el dominio correcto (preview/production)
+    const baseUrl = new URL(request.url).origin;
     let accessToken: string;
     try {
       accessToken = await exchangeCodeForToken(code, baseUrl);
@@ -265,7 +283,7 @@ export async function GET(request: NextRequest) {
       // Validar whitelist
       if (!isAdminAuthorized(email)) {
         return NextResponse.redirect(
-          buildRedirectUrl("/login?error=unauthorized_admin", request.url)
+          buildRedirectUrl("/solicitante/login-simulado?error=unauthorized_admin", request.url)
         );
       }
 
@@ -324,20 +342,32 @@ export async function GET(request: NextRequest) {
       });
 
       // Guardar sesión en cookie
+      // En Vercel (preview y production), usar secure: true y sameSite: "lax"
+      const isVercel = !!process.env.VERCEL;
+      const isProduction = process.env.NODE_ENV === "production";
       cookieStore.set("session", sessionToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
+        secure: isVercel || isProduction, // true en Vercel (preview y production)
+        sameSite: "lax", // "lax" permite que las cookies se envíen en requests del mismo sitio
         maxAge: 7 * 24 * 60 * 60, // 7 días
         path: "/",
+      });
+      console.log("🍪 Cookie de sesión configurada:", {
+        secure: isVercel || isProduction,
+        sameSite: "lax",
+        domain: "no especificado (usará dominio del request)",
       });
 
       // Si falta información del perfil, redirigir a completar perfil
       if (needsProfileCompletion) {
-        return NextResponse.redirect(buildRedirectUrl("/auth/complete-profile", request.url));
+        const redirectUrl = buildRedirectUrl("/auth/complete-profile", request.url);
+        console.log(`🔗 [ADMIN] Redirigiendo a completar perfil: ${redirectUrl.toString()}`);
+        return NextResponse.redirect(redirectUrl);
       }
       
-      return NextResponse.redirect(buildRedirectUrl("/admin/solicitudes", request.url));
+      const redirectUrl = buildRedirectUrl("/admin/solicitudes", request.url);
+      console.log(`🔗 [ADMIN] Redirigiendo a /admin/solicitudes: ${redirectUrl.toString()}`);
+      return NextResponse.redirect(redirectUrl);
     }
 
     if (role === "solicitante") {
@@ -380,20 +410,32 @@ export async function GET(request: NextRequest) {
       });
 
       // Guardar sesión en cookie
+      // En Vercel (preview y production), usar secure: true y sameSite: "lax"
+      const isVercel = !!process.env.VERCEL;
+      const isProduction = process.env.NODE_ENV === "production";
       cookieStore.set("session", sessionToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
+        secure: isVercel || isProduction, // true en Vercel (preview y production)
+        sameSite: "lax", // "lax" permite que las cookies se envíen en requests del mismo sitio
         maxAge: 7 * 24 * 60 * 60, // 7 días
         path: "/",
+      });
+      console.log("🍪 Cookie de sesión configurada:", {
+        secure: isVercel || isProduction,
+        sameSite: "lax",
+        domain: "no especificado (usará dominio del request)",
       });
 
       // Si falta información del perfil, redirigir a completar perfil
       if (needsProfileCompletion) {
-        return NextResponse.redirect(buildRedirectUrl("/auth/complete-profile", request.url));
+        const redirectUrl = buildRedirectUrl("/auth/complete-profile", request.url);
+        console.log(`🔗 [SOLICITANTE] Redirigiendo a completar perfil: ${redirectUrl.toString()}`);
+        return NextResponse.redirect(redirectUrl);
       }
       
-      return NextResponse.redirect(buildRedirectUrl("/solicitante/solicitudes", request.url));
+      const redirectUrl = buildRedirectUrl("/solicitante/solicitudes", request.url);
+      console.log(`🔗 [SOLICITANTE] Redirigiendo a /solicitante/solicitudes: ${redirectUrl.toString()}`);
+      return NextResponse.redirect(redirectUrl);
     }
 
     if (role === "hyperconnector") {
@@ -450,25 +492,37 @@ export async function GET(request: NextRequest) {
       });
 
       // Guardar sesión en cookie
+      // En Vercel (preview y production), usar secure: true y sameSite: "lax"
+      const isVercel = !!process.env.VERCEL;
+      const isProduction = process.env.NODE_ENV === "production";
       cookieStore.set("session", sessionToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
+        secure: isVercel || isProduction, // true en Vercel (preview y production)
+        sameSite: "lax", // "lax" permite que las cookies se envíen en requests del mismo sitio
         maxAge: 7 * 24 * 60 * 60, // 7 días
         path: "/",
+      });
+      console.log("🍪 Cookie de sesión configurada:", {
+        secure: isVercel || isProduction,
+        sameSite: "lax",
+        domain: "no especificado (usará dominio del request)",
       });
 
       // Si falta información del perfil, redirigir a completar perfil
       if (needsProfileCompletion) {
-        return NextResponse.redirect(buildRedirectUrl("/auth/complete-profile", request.url));
+        const redirectUrl = buildRedirectUrl("/auth/complete-profile", request.url);
+        console.log(`🔗 [HYPERCONNECTOR] Redirigiendo a completar perfil: ${redirectUrl.toString()}`);
+        return NextResponse.redirect(redirectUrl);
       }
       
-      return NextResponse.redirect(buildRedirectUrl("/hyperconnector/jobs-home", request.url));
+      const redirectUrl = buildRedirectUrl("/hyperconnector/jobs-home", request.url);
+      console.log(`🔗 [HYPERCONNECTOR] Redirigiendo a /hyperconnector/jobs-home: ${redirectUrl.toString()}`);
+      return NextResponse.redirect(redirectUrl);
     }
 
     // Rol no reconocido
     return NextResponse.redirect(
-      buildRedirectUrl("/login?error=invalid_role", request.url)
+      buildRedirectUrl("/solicitante/login-simulado?error=invalid_role", request.url)
     );
   } catch (error: any) {
     console.error("❌ Error en /api/auth/linkedin/callback:", error);
@@ -493,7 +547,7 @@ export async function GET(request: NextRequest) {
     
     try {
       return NextResponse.redirect(
-        buildRedirectUrl(`/login?error=${errorCode}`, request.url)
+        buildRedirectUrl(`/solicitante/login-simulado?error=${errorCode}`, request.url)
       );
     } catch (redirectError) {
       // Si incluso la redirección falla, devolver una respuesta de error simple

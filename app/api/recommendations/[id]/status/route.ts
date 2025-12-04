@@ -24,53 +24,41 @@ export async function PATCH(
   try {
     const { id } = await params;
     console.log("🔄 PATCH /api/recommendations/[id]/status - ID:", id);
-    console.log("🔍 Request URL:", request.url);
-    console.log("🔍 Request headers:", Object.fromEntries(request.headers.entries()));
 
     // Verificar cookies disponibles
     const cookieStore = await cookies();
     const sessionCookie = cookieStore.get("session");
     console.log("🔍 Cookie 'session' presente:", !!sessionCookie);
-    console.log("🔍 Cookie 'session' value (primeros 50 chars):", sessionCookie?.value?.substring(0, 50) || "NO HAY");
+    console.log("🔍 Cookie 'session' value length:", sessionCookie?.value?.length || 0);
 
     // Verificar sesión y rol
     const session = await getSession();
     console.log("🔍 Sesión obtenida:", session ? { 
       role: session.role, 
       userId: session.userId,
-      email: session.email,
-      fullName: session.fullName
+      email: session.email 
     } : "null");
     
     if (!session) {
       console.error("❌ No hay sesión - Cookie presente:", !!sessionCookie);
-      console.error("❌ Detalles:", {
-        hasCookie: !!sessionCookie,
-        cookieLength: sessionCookie?.value?.length || 0,
-        cookieValue: sessionCookie?.value?.substring(0, 100) || "NO HAY"
-      });
       return NextResponse.json({ 
         error: "No autorizado - Sesión no encontrada",
-        details: "No se pudo obtener la sesión del usuario. Verifica que estés logueado."
+        details: "No se pudo obtener la sesión del usuario"
       }, { status: 401 });
     }
     
     if (session.role !== "admin" && session.role !== "solicitante") {
-      console.error("❌ Rol no autorizado:", {
-        rolActual: session.role,
-        rolesPermitidos: ["admin", "solicitante"],
-        userId: session.userId,
-        email: session.email
-      });
+      console.error("❌ Rol no autorizado - Rol:", session.role, "Permitidos: admin, solicitante");
       return NextResponse.json({ 
         error: "No autorizado - Rol no permitido",
-        details: `Rol '${session.role}' no tiene permisos para esta acción. Se requiere 'admin' o 'solicitante'.`
+        details: `Rol '${session.role}' no tiene permisos. Se requiere 'admin' o 'solicitante'`
       }, { status: 403 });
     }
 
     const body = await request.json();
-    const { status } = body as { status?: RecommendationStatus };
+    const { status, rejection_reason } = body as { status?: RecommendationStatus; rejection_reason?: string };
     console.log("📋 Status recibido:", status);
+    console.log("📋 Rejection reason recibido:", rejection_reason);
 
     if (!status || !ALLOWED_STATUSES.includes(status)) {
       console.error("❌ Status inválido:", status, "Permitidos:", ALLOWED_STATUSES);
@@ -84,11 +72,29 @@ export async function PATCH(
       );
     }
 
+    // Si el status es "rejected", se requiere una razón
+    if (status === "rejected" && (!rejection_reason || rejection_reason.trim() === "")) {
+      console.error("❌ Rejection reason requerido para status 'rejected'");
+      return NextResponse.json(
+        {
+          error: "Se requiere una razón de rechazo cuando el status es 'rejected'",
+          details: "El campo 'rejection_reason' es obligatorio para rechazar una recomendación",
+        },
+        { status: 400 }
+      );
+    }
+
     console.log("💾 Actualizando recomendación...");
-    // Actualizar recomendación (solo el status, updated_at se maneja automáticamente si existe)
-    const updated = await updateRecommendation(id, {
-      status,
-    });
+    // Actualizar recomendación (status y rejection_reason si aplica)
+    const updateData: any = { status };
+    if (status === "rejected" && rejection_reason) {
+      updateData.rejection_reason = rejection_reason.trim();
+    } else if (status !== "rejected") {
+      // Si no es rejected, limpiar la razón de rechazo
+      updateData.rejection_reason = null;
+    }
+    
+    const updated = await updateRecommendation(id, updateData);
 
     if (!updated) {
       console.error("❌ No se pudo actualizar la recomendación");

@@ -1,19 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
 import { deleteSession } from "@/src/utils/session";
-import { getAppUrl } from "@/src/utils/appUrl";
+
+/**
+ * Helper para construir URLs de redirección usando el dominio del request actual
+ * Esto asegura que las redirecciones mantengan el mismo dominio (preview/production)
+ */
+function buildRedirectUrl(path: string, requestUrl: string): URL {
+  try {
+    const baseUrl = new URL(requestUrl).origin;
+    return new URL(path, baseUrl);
+  } catch (error) {
+    console.warn("⚠️ Error construyendo URL de redirección, usando localhost:", error);
+    return new URL(path, "http://localhost:3000");
+  }
+}
 
 /**
  * Función compartida para cerrar sesión
- * @param requestUrl - URL opcional de la request para mantener el dominio personalizado
  */
-async function handleLogout(requestUrl?: string) {
+async function handleLogout(request: NextRequest) {
   // Eliminar la cookie de sesión local
   await deleteSession();
   
-  // Redirigir directamente a nuestra página de login
-  // Usar el dominio de la request si está disponible (para dominios personalizados)
-  const appUrl = getAppUrl(requestUrl);
-  return NextResponse.redirect(new URL("/login", appUrl));
+  // Redirigir usando el dominio del request actual (mantiene preview/production)
+  return NextResponse.redirect(buildRedirectUrl("/solicitante/login-simulado", request.url));
 }
 
 /**
@@ -22,12 +32,11 @@ async function handleLogout(requestUrl?: string) {
  */
 export async function GET(request: NextRequest) {
   try {
-    return await handleLogout(request.url);
+    return await handleLogout(request);
   } catch (error: any) {
     console.error("Error cerrando sesión:", error);
-    // Si hay error, al menos redirigir al login
-    const appUrl = getAppUrl(request.url);
-    return NextResponse.redirect(new URL("/login", appUrl));
+    // Si hay error, al menos redirigir al login usando el dominio del request
+    return NextResponse.redirect(buildRedirectUrl("/solicitante/login-simulado", request.url));
   }
 }
 
@@ -37,12 +46,11 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    return await handleLogout(request.url);
+    return await handleLogout(request);
   } catch (error: any) {
     console.error("Error cerrando sesión:", error);
-    // Si hay error, al menos redirigir al login
-    const appUrl = getAppUrl(request.url);
-    return NextResponse.redirect(new URL("/login", appUrl));
+    // Si hay error, al menos redirigir al login usando el dominio del request
+    return NextResponse.redirect(buildRedirectUrl("/solicitante/login-simulado", request.url));
   }
 }
 

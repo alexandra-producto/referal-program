@@ -11,11 +11,6 @@ const ALLOWED_STATUSES: RecommendationStatus[] = [
   "contracted",
 ];
 
-/**
- * PATCH /api/recommendations/update-status?id=xxx
- * Workaround temporal para rutas dinámicas en Vercel
- * Actualiza el status de una recomendación y recalcula el status del job.
- */
 export async function PATCH(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -32,34 +27,27 @@ export async function PATCH(request: NextRequest) {
     console.log("🔍 Request URL:", request.url);
     console.log("🔍 Request headers:", Object.fromEntries(request.headers.entries()));
 
-    // Verificar cookies disponibles
     const cookieStore = await cookies();
     const sessionCookie = cookieStore.get("session");
     console.log("🔍 Cookie 'session' presente:", !!sessionCookie);
     console.log("🔍 Cookie 'session' value (primeros 50 chars):", sessionCookie?.value?.substring(0, 50) || "NO HAY");
 
-    // Verificar sesión y rol
     const session = await getSession();
-    console.log("🔍 Sesión obtenida:", session ? { 
-      role: session.role, 
+    console.log("🔍 Sesión obtenida:", session ? {
+      role: session.role,
       userId: session.userId,
       email: session.email,
       fullName: session.fullName
     } : "null");
-    
+
     if (!session) {
       console.error("❌ No hay sesión - Cookie presente:", !!sessionCookie);
-      console.error("❌ Detalles:", {
-        hasCookie: !!sessionCookie,
-        cookieLength: sessionCookie?.value?.length || 0,
-        cookieValue: sessionCookie?.value?.substring(0, 100) || "NO HAY"
-      });
-      return NextResponse.json({ 
+      return NextResponse.json({
         error: "No autorizado - Sesión no encontrada",
         details: "No se pudo obtener la sesión del usuario. Verifica que estés logueado."
       }, { status: 401 });
     }
-    
+
     if (session.role !== "admin" && session.role !== "solicitante") {
       console.error("❌ Rol no autorizado:", {
         rolActual: session.role,
@@ -67,15 +55,16 @@ export async function PATCH(request: NextRequest) {
         userId: session.userId,
         email: session.email
       });
-      return NextResponse.json({ 
+      return NextResponse.json({
         error: "No autorizado - Rol no permitido",
         details: `Rol '${session.role}' no tiene permisos para esta acción. Se requiere 'admin' o 'solicitante'.`
       }, { status: 403 });
     }
 
     const body = await request.json();
-    const { status } = body as { status?: RecommendationStatus };
+    const { status, rejection_reason } = body as { status?: RecommendationStatus; rejection_reason?: string };
     console.log("📋 Status recibido:", status);
+    console.log("📋 Rejection reason recibido:", rejection_reason);
 
     if (!status || !ALLOWED_STATUSES.includes(status)) {
       console.error("❌ Status inválido:", status, "Permitidos:", ALLOWED_STATUSES);
@@ -89,11 +78,29 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
+    // Si el status es "rejected", se requiere una razón
+    if (status === "rejected" && (!rejection_reason || rejection_reason.trim() === "")) {
+      console.error("❌ Rejection reason requerido para status 'rejected'");
+      return NextResponse.json(
+        {
+          error: "Se requiere una razón de rechazo cuando el status es 'rejected'",
+          details: "El campo 'rejection_reason' es obligatorio para rechazar una recomendación",
+        },
+        { status: 400 }
+      );
+    }
+
     console.log("💾 Actualizando recomendación...");
-    // Actualizar recomendación (solo el status, updated_at se maneja automáticamente si existe)
-    const updated = await updateRecommendation(id, {
-      status,
-    });
+    // Actualizar recomendación (status y rejection_reason si aplica)
+    const updateData: any = { status };
+    if (status === "rejected" && rejection_reason) {
+      updateData.rejection_reason = rejection_reason.trim();
+    } else if (status !== "rejected") {
+      // Si no es rejected, limpiar la razón de rechazo
+      updateData.rejection_reason = null;
+    }
+    
+    const updated = await updateRecommendation(id, updateData);
 
     if (!updated) {
       console.error("❌ No se pudo actualizar la recomendación");
@@ -105,7 +112,6 @@ export async function PATCH(request: NextRequest) {
 
     console.log("✅ Recomendación actualizada:", updated.id, "Status:", updated.status);
 
-    // Recalcular status del job asociado
     if (updated?.job_id) {
       console.log("🔄 Recalculando status del job:", updated.job_id);
       await updateJobStatusFromRecommendations(updated.job_id);

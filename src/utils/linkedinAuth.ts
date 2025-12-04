@@ -22,51 +22,26 @@ function getLinkedInClientSecret(): string {
 }
 
 function getLinkedInRedirectUri(baseUrl?: string): string {
-  // PRIORIDAD 1: Si tenemos un baseUrl de la request (dominio personalizado), usarlo
-  // Esto asegura que usemos el dominio personalizado incluso si LINKEDIN_REDIRECT_URI está configurado
+  // PRIORIDAD 1: Usar la baseUrl proporcionada (del request actual) - SIEMPRE priorizar esto
   if (baseUrl) {
-    try {
-      // Si baseUrl ya es una URL completa, extraer el origin
-      let origin = baseUrl;
-      if (baseUrl.includes("://")) {
-        const url = new URL(baseUrl);
-        origin = url.origin;
-      } else {
-        // Si no tiene protocolo, agregarlo
-        origin = baseUrl.startsWith("http") ? baseUrl : `https://${baseUrl}`;
-      }
-      
-      // Si no es localhost ni vercel.app, usar el dominio de la request (dominio personalizado)
-      if (!origin.includes("localhost") && !origin.includes("127.0.0.1") && !origin.includes("vercel.app")) {
-        const redirectUri = `${origin}/api/auth/linkedin/callback`;
-        console.log(`🔗 LinkedIn Redirect URI (desde baseUrl - dominio personalizado): ${redirectUri}`);
-        return redirectUri;
-      }
-    } catch (error) {
-      console.warn("⚠️ Error parseando baseUrl en getLinkedInRedirectUri:", error);
-    }
-  }
-  
-  // PRIORIDAD 2: Si está configurado explícitamente APP_URL (dominio personalizado), usarlo
-  // APP_URL debería ser el dominio personalizado (referrals.product-latam.com)
-  if (process.env.APP_URL) {
-    const redirectUri = `${process.env.APP_URL}/api/auth/linkedin/callback`;
-    console.log(`🔗 LinkedIn Redirect URI (desde APP_URL - dominio personalizado): ${redirectUri}`);
+    const redirectUri = `${baseUrl}/api/auth/linkedin/callback`;
+    console.log(`🔗 [getLinkedInRedirectUri] baseUrl proporcionada: ${baseUrl}`);
+    console.log(`🔗 [getLinkedInRedirectUri] Redirect URI construida: ${redirectUri}`);
     return redirectUri;
   }
   
-  // PRIORIDAD 3: Si está configurado LINKEDIN_REDIRECT_URI, usarlo
-  // NOTA: Esta variable puede estar configurada con el dominio personalizado
+  // PRIORIDAD 2: Si está configurado explícitamente, usarlo (solo si no hay baseUrl)
   if (process.env.LINKEDIN_REDIRECT_URI) {
-    console.log(`🔗 LinkedIn Redirect URI (desde LINKEDIN_REDIRECT_URI): ${process.env.LINKEDIN_REDIRECT_URI}`);
+    console.log(`⚠️ [getLinkedInRedirectUri] Usando LINKEDIN_REDIRECT_URI de env: ${process.env.LINKEDIN_REDIRECT_URI}`);
     return process.env.LINKEDIN_REDIRECT_URI;
   }
   
-  // PRIORIDAD 4: Fallback a getAppUrl() (puede usar VERCEL_URL)
+  // PRIORIDAD 3: Si estamos en Vercel, construir la URL automáticamente
   const appUrl = getAppUrl();
   const redirectUri = `${appUrl}/api/auth/linkedin/callback`;
   
-  console.log(`🔗 LinkedIn Redirect URI (fallback - puede ser Vercel): ${redirectUri}`);
+  console.log(`⚠️ [getLinkedInRedirectUri] No hay baseUrl ni LINKEDIN_REDIRECT_URI, usando getAppUrl: ${appUrl}`);
+  console.log(`🔗 [getLinkedInRedirectUri] Redirect URI construida: ${redirectUri}`);
   return redirectUri;
 }
 
@@ -106,7 +81,9 @@ export interface LinkedInPosition {
 
 /**
  * Genera la URL de autorización de LinkedIn
- * @param baseUrl - URL base opcional de la request para usar dominio personalizado
+ * @param state - JWT state token para CSRF protection
+ * @param role - Rol del usuario (admin, hyperconnector, solicitante)
+ * @param baseUrl - URL base opcional (del request actual) para mantener el dominio correcto en preview/production
  */
 export function getLinkedInAuthUrl(state: string, role: string, baseUrl?: string): string {
   const clientId = getLinkedInClientId();
@@ -126,7 +103,8 @@ export function getLinkedInAuthUrl(state: string, role: string, baseUrl?: string
 
 /**
  * Intercambia el código de autorización por un access token
- * @param baseUrl - URL base opcional de la request para usar dominio personalizado
+ * @param code - Código de autorización de LinkedIn
+ * @param baseUrl - URL base opcional (del request actual) para mantener el dominio correcto en preview/production
  */
 export async function exchangeCodeForToken(code: string, baseUrl?: string): Promise<string> {
   const clientId = getLinkedInClientId();

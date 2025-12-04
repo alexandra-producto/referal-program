@@ -1,35 +1,28 @@
 /**
  * Obtiene la URL base de la aplicación
- * Prioriza el dominio de la request (para dominios personalizados), luego APP_URL, luego VERCEL_URL, luego localhost
- * @param requestUrl - URL opcional de la request para extraer el dominio real
+ * Prioriza VERCEL_URL en producción, luego APP_URL, luego localhost
+ * 
+ * NOTA: En preview deployments, VERCEL_URL puede no estar disponible o apuntar a producción.
+ * Por eso, siempre se debe usar request.url en buildRedirectUrl para mantener el dominio correcto.
  */
-export function getAppUrl(requestUrl?: string): string {
-  // Si tenemos una request URL, extraer el dominio de ahí (prioridad máxima para dominios personalizados)
-  if (requestUrl) {
-    try {
-      const url = new URL(requestUrl);
-      // Si no es localhost, usar el dominio de la request
-      if (!url.hostname.includes("localhost") && !url.hostname.includes("127.0.0.1")) {
-        return url.origin;
-      }
-    } catch (error) {
-      console.warn("⚠️ Error parseando requestUrl en getAppUrl:", error);
-    }
+export function getAppUrl(): string {
+  // En Vercel, VERCEL_URL está disponible automáticamente
+  // Formato: https://your-app.vercel.app o preview-referal-program.vercel.app
+  // ⚠️ IMPORTANTE: En preview deployments, esto puede no estar configurado correctamente
+  if (process.env.VERCEL_URL) {
+    const url = `https://${process.env.VERCEL_URL}`;
+    console.log(`🔗 getAppUrl() usando VERCEL_URL: ${url}`);
+    return url;
   }
 
-  // Si está configurado explícitamente APP_URL, usarlo (útil para dominios personalizados)
+  // Si está configurado explícitamente APP_URL, usarlo
   if (process.env.APP_URL) {
+    console.log(`🔗 getAppUrl() usando APP_URL: ${process.env.APP_URL}`);
     return process.env.APP_URL;
   }
 
-  // En Vercel, VERCEL_URL está disponible automáticamente
-  // Formato: https://your-app.vercel.app
-  // NOTA: Esto solo se usa si no hay requestUrl ni APP_URL
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`;
-  }
-
   // Fallback a localhost para desarrollo local
+  console.log(`🔗 getAppUrl() usando fallback localhost`);
   return "http://localhost:3000";
 }
 
