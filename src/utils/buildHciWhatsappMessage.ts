@@ -84,12 +84,12 @@ export function buildHciWhatsappMessage(
   // Determinar si es singular o plural
   const esPlural = candidates.length > 1;
   const textoConoces = esPlural 
-    ? "conoces a algunos miembros de la comunidad" 
-    : "conoces a alguien";
+    ? "Vimos que conoces a personas que podrían encajar perfecto con este reto:" 
+    : "Vimos que conoces a alguien que podría encajar perfecto con este reto:";
 
   return `Hola ${hciFirstName}
 
-${ownerName} está buscando a esa persona para su rol ${job.role_title}
+${ownerName} está buscando a una persona para su rol de: ${job.role_title}
 
 Nada de checklists ni CVs eternos — aquí se trata de quién es la persona, cómo piensa y qué tan bien navega problemas reales.
 
@@ -97,11 +97,11 @@ Los únicos skills que no son negociables:
 
 ${nonNegotiablesText || "No especificado"}
 
-Vimos que ${textoConoces} que podría encajar perfecto con este reto:
+${textoConoces}
 
 ${listaCandidatos}
 
-Nos encantaría que nos ayudaras a recomendar alguno de estos perfiles
+¿Nos ayudas con una recomendación?
 
-Entra aquí para hacer tu recomendación: ${recommendUrl}`.trim();
+Entra aquí para escribirla: ${recommendUrl}`.trim();
 }
