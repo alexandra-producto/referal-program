@@ -170,11 +170,12 @@ export default function RecomendacionesPage({
       setUpdatingId(recId);
       console.log("🔄 Actualizando status de recomendación:", { recId, newStatus, rejectionReason });
       
-      const response = await fetch(`/api/recommendations/${recId}/status`, {
+      const response = await fetch(`/api/recommendations/update-status?id=${recId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include", // Asegurar que las cookies se envíen
         body: JSON.stringify({ 
           status: newStatus,
           ...(newStatus === "rejected" && rejectionReason ? { rejection_reason: rejectionReason } : {})
@@ -641,10 +642,12 @@ export default function RecomendacionesPage({
 
       {/* Dialog para razón de rechazo */}
       <AlertDialog open={rejectionDialogOpen} onOpenChange={setRejectionDialogOpen}>
-        <AlertDialogContent className="max-w-md">
+        <AlertDialogContent className="max-w-md backdrop-blur-[130px] bg-gradient-to-br from-orange-200/90 via-red-200/90 to-amber-200/90 border border-orange-300/50 shadow-2xl rounded-3xl">
           <AlertDialogHeader>
-            <AlertDialogTitle>Razón del rechazo</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="text-gray-800 text-2xl font-bold">
+              Razón del rechazo
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-700 text-base">
               Por favor, proporciona una razón para rechazar esta recomendación. Esta información ayudará a mejorar el proceso.
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -653,15 +656,20 @@ export default function RecomendacionesPage({
               placeholder="Ej: El perfil no cumple con los requisitos técnicos necesarios..."
               value={rejectionReason}
               onChange={(e) => setRejectionReason(e.target.value)}
-              className="min-h-[120px] resize-none"
+              className="min-h-[120px] resize-none bg-white/80 backdrop-blur-sm border border-gray-300 rounded-xl text-gray-900 placeholder:text-gray-500 focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
               autoFocus
             />
           </div>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={handleRejectCancel}>Cancelar</AlertDialogCancel>
+          <AlertDialogFooter className="flex-row gap-3 sm:gap-2">
+            <AlertDialogCancel 
+              onClick={handleRejectCancel}
+              className="bg-white/80 hover:bg-white border-gray-300 text-gray-700 rounded-xl px-5 py-2.5 font-semibold transition-all duration-200"
+            >
+              Cancelar
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleRejectConfirm}
-              className="bg-red-500 hover:bg-red-600 text-white"
+              className="bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 text-white rounded-xl px-5 py-2.5 font-semibold shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={!rejectionReason.trim()}
             >
               Rechazar

@@ -16,6 +16,7 @@
     "test:matching": "tsx src/testMatching.ts",
     "test:sync-relationships": "tsx src/testSyncRelationships.ts",
     "test:create-job": "tsx src/testCreateJobAndNotify.ts",
+    "test:create-job-preview": "tsx src/testCreateJobPreview.ts",
     "generate:emilio-link": "tsx src/generateEmilioHubLink.ts",
     "check:env": "tsx scripts/check-env.ts",
     "create:env-local": "tsx scripts/create-env-local.ts",
