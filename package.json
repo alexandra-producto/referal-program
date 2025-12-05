@@ -14,6 +14,8 @@
     "test:emilio-whatsapp": "tsx src/testEmilioWhatsapp.ts",
     "check:message": "tsx src/checkTwilioMessage.ts",
     "test:matching": "tsx src/testMatching.ts",
+    "match:hci-candidates": "tsx src/matchHyperconnectorCandidates.ts",
+    "test:single-match": "tsx src/testSingleMatch.ts",
     "test:sync-relationships": "tsx src/testSyncRelationships.ts",
     "test:create-job": "tsx src/testCreateJobAndNotify.ts",
     "test:create-job-preview": "tsx src/testCreateJobPreview.ts",
