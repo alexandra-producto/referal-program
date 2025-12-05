@@ -295,7 +295,17 @@ Evalúa estas 4 dimensiones (0-100 pts, puedes usar decimales para mayor precisi
 
 1. TRAYECTORIA (Peso crítico): ¿El candidato viene de la industria correcta (ej: Supply Chain, Fintech)? ¿Viene de empresas relevantes (Startups, Big 3, Tech Giants)? Evalúa la relevancia de su trayectoria profesional.
 
-2. ROLE FIT: ¿Ha tenido el título exacto antes? ¿Tiene la antigüedad (seniority) requerida? Evalúa qué tan bien encaja el rol del candidato con el rol requerido.
+2. ROLE FIT (CRÍTICO - Verifica el rol actual): 
+   - PRIMERO: Verifica el rol actual del candidato (current_job_title) y compáralo con el rol requerido en la vacante.
+   - Si el rol actual NO hace match con el rol requerido (ej: Product Manager vs Engineer, Data Scientist vs Frontend Developer), DEBES penalizar fuertemente esta dimensión (score 0-30).
+   - Si el rol actual hace match parcial (ej: Product Manager vs Senior Product Manager), evalúa la diferencia de seniority.
+   - Si el rol actual hace match exacto o muy cercano, puntúa alto (70-100).
+   - ¿Ha tenido el título exacto antes en su experiencia? ¿Tiene la antigüedad (seniority) requerida?
+   - EJEMPLOS DE NO MATCH que deben puntuar bajo:
+     * Product Manager → Engineer/Developer: 0-20
+     * Data Scientist → Frontend Developer: 0-25
+     * Marketing Manager → Software Engineer: 0-20
+     * Sales Manager → Product Manager: 0-30
 
 3. HARD SKILLS: Verifica los "Non Negotiables" del Job. Si piden skills técnicos (SQL, Python) y no están explícitos en la experiencia del candidato, puntúa bajo. Evalúa la presencia de las habilidades críticas requeridas.
 
@@ -303,13 +313,14 @@ Evalúa estas 4 dimensiones (0-100 pts, puedes usar decimales para mayor precisi
 
 IMPORTANTE: 
 - Sé preciso y variado en tus evaluaciones. No uses siempre el mismo score.
-- Un candidato con evidencia sólida debe tener 70-85.
-- Un candidato perfecto debe tener 90-100.
-- Un candidato con gaps significativos debe tener 40-69.
-- Un candidato con muy poca evidencia o gaps críticos debe tener 0-39.
+- VERIFICA SIEMPRE el rol actual del candidato vs el rol requerido. Si no hay match de rol, el score total debe ser bajo (0-40).
+- Un candidato con evidencia sólida Y match de rol debe tener 70-85.
+- Un candidato perfecto (match de rol + skills + trayectoria) debe tener 90-100.
+- Un candidato con gaps significativos pero match de rol debe tener 40-69.
+- Un candidato SIN match de rol debe tener 0-39, independientemente de otras dimensiones.
 - Usa decimales para mayor precisión (ej: 72.5, 68.3, 85.7).
 
-En 'reasoning', sé breve y directo sobre la evidencia encontrada o faltante."""
+En 'reasoning', sé breve y directo sobre la evidencia encontrada o faltante, especialmente menciona si hay o no match de rol."""
 
 
 # ============================================================================
