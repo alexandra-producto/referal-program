@@ -23,7 +23,7 @@ async function handleLogout(request: NextRequest) {
   await deleteSession();
   
   // Redirigir usando el dominio del request actual (mantiene preview/production)
-  return NextResponse.redirect(buildRedirectUrl("/solicitante/login-simulado", request.url));
+  return NextResponse.redirect(buildRedirectUrl("/login", request.url));
 }
 
 /**
@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
   } catch (error: any) {
     console.error("Error cerrando sesión:", error);
     // Si hay error, al menos redirigir al login usando el dominio del request
-    return NextResponse.redirect(buildRedirectUrl("/solicitante/login-simulado", request.url));
+    return NextResponse.redirect(buildRedirectUrl("/login", request.url));
   }
 }
 
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     console.error("Error cerrando sesión:", error);
     // Si hay error, al menos redirigir al login usando el dominio del request
-    return NextResponse.redirect(buildRedirectUrl("/solicitante/login-simulado", request.url));
+    return NextResponse.redirect(buildRedirectUrl("/login", request.url));
   }
 }
 
