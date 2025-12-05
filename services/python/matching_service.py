@@ -88,7 +88,7 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
 class Dimension(BaseModel):
     """Dimensión de evaluación con score y razonamiento"""
-    score: int = Field(..., ge=0, le=100, description="Score de 0 a 100")
+    score: float = Field(..., ge=0.0, le=100.0, description="Score de 0.0 a 100.0 (puede incluir decimales)")
     reasoning: str = Field(..., description="Razonamiento breve y directo sobre la evidencia")
 
 
@@ -270,17 +270,25 @@ def parse_job_requirements(requirements_json_data: Any) -> Dict[str, Any]:
 
 SYSTEM_PROMPT = """Eres un Senior Technical Recruiter experto en evaluar talento. Tu misión es analizar el encaje (match) entre un Candidato y una Vacante basándote estrictamente en la evidencia provista.
 
-Evalúa estas 4 dimensiones (0-100 pts):
+Evalúa estas 4 dimensiones (0-100 pts, puedes usar decimales para mayor precisión):
 
-1. TRAYECTORIA (Peso crítico): ¿El candidato viene de la industria correcta (ej: Supply Chain, Fintech)? ¿Viene de empresas relevantes (Startups, Big 3, Tech Giants)?
+1. TRAYECTORIA (Peso crítico): ¿El candidato viene de la industria correcta (ej: Supply Chain, Fintech)? ¿Viene de empresas relevantes (Startups, Big 3, Tech Giants)? Evalúa la relevancia de su trayectoria profesional.
 
-2. ROLE FIT: ¿Ha tenido el título exacto antes? ¿Tiene la antigüedad (seniority) requerida?
+2. ROLE FIT: ¿Ha tenido el título exacto antes? ¿Tiene la antigüedad (seniority) requerida? Evalúa qué tan bien encaja el rol del candidato con el rol requerido.
 
-3. HARD SKILLS: Verifica los "Non Negotiables" del Job. Si piden skills técnicos (SQL, Python) y no están explícitos, puntúa bajo.
+3. HARD SKILLS: Verifica los "Non Negotiables" del Job. Si piden skills técnicos (SQL, Python) y no están explícitos en la experiencia del candidato, puntúa bajo. Evalúa la presencia de las habilidades críticas requeridas.
 
-4. ESTABILIDAD: Penaliza saltos de trabajo < 1 año sin justificación. Premia estancias > 2 años.
+4. ESTABILIDAD: Penaliza saltos de trabajo < 1 año sin justificación. Premia estancias > 2 años. Evalúa la estabilidad laboral del candidato.
 
-Sé crítico. Un candidato promedio debe tener ~70-80. Solo los perfectos tienen >90. En 'reasoning', sé breve y directo sobre la evidencia encontrada o faltante."""
+IMPORTANTE: 
+- Sé preciso y variado en tus evaluaciones. No uses siempre el mismo score.
+- Un candidato con evidencia sólida debe tener 70-85.
+- Un candidato perfecto debe tener 90-100.
+- Un candidato con gaps significativos debe tener 40-69.
+- Un candidato con muy poca evidencia o gaps críticos debe tener 0-39.
+- Usa decimales para mayor precisión (ej: 72.5, 68.3, 85.7).
+
+En 'reasoning', sé breve y directo sobre la evidencia encontrada o faltante."""
 
 
 # ============================================================================
