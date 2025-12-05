@@ -42,7 +42,12 @@ export async function matchJobCandidate(
       };
     } catch (error: any) {
       console.error(`⚠️  Error en AI matching, usando fallback:`, error.message);
+      // Mostrar más detalles del error para debugging
+      if (error.stack) {
+        console.error(`   Stack trace: ${error.stack.substring(0, 300)}...`);
+      }
       // Fallback al sistema antiguo si falla el AI
+      console.warn(`   ⚠️  Usando sistema 'auto' como fallback para Job ${jobId} ↔ Candidate ${candidateId}`);
     }
   }
 

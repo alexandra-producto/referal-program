@@ -538,10 +538,14 @@ if __name__ == "__main__":
         
         try:
             result = calculate_and_save_match(job_id, candidate_id)
+            # Imprimir JSON en una sola línea al final para facilitar el parsing
+            # Usar un marcador especial para identificar el JSON
             print("\n" + "="*60)
             print("RESULTADO FINAL:")
             print("="*60)
-            print(json.dumps(result, indent=2, ensure_ascii=False))
+            # Imprimir JSON compacto en una sola línea para el parser
+            json_output = json.dumps(result, ensure_ascii=False)
+            print(json_output)
         except Exception as e:
             print(f"\n❌ Error: {e}")
             sys.exit(1)

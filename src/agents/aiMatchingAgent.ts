@@ -112,7 +112,8 @@ export async function calculateAIMatch(
     const lines = stdout.trim().split('\n');
     let jsonLine: string | undefined;
     
-    // Buscar la última línea que sea JSON válido
+    // Buscar la última línea que sea JSON válido (puede ser multilínea)
+    // Primero intentar encontrar una línea que empiece con { y termine con }
     for (let i = lines.length - 1; i >= 0; i--) {
       const line = lines[i].trim();
       if (line.startsWith('{') && line.endsWith('}')) {
@@ -121,8 +122,33 @@ export async function calculateAIMatch(
       }
     }
     
+    // Si no encontramos una línea completa, intentar buscar desde "RESULTADO FINAL:"
+    // y concatenar todas las líneas desde ahí hasta el final
     if (!jsonLine) {
-      // Intentar parsear todo el stdout como JSON
+      const resultadoIndex = lines.findIndex(line => line.includes('RESULTADO FINAL:'));
+      if (resultadoIndex >= 0) {
+        // Buscar la primera línea con { después de "RESULTADO FINAL:"
+        for (let i = resultadoIndex + 1; i < lines.length; i++) {
+          const line = lines[i].trim();
+          if (line.startsWith('{')) {
+            // Intentar parsear desde esta línea hasta el final
+            const jsonCandidate = lines.slice(i).join('').trim();
+            try {
+              const parsed = JSON.parse(jsonCandidate);
+              if (parsed.match_score !== undefined) {
+                jsonLine = jsonCandidate;
+                break;
+              }
+            } catch (e) {
+              // Continuar buscando
+            }
+          }
+        }
+      }
+    }
+    
+    if (!jsonLine) {
+      // Intentar parsear todo el stdout como JSON (por si acaso está todo en una línea)
       try {
         const parsed = JSON.parse(stdout.trim());
         if (parsed.match_score !== undefined) {
@@ -133,6 +159,22 @@ export async function calculateAIMatch(
         }
       } catch (e) {
         // Continuar con el error original
+      }
+      
+      // Si aún no funciona, buscar cualquier objeto JSON en el output
+      const jsonMatch = stdout.match(/\{[\s\S]*"match_score"[\s\S]*\}/);
+      if (jsonMatch) {
+        try {
+          const parsed = JSON.parse(jsonMatch[0]);
+          if (parsed.match_score !== undefined) {
+            return {
+              score: parsed.match_score,
+              detail: parsed.match_detail,
+            };
+          }
+        } catch (e) {
+          // Continuar con el error original
+        }
       }
       
       throw new Error(`No se pudo parsear el resultado del matching. Output: ${stdout.substring(0, 500)}`);
