@@ -78,7 +78,7 @@ async function processCandidates(links: any[], jobId: string) {
   // 3) info de candidatos (obtener más campos para el diseño)
   const { data: candidates, error: candidatesError } = await supabase
     .from("candidates")
-    .select("id, full_name, current_company, current_job_title, country, industry, profile_picture_url")
+    .select("id, full_name, current_company, current_job_title, country, industry, profile_picture_url, linkedin_url")
     .in("id", candidateIds);
 
   if (candidatesError) throw new Error(candidatesError.message);
@@ -120,6 +120,7 @@ async function processCandidates(links: any[], jobId: string) {
         country: c.country || null,
         industry: c.industry || null,
         profile_picture_url: c.profile_picture_url || null,
+        linkedin_url: c.linkedin_url || null,
         match_score: matchData?.score || null,
         match_source: matchData?.source || null,
         shared_experience: linkByCandidateId.get(c.id) || null,

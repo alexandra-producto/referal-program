@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Building, LogOut, List, Grid, Plus, Users, Zap, MoreVertical, Eye } from "lucide-react";
+import { Building, LogOut, List, Grid, Plus, Zap, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ProductLatamLogo } from "@/components/ProductLatamLogo";
@@ -238,10 +238,6 @@ export default function AdminSolicitudesPage() {
                   </>
                 )}
               </Button>
-              <Button className="bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white rounded-xl flex items-center gap-2 shadow-lg transition-all duration-200">
-                <Users className="h-4 w-4" />
-                Recomendar
-              </Button>
               <Button
                 onClick={handleNavigateToControlTower}
                 disabled={navigating === "control-tower"}
@@ -287,6 +283,7 @@ export default function AdminSolicitudesPage() {
                     <th className="px-6 py-4 text-left text-gray-800 font-semibold">Quien Solicita</th>
                     <th className="px-6 py-4 text-left text-gray-800 font-semibold">Puesto</th>
                     <th className="px-6 py-4 text-left text-gray-800 font-semibold">Empresa</th>
+                    <th className="px-6 py-4 text-left text-gray-800 font-semibold">Estado</th>
                     <th className="px-6 py-4 text-left text-gray-800 font-semibold">Recomendaciones</th>
                   </tr>
                 </thead>
@@ -319,6 +316,12 @@ export default function AdminSolicitudesPage() {
                         <div className="flex items-center gap-2 text-gray-700">
                           <Building className="h-4 w-4" />
                           <span>{job.company_name}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className={`flex items-center gap-2 px-3 py-2 rounded-xl border ${getStatusColor(job.status)}`}>
+                          <div className={`h-2 w-2 rounded-full ${getStatusDot(job.status)}`} />
+                          <span className="text-sm font-medium">{getStatusText(job.status)}</span>
                         </div>
                       </td>
                       <td className="px-6 py-4">
@@ -361,9 +364,6 @@ export default function AdminSolicitudesPage() {
                 <Card className="backdrop-blur-[130px] bg-white/40 border border-white/50 rounded-3xl shadow-xl p-6 h-full flex flex-col">
                   <div className="flex items-start justify-between mb-4">
                     <h3 className="text-gray-800 font-semibold text-xl flex-1">{job.job_title}</h3>
-                    <button className="text-gray-400 hover:text-gray-600">
-                      <MoreVertical className="h-5 w-5" />
-                    </button>
                   </div>
 
                   <p className="text-gray-600 text-sm mb-4 flex-1">

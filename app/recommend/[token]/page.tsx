@@ -27,6 +27,7 @@ interface Candidate {
   country?: string | null;
   industry?: string | null;
   profile_picture_url?: string | null;
+  linkedin_url?: string | null;
   fit_score: number | null;
   match_score: number | null; // Match score from job_candidate_matches
   shared_experience: string | null;
@@ -498,6 +499,21 @@ export default function RecommendPage({
                         <div className="flex items-center gap-2 text-gray-600 text-sm">
                           <Users className="h-4 w-4" />
                           <span>{person.shared_experience}</span>
+                        </div>
+                      )}
+                      
+                      {/* LinkedIn Link */}
+                      {person.linkedin_url && (
+                        <div className="flex items-center gap-2">
+                          <a
+                            href={person.linkedin_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-semibold text-sm underline transition-colors"
+                          >
+                            <LinkIcon className="h-4 w-4" />
+                            Ver perfil de LinkedIn
+                          </a>
                         </div>
                       )}
                     </div>
