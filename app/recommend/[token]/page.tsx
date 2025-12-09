@@ -86,6 +86,7 @@ export default function RecommendPage({
     alreadyRecommendedCandidateIds?: string[];
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -354,9 +355,23 @@ export default function RecommendPage({
               
               {/* Descripción del job si existe */}
               {job.description && (
-                <p className="text-gray-700 text-lg text-center max-w-3xl mx-auto">
-                  {job.description}
-                </p>
+                <div className="text-gray-700 text-lg text-center max-w-3xl mx-auto">
+                  <p
+                    className={`${
+                      !isDescriptionExpanded ? "line-clamp-3" : ""
+                    } transition-all duration-300`}
+                  >
+                    {job.description}
+                  </p>
+                  {job.description.length > 150 && (
+                    <button
+                      onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+                      className="mt-2 text-blue-600 hover:text-blue-700 font-semibold text-sm underline transition-colors"
+                    >
+                      {isDescriptionExpanded ? "Ver menos" : "Ver más"}
+                    </button>
+                  )}
+                </div>
               )}
 
               {/* Información del owner candidate y empresa */}
