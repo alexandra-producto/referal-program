@@ -54,12 +54,12 @@ async function processCandidates(links: any[], jobId: string) {
   const candidateIds = links.map((l) => l.candidate_id);
 
   // 2) matches job ↔ candidatos (opcional, si la tabla existe)
-  // IMPORTANTE: Obtener también match_source para filtrar por fuente != 'auto'
+  // IMPORTANTE: Obtener también match_source y match_detail para filtrar por fuente != 'auto'
   let matches: any[] = [];
   try {
     const { data: jobMatches, error: matchesError } = await supabase
       .from("job_candidate_matches")
-      .select("candidate_id, match_score, match_source")
+      .select("candidate_id, match_score, match_source, match_detail")
       .eq("job_id", jobId)
       .in("candidate_id", candidateIds);
 
@@ -72,7 +72,7 @@ async function processCandidates(links: any[], jobId: string) {
   }
 
   const matchByCandidateId = new Map(
-    matches.map((m) => [m.candidate_id, { score: m.match_score, source: m.match_source }])
+    matches.map((m) => [m.candidate_id, { score: m.match_score, source: m.match_source, detail: m.match_detail }])
   );
 
   // 3) info de candidatos (obtener más campos para el diseño)
@@ -123,6 +123,7 @@ async function processCandidates(links: any[], jobId: string) {
         linkedin_url: c.linkedin_url || null,
         match_score: matchData?.score || null,
         match_source: matchData?.source || null,
+        match_detail: matchData?.detail || null,
         shared_experience: linkByCandidateId.get(c.id) || null,
       };
     })
