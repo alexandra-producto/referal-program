@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, use } from "react";
-import { Users, MapPin, Building, User, Send, UserPlus, Link as LinkIcon, ArrowLeft, CheckCircle2 } from "lucide-react";
+import { Users, MapPin, Building, User, Send, UserPlus, Link as LinkIcon, ArrowLeft, CheckCircle2, Info } from "lucide-react";
 import { MatchScorePopover, MatchScoreData } from "@/components/MatchScorePopover";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -470,7 +470,11 @@ export default function RecommendPage({
                             matchData={person.match_detail}
                             totalScore={person.match_score}
                             trigger={
-                              <div className="flex items-center gap-2 bg-white/80 rounded-xl px-4 py-2 border border-gray-200 shadow-sm hover:shadow-md hover:border-blue-300 transition-all duration-200 cursor-pointer">
+                              <motion.div
+                                whileHover={{ scale: 1.05, y: -2 }}
+                                whileTap={{ scale: 0.98 }}
+                                className="flex items-center gap-3 bg-white/90 rounded-xl px-5 py-3 border-2 border-blue-200/50 shadow-lg hover:shadow-xl hover:border-blue-400/70 transition-all duration-300 cursor-pointer group backdrop-blur-sm"
+                              >
                                 <div
                                   className={`h-3 w-3 rounded-full ${
                                     person.match_score >= 90
@@ -480,10 +484,15 @@ export default function RecommendPage({
                                       : "bg-orange-500"
                                   }`}
                                 />
-                                <span className="text-gray-800 font-semibold text-base">
+                                <span className="text-gray-800 font-bold text-base">
                                   {Math.round(person.match_score)}%
                                 </span>
-                              </div>
+                                <div className="h-4 w-px bg-gray-300"></div>
+                                <div className="flex items-center gap-1.5 text-gray-600 group-hover:text-blue-600 transition-colors">
+                                  <Info className="h-4 w-4" />
+                                  <span className="text-sm font-medium">Ver análisis</span>
+                                </div>
+                              </motion.div>
                             }
                           />
                         )}
