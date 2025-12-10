@@ -18,50 +18,65 @@ import {
   XCircle,
   AlertTriangle,
   X,
+  Building,
 } from "lucide-react";
 
 export interface MatchScoreData {
-  key_gap: string;
-  weights: {
-    role_fit: number;
-    stability: number;
-    trajectory: number;
-    hard_skills: number;
+  seniority_match: {
+    job_level: string;
+    candidate_level: string;
+    score: number;
+    reason: string;
   };
   role_fit: {
+    job_role: string;
+    candidate_role: string;
     score: number;
-    reasoning: string;
+    reason: string;
   };
-  stability: {
+  industry: {
+    job_industries: string[];
+    candidate_industries: string[];
     score: number;
-    reasoning: string;
+    reason: string;
   };
   trajectory: {
     score: number;
-    reasoning: string;
+    reason: string;
   };
-  hard_skills: {
+  stability: {
     score: number;
-    reasoning: string;
+    reason: string;
   };
+  final_score?: number;
+  weights: {
+    seniority_match: number;
+    role_fit: number;
+    trajectory: number;
+    industry: number;
+    stability: number;
+  };
+  calculated_at?: string;
 }
 
 interface MatchScorePopoverProps {
-  matchData: MatchScoreData | null;
+  matchData: MatchScoreData | null | any; // Allow any to handle old structure
   totalScore: number;
   trigger: React.ReactNode;
 }
 
 const getCategoryIcon = (category: string) => {
   switch (category) {
+    case "seniority_match":
+      return <Award className="h-5 w-5" />;
     case "role_fit":
       return <Briefcase className="h-5 w-5" />;
-    case "stability":
-      return <Award className="h-5 w-5" />;
+    case "industry":
+      return <Building className="h-5 w-5" />;
     case "trajectory":
       return <TrendingUp className="h-5 w-5" />;
-    case "hard_skills":
-      return <Wrench className="h-5 w-5" />;
+    case "stability":
+      return <CheckCircle2 className="h-5 w-5" />;
     default:
       return <Award className="h-5 w-5" />;
   }
@@ -69,14 +84,16 @@ const getCategoryIcon = (category: string) => {
 
 const getCategoryLabel = (category: string) => {
   switch (category) {
+    case "seniority_match":
+      return "Match de Seniority";
     case "role_fit":
       return "Fit del Rol";
-    case "stability":
-      return "Estabilidad Laboral";
+    case "industry":
+      return "Industria";
     case "trajectory":
       return "Trayectoria";
-    case "hard_skills":
-      return "Habilidades Técnicas";
+    case "stability":
+      return "Estabilidad Laboral";
     default:
       return category;
   }
@@ -123,6 +140,60 @@ const getProgressColor = (score: number) => {
   return "bg-gradient-to-r from-orange-500 to-red-500";
 };
 
+// Helper function to normalize match data (handle both old and new structures)
+function normalizeMatchData(matchData: any): MatchScoreData | null {
+  if (!matchData) return null;
+
+  // Check if it's the new structure
+  if (matchData.seniority_match && matchData.industry) {
+    return matchData as MatchScoreData;
+  }
+
+  // Old structure - convert to new structure
+  try {
+    const normalized: MatchScoreData = {
+      seniority_match: {
+        job_level: "N/A",
+        candidate_level: "N/A",
+        score: matchData.role_fit?.score || 0,
+        reason: matchData.role_fit?.reasoning || "Datos de estructura antigua - recalcular match para ver análisis completo",
+      },
+      role_fit: {
+        job_role: "N/A",
+        candidate_role: "N/A",
+        score: matchData.role_fit?.score || 0,
+        reason: matchData.role_fit?.reasoning || "Datos de estructura antigua",
+      },
+      industry: {
+        job_industries: [],
+        candidate_industries: [],
+        score: matchData.trajectory?.score || 0,
+        reason: "Datos de estructura antigua - recalcular match para ver análisis completo",
+      },
+      trajectory: {
+        score: matchData.trajectory?.score || 0,
+        reason: matchData.trajectory?.reasoning || "Datos de estructura antigua",
+      },
+      stability: {
+        score: matchData.stability?.score || 0,
+        reason: matchData.stability?.reasoning || "Datos de estructura antigua",
+      },
+      weights: matchData.weights || {
+        seniority_match: 0.4,
+        role_fit: 0.2,
+        trajectory: 0.15,
+        industry: 0.15,
+        stability: 0.1,
+      },
+      calculated_at: matchData.calculated_at,
+    };
+    return normalized;
+  } catch (error) {
+    console.error("Error normalizing match data:", error);
+    return null;
+  }
+}
+
 export function MatchScorePopover({
   matchData,
   totalScore,
@@ -134,32 +205,67 @@ export function MatchScorePopover({
     return <>{trigger}</>;
   }
 
+  // Normalize data to handle both old and new structures
+  const normalizedData = normalizeMatchData(matchData);
+  
+  if (!normalizedData) {
+    return <>{trigger}</>;
+  }
+
+  // Safely build categories array with null checks
   const categories = [
-    {
+    normalizedData.seniority_match && {
+      key: "seniority_match",
+      data: normalizedData.seniority_match,
+      weight: normalizedData.weights?.seniority_match || 0.4,
+      extra: {
+        job_level: normalizedData.seniority_match.job_level,
+        candidate_level: normalizedData.seniority_match.candidate_level,
+      },
+    },
+    normalizedData.role_fit && {
       key: "role_fit",
-      data: matchData.role_fit,
-      weight: matchData.weights.role_fit,
+      data: normalizedData.role_fit,
+      weight: normalizedData.weights?.role_fit || 0.2,
+      extra: {
+        job_role: normalizedData.role_fit.job_role,
+        candidate_role: normalizedData.role_fit.candidate_role,
+      },
     },
-    {
-      key: "stability",
-      data: matchData.stability,
-      weight: matchData.weights.stability,
+    normalizedData.industry && {
+      key: "industry",
+      data: normalizedData.industry,
+      weight: normalizedData.weights?.industry || 0.15,
+      extra: {
+        job_industries: normalizedData.industry.job_industries || [],
+        candidate_industries: normalizedData.industry.candidate_industries || [],
+      },
     },
-    {
+    normalizedData.trajectory && {
       key: "trajectory",
-      data: matchData.trajectory,
-      weight: matchData.weights.trajectory,
+      data: normalizedData.trajectory,
+      weight: normalizedData.weights?.trajectory || 0.15,
     },
-    {
-      key: "hard_skills",
-      data: matchData.hard_skills,
-      weight: matchData.weights.hard_skills,
+    normalizedData.stability && {
+      key: "stability",
+      data: normalizedData.stability,
+      weight: normalizedData.weights?.stability || 0.1,
     },
-  ];
+  ].filter(Boolean) as Array<{
+    key: string;
+    data: { score: number; reason?: string; reasoning?: string };
+    weight: number;
+    extra?: any;
+  }>;
 
   // Calculate contribution to total score
   const calculateContribution = (score: number, weight: number) => {
     return (score * weight).toFixed(1);
+  };
+
+  // Get reason text (support both old "reasoning" and new "reason" fields)
+  const getReason = (data: any) => {
+    return data.reason || data.reasoning || "Sin análisis disponible";
   };
 
   return (
@@ -233,29 +339,6 @@ export function MatchScorePopover({
               </div>
             </motion.div>
 
-            {/* Key Gap Alert */}
-            {matchData.key_gap && (
-              <motion.div
-                initial={{ y: 10, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.3, delay: 0.1 }}
-                className="backdrop-blur-sm bg-gradient-to-br from-orange-100/80 to-orange-50/60 border-2 border-orange-300/60 rounded-2xl p-5 shadow-md"
-              >
-                <div className="flex gap-3">
-                  <div className="p-2 rounded-xl bg-orange-200/50 h-fit">
-                    <AlertCircle className="h-5 w-5 text-orange-600 flex-shrink-0" />
-                  </div>
-                  <div>
-                    <p className="text-orange-900 font-semibold mb-1.5 text-lg">
-                      ⚠️ Brecha Principal Identificada
-                    </p>
-                    <p className="text-orange-800 leading-relaxed">
-                      {matchData.key_gap}
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
-            )}
           </DialogHeader>
 
           {/* Categories Breakdown */}
@@ -269,12 +352,21 @@ export function MatchScorePopover({
               </span>
             </div>
 
-            {categories.map((category, index) => {
-              const contribution = calculateContribution(
-                category.data.score,
-                category.weight
-              );
-              const badge = getScoreBadge(category.data.score);
+            {categories.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                <p>No hay datos de análisis disponibles.</p>
+                <p className="text-sm mt-2">Recalcula el match para ver el análisis completo.</p>
+              </div>
+            ) : (
+              categories.map((category, index) => {
+                if (!category || !category.data) return null;
+                
+                const contribution = calculateContribution(
+                  category.data.score,
+                  category.weight
+                );
+                const badge = getScoreBadge(category.data.score);
+                const reason = getReason(category.data);
 
               return (
                 <motion.div
@@ -309,6 +401,26 @@ export function MatchScorePopover({
                               {(category.weight * 100).toFixed(0)}%
                             </span>
                           </div>
+                          {/* Show extra info for specific categories */}
+                          {category.extra && (
+                            <div className="mt-2 space-y-1">
+                              {category.extra.job_level && (
+                                <div className="text-xs text-gray-600">
+                                  <span className="font-semibold">Job:</span> {category.extra.job_level} → <span className="font-semibold">Candidato:</span> {category.extra.candidate_level}
+                                </div>
+                              )}
+                              {category.extra.job_role && (
+                                <div className="text-xs text-gray-600">
+                                  <span className="font-semibold">Job:</span> {category.extra.job_role} → <span className="font-semibold">Candidato:</span> {category.extra.candidate_role}
+                                </div>
+                              )}
+                              {category.extra.job_industries && (
+                                <div className="text-xs text-gray-600">
+                                  <span className="font-semibold">Job:</span> {category.extra.job_industries.join(", ") || "N/A"} | <span className="font-semibold">Candidato:</span> {category.extra.candidate_industries.join(", ") || "N/A"}
+                                </div>
+                              )}
+                            </div>
+                          )}
                         </div>
                       </div>
                       <div className="flex flex-col items-end gap-2">
@@ -326,7 +438,7 @@ export function MatchScorePopover({
                               category.data.score
                             )}`}
                           >
-                            {category.data.score}
+                            {Math.round(category.data.score)}
                           </span>
                           <span className="text-gray-400 text-sm">/100</span>
                         </div>
@@ -339,7 +451,7 @@ export function MatchScorePopover({
                         <span className="text-gray-600">Progreso de evaluación</span>
                         <div className="flex items-center gap-2">
                           <span className="text-gray-500">
-                            {category.data.score} ×{" "}
+                            {Math.round(category.data.score)} ×{" "}
                             {(category.weight * 100).toFixed(0)}% =
                           </span>
                           <span
@@ -373,13 +485,14 @@ export function MatchScorePopover({
                         ANÁLISIS:
                       </p>
                       <p className="text-gray-700 leading-relaxed">
-                        {category.data.reasoning}
+                        {reason}
                       </p>
                     </div>
                   </div>
                 </motion.div>
               );
-            })}
+              })
+            )}
           </div>
 
           {/* Summary Footer */}
