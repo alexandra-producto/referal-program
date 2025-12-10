@@ -156,7 +156,7 @@ export default function PotentialCandidatesPage({
           {candidates.length === 0 ? (
             <Card className="backdrop-blur-[130px] bg-white/40 border border-white/50 rounded-3xl shadow-xl p-12 text-center">
               <p className="text-gray-700 text-lg">
-                No hay candidatos potenciales con match >= 40% para este puesto.
+                No hay candidatos potenciales con match mayor o igual a 40% para este puesto.
               </p>
             </Card>
           ) : (
