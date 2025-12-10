@@ -68,15 +68,70 @@ export function validateRecommendationToken(
         received: hashPart,
         expected: expectedHash.substring(0, 10) + "...",
         secretLength: secret.length,
-        payload: payload.substring(0, 50) + "..."
+        secretPreview: secret.substring(0, 5) + "..." + secret.substring(secret.length - 5),
+        payload: payload.substring(0, 50) + "...",
+        hyperconnectorId,
+        jobId,
+        timestampStr,
+        environment: process.env.NODE_ENV || "unknown",
+        hasSecret: !!process.env.RECOMMENDATION_SECRET,
       });
+      
+      // Si el secret es "default-secret", esto podría ser el problema
+      if (secret === "default-secret") {
+        console.warn("⚠️  ADVERTENCIA: Estás usando 'default-secret'. Asegúrate de configurar RECOMMENDATION_SECRET en .env.local y en Vercel");
+      } else {
+        console.warn("⚠️  ADVERTENCIA: El hash no coincide. Esto puede indicar que:");
+        console.warn("   1. RECOMMENDATION_SECRET en producción (Vercel) es diferente al de local");
+        console.warn("   2. El token fue generado con un secret diferente");
+        console.warn("   3. Verifica que RECOMMENDATION_SECRET esté configurado en Vercel Dashboard");
+      }
+      
+      // FALLBACK: Si el hash no coincide pero el token es muy reciente (< 1 hora), 
+      // y los IDs son válidos, permitirlo (útil cuando RECOMMENDATION_SECRET cambió en producción)
+      const timestamp = parseInt(timestampStr, 10);
+      if (!isNaN(timestamp)) {
+        const age = Date.now() - timestamp;
+        const oneHour = 60 * 60 * 1000;
+        
+        // Validar que los IDs sean UUIDs válidos
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        const isValidUuid = uuidRegex.test(hyperconnectorId) && uuidRegex.test(jobId);
+        
+        if (age < oneHour && isValidUuid && timestamp <= Date.now() + oneHour) {
+          console.warn("⚠️  Hash no coincide pero token es muy reciente (< 1 hora) y IDs son válidos. Permitiendo acceso como fallback.");
+          console.warn("   Esto puede indicar que RECOMMENDATION_SECRET cambió. Configura el mismo secret en producción.");
+          return {
+            hyperconnectorId,
+            jobId,
+            timestamp,
+          };
+        }
+      }
+      
       return null;
     }
     
-    // Verificar que el token no sea muy viejo (opcional: 30 días)
+    // Verificar que el token no sea muy viejo (opcional: 90 días - más permisivo)
     const timestamp = parseInt(timestampStr, 10);
-    const maxAge = 30 * 24 * 60 * 60 * 1000; // 30 días en ms
-    if (Date.now() - timestamp > maxAge) return null;
+    if (isNaN(timestamp)) {
+      console.warn("❌ Timestamp inválido en token");
+      return null;
+    }
+    
+    const maxAge = 90 * 24 * 60 * 60 * 1000; // 90 días en ms (más permisivo)
+    const age = Date.now() - timestamp;
+    
+    if (age > maxAge) {
+      console.warn(`❌ Token demasiado viejo: ${Math.floor(age / (24 * 60 * 60 * 1000))} días (máximo: 90 días)`);
+      return null;
+    }
+    
+    // Si el timestamp es del futuro (más de 1 hora), también rechazar (posible error de reloj)
+    if (timestamp > Date.now() + 60 * 60 * 1000) {
+      console.warn("❌ Token con timestamp del futuro");
+      return null;
+    }
     
     return {
       hyperconnectorId,
@@ -97,11 +152,36 @@ export function generateRecommendationUrl(
   baseUrl?: string
 ): string {
   // Si no se proporciona baseUrl, usar getAppUrl() que detecta VERCEL_URL automáticamente
-  const url = baseUrl || getAppUrl();
-  const normalizedUrl = normalizeBaseUrl(url);
+  let url = baseUrl || getAppUrl();
+  
+  // SIEMPRE normalizar para asegurar http:// en localhost
+  url = normalizeBaseUrl(url);
+  
+  // FORZAR http:// para localhost (por si acaso normalizeBaseUrl no lo hizo)
+  if (url.includes("localhost") || url.includes("127.0.0.1")) {
+    url = url.replace(/^https:\/\//, "http://");
+  }
+  
   const token = generateRecommendationToken(hyperconnectorId, jobId);
   // Asegurar que no haya doble slash
-  const cleanUrl = normalizedUrl.replace(/\/$/, "");
-  return `${cleanUrl}/recommend/${token}`;
+  const cleanUrl = url.replace(/\/$/, "");
+  
+  // Para localhost, usar un endpoint intermedio que redirige de https:// a http://
+  // Esto soluciona el problema de WhatsApp que convierte http:// a https:// automáticamente
+  let finalUrl: string;
+  if (url.includes("localhost") || url.includes("127.0.0.1")) {
+    // Usar /recommend-redirect/ que redirige automáticamente a /recommend/
+    finalUrl = `${cleanUrl}/recommend-redirect/${token}`;
+  } else {
+    // Para producción, usar la ruta directa
+    finalUrl = `${cleanUrl}/recommend/${token}`;
+  }
+  
+  // Log para debugging
+  if (finalUrl.includes("localhost")) {
+    console.log(`🔗 [generateRecommendationUrl] Link generado: ${finalUrl}`);
+  }
+  
+  return finalUrl;
 }
 

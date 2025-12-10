@@ -126,6 +126,7 @@ async function testCreateJobAndNotify() {
       console.log(`✅ Job creado: ${job.id}`);
       console.log(`✅ Matches creados: ${matches.length}`);
       console.log(`✅ WhatsApp enviados: ${result.notified}`);
+      console.log(`✅ Emails enviados: ${result.emailsSent || 0}`);
       console.log(`❌ Errores: ${result.errors}`);
       console.log("");
     } else {

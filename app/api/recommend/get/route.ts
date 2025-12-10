@@ -5,6 +5,7 @@ import { validateRecommendationLink } from "@/src/domain/recommendationLinks";
 import { getJobById } from "@/src/domain/jobs";
 import { getHyperconnectorById } from "@/src/domain/hyperconnectors";
 import { getRecommendableCandidatesForHyperconnector } from "@/src/domain/hyperconnectorCandidates";
+import { supabase } from "@/src/db/supabaseClient";
 
 // Asegurar que las variables de entorno estén cargadas en Next.js
 if (!process.env.RECOMMENDATION_SECRET) {
@@ -28,12 +29,38 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    console.log("🔍 Validando token:", token.substring(0, 30) + "...");
+    console.log("🔍 [GET /api/recommend/get] Validando token:", token.substring(0, 30) + "...");
+    console.log("   Token completo:", token);
+    console.log("   RECOMMENDATION_SECRET configurado:", !!process.env.RECOMMENDATION_SECRET);
+    console.log("   RECOMMENDATION_SECRET length:", process.env.RECOMMENDATION_SECRET?.length || 0);
 
     // Validar el token
     const linkData = await validateRecommendationLink(token);
     if (!linkData) {
-      console.error("❌ Token inválido o expirado");
+      console.error("❌ [GET /api/recommend/get] Token inválido o expirado");
+      
+      // Intentar decodificar para debugging
+      try {
+        const parts = token.split(".");
+        if (parts.length === 2) {
+          const payload = Buffer.from(parts[1], "base64url").toString("utf-8");
+          const [hciId, jobId, timestampStr] = payload.split(":");
+          const timestamp = parseInt(timestampStr, 10);
+          const age = Date.now() - timestamp;
+          console.error("   Payload decodificado:", {
+            hyperconnectorId: hciId,
+            jobId: jobId,
+            timestamp: timestamp,
+            timestampDate: new Date(timestamp).toISOString(),
+            ageDays: Math.floor(age / (24 * 60 * 60 * 1000)),
+            currentTime: Date.now(),
+            currentDate: new Date().toISOString(),
+          });
+        }
+      } catch (e) {
+        console.error("   Error decodificando payload:", e);
+      }
+      
       return NextResponse.json(
         { error: "Token inválido o expirado" },
         { status: 401 }
@@ -77,32 +104,15 @@ export async function GET(request: NextRequest) {
     }
 
     // Obtener candidatos recomendables
+    // NOTA: getRecommendableCandidatesForHyperconnector ya filtra por:
+    // - match_score > 60%
+    // - match_source != 'auto'
+    // Y ya incluye match_score y match_source en cada candidato
     const candidates = await getRecommendableCandidatesForHyperconnector(jobId, hyperconnectorId);
 
-    // Obtener match scores de job_candidate_matches para cada candidato
-    const { supabase } = await import("@/src/db/supabaseClient");
-    const candidateIds = candidates.map((c: any) => c.id);
-    
-    let matchScores: Map<string, number> = new Map();
-    if (candidateIds.length > 0) {
-      const { data: matches, error: matchesError } = await supabase
-        .from("job_candidate_matches")
-        .select("candidate_id, match_score")
-        .eq("job_id", jobId)
-        .in("candidate_id", candidateIds);
-
-      if (!matchesError && matches) {
-        matches.forEach((match: any) => {
-          matchScores.set(match.candidate_id, match.match_score);
-        });
-      }
-    }
-
-    // Agregar match_score a cada candidato
-    const candidatesWithMatch = candidates.map((candidate: any) => ({
-      ...candidate,
-      match_score: matchScores.get(candidate.id) || null,
-    }));
+    // Los candidatos ya vienen con match_score y match_source desde getRecommendableCandidatesForHyperconnector
+    // No necesitamos hacer una consulta adicional
+    const candidatesWithMatch = candidates;
 
     // Obtener recomendaciones existentes del hyperconnector para este job
     const { data: existingRecommendations } = await supabase

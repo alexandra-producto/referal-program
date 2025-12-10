@@ -114,29 +114,49 @@ export async function matchJobWithAllCandidates(jobId: string): Promise<number> 
   let errorCount = 0;
   let matchesWithScore: Array<{ candidateId: string; score: number }> = [];
 
-  // Process in batches to avoid overwhelming the system
-  const batchSize = 10;
+  // Process in smaller batches with delays to avoid rate limits
+  const batchSize = 2; // Reducido para evitar rate limits
+  const delayBetweenMatches = 500; // 500ms entre matches
+  const delayBetweenBatches = 2000; // 2 segundos entre batches
+  
   for (let i = 0; i < candidates.length; i += batchSize) {
     const batch = candidates.slice(i, i + batchSize);
     
-    await Promise.all(
-      batch.map(async (candidate) => {
-        try {
-          const result = await matchJobCandidate(jobId, candidate.id);
-          successCount++;
-          if (result.score > 0) {
-            matchesWithScore.push({ candidateId: candidate.id, score: result.score });
-            console.log(`   ✅ [MATCHING] Match encontrado: candidate ${candidate.id} → score: ${result.score}`);
-          }
-        } catch (error: any) {
-          console.error(
-            `   ❌ [MATCHING] Error matching job ${jobId} with candidate ${candidate.id}:`,
-            error.message
-          );
-          errorCount++;
+    // Procesar secuencialmente con delays para evitar rate limits
+    for (let j = 0; j < batch.length; j++) {
+      const candidate = batch[j];
+      try {
+        const result = await matchJobCandidate(jobId, candidate.id, { useAI: true });
+        successCount++;
+        if (result.score > 0) {
+          matchesWithScore.push({ candidateId: candidate.id, score: result.score });
+          console.log(`   ✅ [MATCHING] Match encontrado: candidate ${candidate.id} → score: ${result.score}`);
         }
-      })
-    );
+        
+        // Delay entre matches (excepto el último del batch)
+        if (j < batch.length - 1) {
+          await new Promise((resolve) => setTimeout(resolve, delayBetweenMatches));
+        }
+      } catch (error: any) {
+        console.error(
+          `   ❌ [MATCHING] Error matching job ${jobId} with candidate ${candidate.id}:`,
+          error.message
+        );
+        errorCount++;
+        
+        // Si es un error de rate limit, esperar más tiempo
+        if (error.message.includes("429") || error.message.includes("rate limit")) {
+          console.warn(`   ⏳ Rate limit detectado, esperando 5 segundos...`);
+          await new Promise((resolve) => setTimeout(resolve, 5000));
+        }
+      }
+    }
+
+    // Delay entre batches (excepto el último)
+    if (i + batchSize < candidates.length) {
+      console.log(`   ⏳ Esperando ${delayBetweenBatches / 1000}s antes del siguiente batch...`);
+      await new Promise((resolve) => setTimeout(resolve, delayBetweenBatches));
+    }
 
     console.log(`📋 [MATCHING] Procesados ${Math.min(i + batchSize, candidates.length)}/${candidates.length} candidatos`);
   }

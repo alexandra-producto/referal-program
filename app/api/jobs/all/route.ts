@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/src/db/supabaseClient';
+import { getPotentialCandidatesCount } from '@/src/domain/potentialCandidates';
 
 /**
  * GET /api/jobs/all
@@ -62,16 +63,32 @@ export async function GET(request: NextRequest) {
       });
     }
 
+    // Obtener conteo de candidatos potenciales (matches >= 40%) para cada job
+    const potentialCandidatesCounts = new Map<string, number>();
+    await Promise.all(
+      jobIds.map(async (jobId: string) => {
+        try {
+          const count = await getPotentialCandidatesCount(jobId);
+          potentialCandidatesCounts.set(jobId, count);
+        } catch (error) {
+          console.error(`Error obteniendo conteo de matches para job ${jobId}:`, error);
+          potentialCandidatesCounts.set(jobId, 0);
+        }
+      })
+    );
+
     // Combinar toda la información
     // El status viene directamente de la tabla jobs
     const jobsWithDetails = jobs.map((job: any) => {
       const ownerCandidate = ownerCandidates.get(job.owner_candidate_id);
       const recommendationsCount = recommendationCounts.get(job.id) || 0;
+      const potentialCandidatesCount = potentialCandidatesCounts.get(job.id) || 0;
 
       return {
         ...job,
         ownerCandidate: ownerCandidate || null,
         recommendations_count: recommendationsCount,
+        potential_candidates_count: potentialCandidatesCount,
         // El status viene directamente de jobs.status
         // Valores posibles: "Esperando Recomendaciones", "Recomendaciones Recibidas", 
         // "En Proceso Reclutamiento", "Recomendaciones Rechazadas", "Recomendación Contratada"

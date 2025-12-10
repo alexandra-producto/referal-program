@@ -269,6 +269,7 @@ async function createTestJobWithFullLogs() {
         console.log(`✅ Matches totales: ${matches.length}`);
         console.log(`✅ Matches >= 60%: ${matchesAbove60.length}`);
         console.log(`✅ WhatsApp enviados: ${result.notified}`);
+        console.log(`✅ Emails enviados: ${result.emailsSent || 0}`);
         console.log(`❌ Errores en notificaciones: ${result.errors}`);
         console.log("");
       } else {

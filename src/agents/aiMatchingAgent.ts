@@ -182,7 +182,8 @@ export async function calculateAIMatch(
 
     const result = JSON.parse(jsonLine);
     
-    if (!result.match_score || !result.match_detail) {
+    // Validar que tenga match_score (puede ser 0) y match_detail
+    if (result.match_score === undefined || result.match_score === null || !result.match_detail) {
       throw new Error(`Resultado inválido del matching: ${JSON.stringify(result)}`);
     }
     

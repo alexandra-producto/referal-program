@@ -39,6 +39,8 @@ async function testMatching() {
 
     if (expError) throw new Error(`Error fetching experience: ${expError.message}`);
     
+    console.log(`   📊 Total registros de experiencia encontrados: ${experienceData?.length || 0}`);
+    
     // Get unique candidate IDs
     const candidateIdsWithExperience = [...new Set(
       (experienceData || []).map((exp: any) => exp.candidate_id)
@@ -48,7 +50,8 @@ async function testMatching() {
       console.log("❌ No candidates with experience found.");
       return;
     }
-    console.log(`✅ Found ${candidateIdsWithExperience.length} candidate(s) with experience\n`);
+    console.log(`✅ Found ${candidateIdsWithExperience.length} unique candidate(s) with experience`);
+    console.log(`   (${experienceData?.length || 0} total experience records)\n`);
 
     // Get only those candidates
     console.log("👥 Fetching candidate details...");
@@ -76,6 +79,7 @@ async function testMatching() {
     console.log(`   Jobs: ${jobs.length}`);
     console.log(`   Candidates with experience: ${candidatesWithExperience.length}`);
     console.log(`   Total matches to compute: ${jobs.length * candidatesWithExperience.length}`);
+    console.log(`   Calculation: ${jobs.length} jobs × ${candidatesWithExperience.length} candidates = ${jobs.length * candidatesWithExperience.length} matches`);
     console.log("=".repeat(70) + "\n");
 
     // Track results
@@ -91,6 +95,7 @@ async function testMatching() {
     let totalMatches = 0;
     let successCount = 0;
     let errorCount = 0;
+    let skippedCount = 0;
 
     // Process each job
     for (let jobIndex = 0; jobIndex < jobs.length; jobIndex++) {
@@ -104,6 +109,34 @@ async function testMatching() {
         totalMatches++;
 
         try {
+          // Verificar si ya existe un match para esta combinación
+          const { data: existingMatch } = await supabase
+            .from("job_candidate_matches")
+            .select("id, match_score, match_source")
+            .eq("job_id", job.id)
+            .eq("candidate_id", candidate.id)
+            .maybeSingle();
+
+          if (existingMatch) {
+            // Match ya existe, saltarlo
+            skippedCount++;
+            results.push({
+              jobId: job.id,
+              jobTitle,
+              companyName: job.company_name,
+              candidateId: candidate.id,
+              candidateName: candidate.full_name,
+              score: existingMatch.match_score || 0,
+            });
+
+            // Show progress for every 10 skipped matches
+            if (skippedCount % 10 === 0) {
+              console.log(`   ⏭️  Saltado ${skippedCount} matches existentes...`);
+            }
+            continue; // Saltar este match
+          }
+
+          // No existe, procesar el match
           const result = await matchJobCandidate(job.id, candidate.id);
           successCount++;
 
@@ -117,8 +150,8 @@ async function testMatching() {
           });
 
           // Show progress for every 5 matches
-          if (totalMatches % 5 === 0) {
-            console.log(`   ✓ Matched ${candidate.full_name} (${result.score.toFixed(2)}%) - Progress: ${totalMatches}/${jobs.length * candidatesWithExperience.length}`);
+          if ((successCount + skippedCount) % 5 === 0) {
+            console.log(`   ✓ Matched ${candidate.full_name} (${result.score.toFixed(2)}%) - Progress: ${successCount + skippedCount}/${jobs.length * candidatesWithExperience.length} (${skippedCount} saltados)`);
           }
         } catch (error: any) {
           errorCount++;
@@ -132,8 +165,9 @@ async function testMatching() {
     console.log("✅ MATCHING COMPLETE");
     console.log("=".repeat(70));
     console.log(`\n📊 Statistics:`);
-    console.log(`   Total matches computed: ${totalMatches}`);
-    console.log(`   Successful: ${successCount}`);
+    console.log(`   Total matches evaluated: ${totalMatches}`);
+    console.log(`   New matches computed: ${successCount}`);
+    console.log(`   Existing matches skipped: ${skippedCount}`);
     console.log(`   Errors: ${errorCount}`);
 
     // Top matches

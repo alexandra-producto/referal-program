@@ -77,7 +77,7 @@ export async function createJob(
                 notifyHyperconnectorsForJob(data.id, baseUrl)
                   .then((result) => {
                     console.log(
-                      `\n✅ [JOBS] Notificación completada: ${result.notified} notificados, ${result.errors} errores`
+                      `\n✅ [JOBS] Notificación completada: ${result.notified} WhatsApp, ${result.emailsSent || 0} emails, ${result.errors} errores`
                     );
                   })
                   .catch((err) => {
