@@ -40,10 +40,6 @@ export interface MatchScoreData {
     score: number;
     reason: string;
   };
-  trajectory: {
-    score: number;
-    reason: string;
-  };
   stability: {
     score: number;
     reason: string;
@@ -52,7 +48,6 @@ export interface MatchScoreData {
   weights: {
     seniority_match: number;
     role_fit: number;
-    trajectory: number;
     industry: number;
     stability: number;
   };
@@ -73,8 +68,6 @@ const getCategoryIcon = (category: string) => {
       return <Briefcase className="h-5 w-5" />;
     case "industry":
       return <Building className="h-5 w-5" />;
-    case "trajectory":
-      return <TrendingUp className="h-5 w-5" />;
     case "stability":
       return <CheckCircle2 className="h-5 w-5" />;
     default:
@@ -90,8 +83,6 @@ const getCategoryLabel = (category: string) => {
       return "Fit del Rol";
     case "industry":
       return "Industria";
-    case "trajectory":
-      return "Trayectoria";
     case "stability":
       return "Estabilidad Laboral";
     default:
@@ -167,12 +158,8 @@ function normalizeMatchData(matchData: any): MatchScoreData | null {
       industry: {
         job_industries: [],
         candidate_industries: [],
-        score: matchData.trajectory?.score || 0,
+        score: matchData.trajectory?.score || matchData.industry?.score || 0,
         reason: "Datos de estructura antigua - recalcular match para ver análisis completo",
-      },
-      trajectory: {
-        score: matchData.trajectory?.score || 0,
-        reason: matchData.trajectory?.reasoning || "Datos de estructura antigua",
       },
       stability: {
         score: matchData.stability?.score || 0,
@@ -181,8 +168,7 @@ function normalizeMatchData(matchData: any): MatchScoreData | null {
       weights: matchData.weights || {
         seniority_match: 0.4,
         role_fit: 0.2,
-        trajectory: 0.15,
-        industry: 0.15,
+        industry: 0.3,
         stability: 0.1,
       },
       calculated_at: matchData.calculated_at,
@@ -235,16 +221,11 @@ export function MatchScorePopover({
     normalizedData.industry && {
       key: "industry",
       data: normalizedData.industry,
-      weight: normalizedData.weights?.industry || 0.15,
+      weight: normalizedData.weights?.industry || 0.3,
       extra: {
         job_industries: normalizedData.industry.job_industries || [],
         candidate_industries: normalizedData.industry.candidate_industries || [],
       },
-    },
-    normalizedData.trajectory && {
-      key: "trajectory",
-      data: normalizedData.trajectory,
-      weight: normalizedData.weights?.trajectory || 0.15,
     },
     normalizedData.stability && {
       key: "stability",
