@@ -28,6 +28,14 @@ interface Job {
   job_title: string;
   company_name: string;
   description: string | null;
+  owner_role_title: string | null;
+  owner_candidate_id: string | null;
+}
+
+interface OwnerCandidate {
+  id: string;
+  full_name: string;
+  current_job_title: string | null;
 }
 
 export default function PotentialCandidatesPage({
@@ -40,8 +48,10 @@ export default function PotentialCandidatesPage({
   
   const [loading, setLoading] = useState(true);
   const [job, setJob] = useState<Job | null>(null);
+  const [ownerCandidate, setOwnerCandidate] = useState<OwnerCandidate | null>(null);
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -54,6 +64,7 @@ export default function PotentialCandidatesPage({
         }
         const result = await response.json();
         setJob(result.job);
+        setOwnerCandidate(result.ownerCandidate || null);
         setCandidates(result.candidates || []);
       } catch (err: any) {
         setError("Error al cargar los datos");
@@ -123,15 +134,56 @@ export default function PotentialCandidatesPage({
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
         >
-          <Card className="overflow-hidden backdrop-blur-[130px] bg-white/30 border border-white/40 shadow-[8px_8px_30px_0px_rgba(0,0,0,0.06)] rounded-3xl">
-            <div className="p-8 space-y-4">
-              <h1 className="text-gray-800 text-[48px] font-bold">{job.job_title}</h1>
-              <p className="text-gray-700 text-lg">{job.description || "Sin descripción"}</p>
-              <div className="flex flex-wrap gap-4 pt-2">
-                <div className="flex items-center gap-2 text-gray-600">
-                  <Building className="h-4 w-4" />
-                  <span>{job.company_name}</span>
+          <Card className="overflow-hidden backdrop-blur-[130px] bg-white/40 border border-white/50 shadow-xl rounded-3xl">
+            <div className="p-8 space-y-6">
+              {/* Job Title - Grande y centrado */}
+              <h1 className="text-gray-800 text-[48px] font-semibold text-center leading-tight">
+                {job.job_title}
+              </h1>
+              
+              {/* Descripción del job si existe */}
+              {job.description && (
+                <div className="text-gray-700 text-lg text-center max-w-3xl mx-auto">
+                  <p
+                    className={`${
+                      !isDescriptionExpanded ? "line-clamp-3" : ""
+                    } transition-all duration-300`}
+                  >
+                    {job.description}
+                  </p>
+                  {job.description.length > 150 && (
+                    <button
+                      onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+                      className="mt-2 text-blue-600 hover:text-blue-700 font-semibold text-sm underline transition-colors"
+                    >
+                      {isDescriptionExpanded ? "Ver menos" : "Ver más"}
+                    </button>
+                  )}
                 </div>
+              )}
+
+              {/* Información del owner candidate y empresa */}
+              <div className="flex flex-wrap items-center justify-center gap-6 pt-4">
+                {ownerCandidate && (
+                  <>
+                    <div className="flex items-center gap-2 text-gray-700">
+                      <User className="h-4 w-4" />
+                      <span>{ownerCandidate.full_name}</span>
+                    </div>
+                    {(job.owner_role_title || ownerCandidate.current_job_title) && (
+                      <div className="flex items-center gap-2 text-gray-700">
+                        <Users className="h-4 w-4" />
+                        <span>{job.owner_role_title || ownerCandidate.current_job_title}</span>
+                      </div>
+                    )}
+                  </>
+                )}
+                {job.company_name && (
+                  <div className="flex items-center gap-2 text-gray-700">
+                    <Building className="h-4 w-4" />
+                    <span>{job.company_name}</span>
+                  </div>
+                )}
               </div>
             </div>
           </Card>

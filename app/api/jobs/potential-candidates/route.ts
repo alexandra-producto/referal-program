@@ -31,13 +31,28 @@ export async function GET(request: NextRequest) {
     // Obtener candidatos potenciales
     const candidates = await getPotentialCandidatesForJob(jobId);
 
+    // Obtener información del owner candidate si existe
+    let ownerCandidate = null;
+    if (job.owner_candidate_id) {
+      const { supabase } = await import("@/src/db/supabaseClient");
+      const { data: owner } = await supabase
+        .from("candidates")
+        .select("id, full_name, current_job_title")
+        .eq("id", job.owner_candidate_id)
+        .maybeSingle();
+      ownerCandidate = owner;
+    }
+
     return NextResponse.json({
       job: {
         id: job.id,
         job_title: job.job_title,
         company_name: job.company_name,
         description: job.description,
+        owner_role_title: job.owner_role_title,
+        owner_candidate_id: job.owner_candidate_id,
       },
+      ownerCandidate: ownerCandidate || null,
       candidates,
       count: candidates.length,
     });
