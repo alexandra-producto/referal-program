@@ -23,11 +23,36 @@ export async function GET(
     const { token } = await params;
 
     console.log("🔍 Validando token:", token.substring(0, 30) + "...");
+    console.log("   Token completo:", token);
 
     // Validar el token
     const linkData = await validateRecommendationLink(token);
     if (!linkData) {
       console.error("❌ Token inválido o expirado");
+      console.error("   Intentando decodificar token para debugging...");
+      
+      // Intentar decodificar el payload para debugging
+      try {
+        const parts = token.split(".");
+        if (parts.length === 2) {
+          const payload = Buffer.from(parts[1], "base64url").toString("utf-8");
+          const [hciId, jobId, timestampStr] = payload.split(":");
+          const timestamp = parseInt(timestampStr, 10);
+          const age = Date.now() - timestamp;
+          console.error("   Payload decodificado:", {
+            hyperconnectorId: hciId,
+            jobId: jobId,
+            timestamp: timestamp,
+            timestampDate: new Date(timestamp).toISOString(),
+            ageDays: Math.floor(age / (24 * 60 * 60 * 1000)),
+            currentTime: Date.now(),
+            currentDate: new Date().toISOString(),
+          });
+        }
+      } catch (e) {
+        console.error("   Error decodificando payload:", e);
+      }
+      
       return NextResponse.json(
         { error: "Token inválido o expirado" },
         { status: 401 }

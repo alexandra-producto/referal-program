@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState, use } from "react";
-import { Users, MapPin, Building, User, Send, UserPlus, Link as LinkIcon, ArrowLeft, CheckCircle2 } from "lucide-react";
+import { Users, MapPin, Building, User, Send, UserPlus, Link as LinkIcon, ArrowLeft, CheckCircle2, Info } from "lucide-react";
+import { MatchScorePopover, MatchScoreData } from "@/components/MatchScorePopover";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -27,8 +28,10 @@ interface Candidate {
   country?: string | null;
   industry?: string | null;
   profile_picture_url?: string | null;
+  linkedin_url?: string | null;
   fit_score: number | null;
   match_score: number | null; // Match score from job_candidate_matches
+  match_detail: MatchScoreData | null; // Match details from job_candidate_matches
   shared_experience: string | null;
 }
 
@@ -86,6 +89,7 @@ export default function RecommendPage({
     alreadyRecommendedCandidateIds?: string[];
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -354,9 +358,23 @@ export default function RecommendPage({
               
               {/* Descripción del job si existe */}
               {job.description && (
-                <p className="text-gray-700 text-lg text-center max-w-3xl mx-auto">
-                  {job.description}
-                </p>
+                <div className="text-gray-700 text-lg text-center max-w-3xl mx-auto">
+                  <p
+                    className={`${
+                      !isDescriptionExpanded ? "line-clamp-3" : ""
+                    } transition-all duration-300`}
+                  >
+                    {job.description}
+                  </p>
+                  {job.description.length > 150 && (
+                    <button
+                      onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+                      className="mt-2 text-blue-600 hover:text-blue-700 font-semibold text-sm underline transition-colors"
+                    >
+                      {isDescriptionExpanded ? "Ver menos" : "Ver más"}
+                    </button>
+                  )}
+                </div>
               )}
 
               {/* Información del owner candidate y empresa */}
@@ -446,20 +464,37 @@ export default function RecommendPage({
                             </p>
                           )}
                         </div>
-                        {/* Match Score Badge - Esquina superior derecha */}
+                        {/* Match Score Badge - Esquina superior derecha - Clickeable */}
                         {(person.match_score !== null && person.match_score !== undefined) && (
-                          <div className="flex items-center gap-2 bg-white/80 rounded-xl px-4 py-2 border border-gray-200 shadow-sm">
-                            <div
-                              className={`h-3 w-3 rounded-full ${
-                                person.match_score >= 90
-                                  ? "bg-green-500"
-                                  : person.match_score >= 75
-                                  ? "bg-yellow-500"
-                                  : "bg-orange-500"
-                              }`}
-                            />
-                            <span className="text-gray-800 font-semibold text-base">{Math.round(person.match_score)}%</span>
-                          </div>
+                          <MatchScorePopover
+                            matchData={person.match_detail}
+                            totalScore={person.match_score}
+                            trigger={
+                              <motion.div
+                                whileHover={{ scale: 1.05, y: -2 }}
+                                whileTap={{ scale: 0.98 }}
+                                className="flex items-center gap-3 bg-white/90 rounded-xl px-5 py-3 border-2 border-blue-200/50 shadow-lg hover:shadow-xl hover:border-blue-400/70 transition-all duration-300 cursor-pointer group backdrop-blur-sm"
+                              >
+                                <div
+                                  className={`h-3 w-3 rounded-full ${
+                                    person.match_score >= 90
+                                      ? "bg-green-500"
+                                      : person.match_score >= 75
+                                      ? "bg-yellow-500"
+                                      : "bg-orange-500"
+                                  }`}
+                                />
+                                <span className="text-gray-800 font-bold text-base">
+                                  {Math.round(person.match_score)}%
+                                </span>
+                                <div className="h-4 w-px bg-gray-300"></div>
+                                <div className="flex items-center gap-1.5 text-gray-600 group-hover:text-blue-600 transition-colors">
+                                  <Info className="h-4 w-4" />
+                                  <span className="text-sm font-medium">Ver análisis</span>
+                                </div>
+                              </motion.div>
+                            }
+                          />
                         )}
                       </div>
                       
@@ -483,6 +518,21 @@ export default function RecommendPage({
                         <div className="flex items-center gap-2 text-gray-600 text-sm">
                           <Users className="h-4 w-4" />
                           <span>{person.shared_experience}</span>
+                        </div>
+                      )}
+                      
+                      {/* LinkedIn Link */}
+                      {person.linkedin_url && (
+                        <div className="flex items-center gap-2">
+                          <a
+                            href={person.linkedin_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-semibold text-sm underline transition-colors"
+                          >
+                            <LinkIcon className="h-4 w-4" />
+                            Ver perfil de LinkedIn
+                          </a>
                         </div>
                       )}
                     </div>

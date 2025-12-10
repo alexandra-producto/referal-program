@@ -87,6 +87,10 @@ export function buildHciWhatsappMessage(
     ? "Vimos que conoces a personas que podrían encajar perfecto con este reto:" 
     : "Vimos que conoces a alguien que podría encajar perfecto con este reto:";
 
+  // El link ya viene con /recommend-redirect/ para localhost, que maneja automáticamente
+  // la conversión de https:// a http://, así que no necesitamos normalizarlo aquí
+  const finalUrl = recommendUrl;
+
   return `Hola ${hciFirstName}
 
 ${ownerName} está buscando a una persona para su rol de: ${job.role_title}
@@ -103,5 +107,5 @@ ${listaCandidatos}
 
 ¿Nos ayudas con una recomendación?
 
-Entra aquí para escribirla: ${recommendUrl}`.trim();
+Entra aquí para escribirla: ${finalUrl}`.trim();
 }

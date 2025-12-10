@@ -12,6 +12,7 @@ import { supabase } from "../db/supabaseClient";
 import { getJobById } from "../domain/jobs";
 import { getRecommendableCandidatesForHyperconnector } from "../domain/hyperconnectorCandidates";
 import { sendHciWhatsappNotification } from "./sendHciWhatsappNotification";
+import { sendHciEmailNotification } from "./sendHciEmailNotification";
 import { getHyperconnectorById } from "../domain/hyperconnectors";
 import { getAppUrl } from "../utils/appUrl";
 
@@ -21,7 +22,7 @@ import { getAppUrl } from "../utils/appUrl";
 export async function notifyHyperconnectorsForJob(
   jobId: string,
   baseUrl?: string
-): Promise<{ notified: number; errors: number }> {
+): Promise<{ notified: number; emailsSent: number; errors: number }> {
   console.log(`\n🔔 [NOTIFY] Iniciando notificación de hyperconnectors para job: ${jobId}`);
   
   // Si no se proporciona baseUrl, usar getAppUrl() que detecta VERCEL_URL automáticamente
@@ -42,7 +43,7 @@ export async function notifyHyperconnectorsForJob(
     console.log(`\n🔔 [NOTIFY] Paso 2: Buscando job_candidate_matches...`);
     const { data: matches, error: matchesError } = await supabase
       .from("job_candidate_matches")
-      .select("candidate_id, match_score")
+      .select("candidate_id, match_score, match_source")
       .eq("job_id", jobId);
 
     if (matchesError) {
@@ -51,19 +52,25 @@ export async function notifyHyperconnectorsForJob(
 
     if (!matches || matches.length === 0) {
       console.log(`   ℹ️  No hay matches para este job, no se enviarán notificaciones`);
-      return { notified: 0, errors: 0 };
+      return { notified: 0, emailsSent: 0, errors: 0 };
     }
 
     console.log(`   ✅ Encontrados ${matches.length} candidatos matcheados`);
     
-    // Filtrar solo matches con score >= 60% (mínimo requerido)
+    // Filtrar solo matches que cumplan:
+    // - match_score > 60% (mínimo requerido, estricto: mayor a 60, no igual)
+    // - match_source != 'auto' (excluir matches automáticos que no se puntuaron bien)
     const MIN_MATCH_SCORE = 60;
-    const matchesWithScore = matches.filter((m: any) => (m.match_score || 0) >= MIN_MATCH_SCORE);
-    console.log(`   📊 Matches con score >= ${MIN_MATCH_SCORE}%: ${matchesWithScore.length}`);
+    const matchesWithScore = matches.filter((m: any) => {
+      const score = m.match_score || 0;
+      const source = m.match_source || 'auto';
+      return score > MIN_MATCH_SCORE && source !== 'auto';
+    });
+    console.log(`   📊 Matches con score > ${MIN_MATCH_SCORE}% y source != 'auto': ${matchesWithScore.length}`);
     
     if (matchesWithScore.length === 0) {
-      console.log(`   ℹ️  No hay matches con score >= ${MIN_MATCH_SCORE}%, no se enviarán notificaciones`);
-      return { notified: 0, errors: 0 };
+      console.log(`   ℹ️  No hay matches con score > ${MIN_MATCH_SCORE}% y source != 'auto', no se enviarán notificaciones`);
+      return { notified: 0, emailsSent: 0, errors: 0 };
     }
 
     // 3. Obtener todos los candidatos únicos que matchean (solo con score >= 60%)
@@ -106,7 +113,7 @@ export async function notifyHyperconnectorsForJob(
 
     if (allHyperconnectorCandidates.length === 0) {
       console.log(`   ℹ️  No hay hyperconnectors con estos candidatos en su red`);
-      return { notified: 0, errors: 0 };
+      return { notified: 0, emailsSent: 0, errors: 0 };
     }
 
     console.log(`   ✅ Total de relaciones encontradas: ${allHyperconnectorCandidates.length}`);
@@ -117,9 +124,10 @@ export async function notifyHyperconnectorsForJob(
     )];
     console.log(`   🔗 Hyperconnectors únicos encontrados: ${hyperconnectorIds.length}`);
 
-    // 6. Para cada hyperconnector, obtener sus candidatos recomendables y enviar WhatsApp
+    // 6. Para cada hyperconnector, obtener sus candidatos recomendables y enviar WhatsApp y Email
     console.log(`\n🔔 [NOTIFY] Paso 4: Procesando cada hyperconnector...`);
     let notified = 0;
+    let emailsSent = 0;
     let errors = 0;
 
     for (let i = 0; i < hyperconnectorIds.length; i++) {
@@ -136,6 +144,30 @@ export async function notifyHyperconnectorsForJob(
         }
 
         console.log(`   ✅ Hyperconnector encontrado: ${hyperconnector.full_name}`);
+
+        // Obtener email del hyperconnector
+        let hciEmail = (hyperconnector as any).email;
+        
+        // Si no tiene email, intentar obtenerlo desde el candidate asociado
+        if (!hciEmail && (hyperconnector as any).candidate_id) {
+          console.log(`   🔄 Buscando email en candidate asociado...`);
+          const { data: candidate } = await supabase
+            .from("candidates")
+            .select("email")
+            .eq("id", (hyperconnector as any).candidate_id)
+            .maybeSingle();
+          
+          if (candidate && (candidate as any).email) {
+            hciEmail = (candidate as any).email;
+            console.log(`   ✅ Email encontrado en candidate: ${hciEmail}`);
+          }
+        }
+        
+        if (hciEmail) {
+          console.log(`   📧 Email encontrado: ${hciEmail}`);
+        } else {
+          console.log(`   ⚠️  No se encontró email para ${hyperconnector.full_name}`);
+        }
 
         // Obtener teléfono: primero intentar desde hyperconnector, luego desde candidate, luego usar TEST_PHONE_NUMBER
         let phoneNumber = (hyperconnector as any).phone_number;
@@ -178,13 +210,20 @@ export async function notifyHyperconnectorsForJob(
 
         // Solo enviar si hay candidatos recomendables
         if (recommendableCandidates.length === 0) {
-          console.log(`   ⏭️  No hay candidatos recomendables (intersección vacía), saltando...`);
+          console.log(`   ⏭️  No hay candidatos recomendables (filtrados por score > 60% y source != 'auto'), saltando...`);
           continue;
         }
 
         console.log(`   ✅ Candidatos recomendables encontrados: ${recommendableCandidates.length}`);
         recommendableCandidates.forEach((c, idx) => {
-          console.log(`      ${idx + 1}. ${c.full_name} (match_score: ${c.match_score || "N/A"})`);
+          console.log(`      ${idx + 1}. ${c.full_name} (match_score: ${c.match_score || "N/A"}%, source: ${c.match_source || "N/A"})`);
+        });
+
+        // IMPORTANTE: Para WhatsApp, solo mostrar los 3 candidatos con mayor puntaje
+        const topCandidatesForWhatsApp = recommendableCandidates.slice(0, 3);
+        console.log(`   📱 Candidatos para WhatsApp (top 3): ${topCandidatesForWhatsApp.length}`);
+        topCandidatesForWhatsApp.forEach((c, idx) => {
+          console.log(`      ${idx + 1}. ${c.full_name} (${c.match_score || "N/A"}%)`);
         });
 
         console.log(`   📤 Enviando WhatsApp a ${hyperconnector.full_name}...`);
@@ -219,7 +258,8 @@ export async function notifyHyperconnectorsForJob(
           requirements_json: job.requirements_json || null,
         };
 
-        const candidatesData = recommendableCandidates.map(c => ({
+        // Usar solo los top 3 candidatos para WhatsApp
+        const candidatesData = topCandidatesForWhatsApp.map(c => ({
           full_name: c.full_name,
           current_company: c.current_company,
           fit_score: c.match_score || null,
@@ -227,18 +267,54 @@ export async function notifyHyperconnectorsForJob(
         }));
 
         // Enviar WhatsApp
-        const result = await sendHciWhatsappNotification(
-          phoneNumber,
-          hciData,
-          jobData,
-          candidatesData,
-          appUrl,
-          ownerCandidate
-        );
+        let whatsappResult = null;
+        if (phoneNumber) {
+          try {
+            whatsappResult = await sendHciWhatsappNotification(
+              phoneNumber,
+              hciData,
+              jobData,
+              candidatesData,
+              appUrl,
+              ownerCandidate
+            );
 
-        console.log(`      ✅ WhatsApp enviado (SID: ${result.sid})`);
-        console.log(`      🔗 Link: ${result.recommendUrl}`);
-        notified++;
+            console.log(`      ✅ WhatsApp enviado (SID: ${whatsappResult.sid})`);
+            console.log(`      🔗 Link: ${whatsappResult.recommendUrl}`);
+            notified++;
+          } catch (whatsappError: any) {
+            console.error(`      ❌ Error enviando WhatsApp: ${whatsappError.message}`);
+            errors++;
+          }
+        }
+
+        // Enviar Email
+        let emailResult = null;
+        if (hciEmail) {
+          try {
+            console.log(`   📧 Enviando email a ${hyperconnector.full_name}...`);
+            
+            emailResult = await sendHciEmailNotification(
+              hciEmail,
+              {
+                id: hyperconnector.id,
+                full_name: hyperconnector.full_name,
+                email: hciEmail,
+              },
+              jobData,
+              candidatesData,
+              appUrl,
+              ownerCandidate
+            );
+
+            console.log(`      ✅ Email enviado (Message ID: ${emailResult.messageId || "N/A"})`);
+            console.log(`      🔗 Link: ${emailResult.recommendUrl}`);
+            emailsSent++;
+          } catch (emailError: any) {
+            console.error(`      ❌ Error enviando email: ${emailError.message}`);
+            errors++;
+          }
+        }
 
       } catch (error: any) {
         console.error(`   ❌ Error notificando hyperconnector ${hyperconnectorId}:`, error.message);
@@ -246,8 +322,8 @@ export async function notifyHyperconnectorsForJob(
       }
     }
 
-    console.log(`\n✅ Notificación completa: ${notified} enviados, ${errors} errores`);
-    return { notified, errors };
+    console.log(`\n✅ Notificación completa: ${notified} WhatsApp enviados, ${emailsSent} emails enviados, ${errors} errores`);
+    return { notified, emailsSent, errors };
 
   } catch (error: any) {
     console.error(`❌ Error en notifyHyperconnectorsForJob:`, error.message);

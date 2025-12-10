@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { validateCreateJobRequest } from '@/src/types/jobCreation';
 import { createJobFromCandidate } from '@/src/services/jobCreationService';
+import { getPotentialCandidatesCount } from '@/src/domain/potentialCandidates';
 
 /**
  * GET /api/jobs
@@ -53,10 +54,25 @@ export async function GET(request: NextRequest) {
         });
       }
 
+      // Obtener conteo de candidatos potenciales (matches >= 40%) para cada job
+      const potentialCandidatesCounts = new Map<string, number>();
+      await Promise.all(
+        jobIds.map(async (jobId: string) => {
+          try {
+            const count = await getPotentialCandidatesCount(jobId);
+            potentialCandidatesCounts.set(jobId, count);
+          } catch (error) {
+            console.error(`Error obteniendo conteo de matches para job ${jobId}:`, error);
+            potentialCandidatesCounts.set(jobId, 0);
+          }
+        })
+      );
+
       // Agregar conteo a cada job
       const jobsWithCounts = jobs.map((job: any) => ({
         ...job,
         recommendations_count: recommendationCounts.get(job.id) || 0,
+        potential_candidates_count: potentialCandidatesCounts.get(job.id) || 0,
       }));
 
       return NextResponse.json({ jobs: jobsWithCounts });

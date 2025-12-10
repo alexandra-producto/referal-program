@@ -54,11 +54,12 @@ async function processCandidates(links: any[], jobId: string) {
   const candidateIds = links.map((l) => l.candidate_id);
 
   // 2) matches job ↔ candidatos (opcional, si la tabla existe)
+  // IMPORTANTE: Obtener también match_source y match_detail para filtrar por fuente != 'auto'
   let matches: any[] = [];
   try {
     const { data: jobMatches, error: matchesError } = await supabase
       .from("job_candidate_matches")
-      .select("candidate_id, match_score")
+      .select("candidate_id, match_score, match_source, match_detail")
       .eq("job_id", jobId)
       .in("candidate_id", candidateIds);
 
@@ -71,13 +72,13 @@ async function processCandidates(links: any[], jobId: string) {
   }
 
   const matchByCandidateId = new Map(
-    matches.map((m) => [m.candidate_id, m.match_score])
+    matches.map((m) => [m.candidate_id, { score: m.match_score, source: m.match_source, detail: m.match_detail }])
   );
 
   // 3) info de candidatos (obtener más campos para el diseño)
   const { data: candidates, error: candidatesError } = await supabase
     .from("candidates")
-    .select("id, full_name, current_company, current_job_title, country, industry, profile_picture_url")
+    .select("id, full_name, current_company, current_job_title, country, industry, profile_picture_url, linkedin_url")
     .in("id", candidateIds);
 
   if (candidatesError) throw new Error(candidatesError.message);
@@ -89,27 +90,43 @@ async function processCandidates(links: any[], jobId: string) {
 
   // IMPORTANTE: Solo devolver candidatos que están TANTO en hyperconnector_candidates
   // COMO en job_candidate_matches (intersección de ambas tablas)
-  // Y que tengan un match_score >= 60% (mínimo requerido)
-  const MIN_MATCH_SCORE = 60;
+  // Y que cumplan:
+  // - match_score >= 20% (mínimo requerido, más permisivo para mostrar candidatos con relación)
+  // - match_source != 'auto' (excluir matches automáticos que no se puntuaron bien)
+  // Si un candidato tiene relación con el hyperconnector, es más valioso mostrarlo aunque tenga score bajo
+  const MIN_MATCH_SCORE = 20; // Bajado de 60 a 20 para ser más permisivo
   const filteredCandidates = matches.length > 0
     ? (candidates || []).filter((c) => {
-        const score = matchByCandidateId.get(c.id);
-        return score !== undefined && score >= MIN_MATCH_SCORE;
+        const matchData = matchByCandidateId.get(c.id);
+        if (!matchData) return false;
+        
+        const score = matchData.score;
+        const source = matchData.source;
+        
+        // Filtrar: score >= 20 Y source != 'auto'
+        // Si tiene relación con hyperconnector, mostrarlo aunque tenga score bajo
+        return score !== undefined && score >= MIN_MATCH_SCORE && source !== 'auto';
       })
     : []; // No devolver candidatos si no hay matches
 
   return filteredCandidates
-    .map((c) => ({
-      id: c.id,
-      full_name: c.full_name,
-      current_company: c.current_company,
-      current_job_title: c.current_job_title || null,
-      country: c.country || null,
-      industry: c.industry || null,
-      profile_picture_url: c.profile_picture_url || null,
-      match_score: matchByCandidateId.get(c.id) || null,
-      shared_experience: linkByCandidateId.get(c.id) || null,
-    }))
+    .map((c) => {
+      const matchData = matchByCandidateId.get(c.id);
+      return {
+        id: c.id,
+        full_name: c.full_name,
+        current_company: c.current_company,
+        current_job_title: c.current_job_title || null,
+        country: c.country || null,
+        industry: c.industry || null,
+        profile_picture_url: c.profile_picture_url || null,
+        linkedin_url: c.linkedin_url || null,
+        match_score: matchData?.score || null,
+        match_source: matchData?.source || null,
+        match_detail: matchData?.detail || null,
+        shared_experience: linkByCandidateId.get(c.id) || null,
+      };
+    })
     .sort((a, b) => (b.match_score || 0) - (a.match_score || 0));
 }
 

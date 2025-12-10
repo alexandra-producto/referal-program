@@ -222,7 +222,7 @@ async function testCreateJobWithMatching() {
     console.log("=".repeat(80));
     console.log("");
 
-    let whatsappResult = { notified: 0, errors: 0 };
+        let whatsappResult = { notified: 0, emailsSent: 0, errors: 0 };
 
     if (matchesAbove50.length > 0) {
       try {
@@ -239,6 +239,7 @@ async function testCreateJobWithMatching() {
         
         console.log("");
         console.log(`   ✅ WhatsApp enviados: ${whatsappResult.notified}`);
+        console.log(`   ✅ Emails enviados: ${whatsappResult.emailsSent || 0}`);
         console.log(`   ❌ Errores: ${whatsappResult.errors}`);
         console.log("");
       } catch (error: any) {

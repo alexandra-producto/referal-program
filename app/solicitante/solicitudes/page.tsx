@@ -17,6 +17,7 @@ interface Job {
   status: string;
   created_at: string;
   recommendations_count: number;
+  potential_candidates_count: number;
   requirements_json?: any;
   modality?: string;
   document_url?: string | null;
@@ -242,6 +243,7 @@ export default function MisSolicitudesPage() {
                     <th className="px-6 py-4 text-left text-gray-800 font-semibold">Perfil Solicitado</th>
                     <th className="px-6 py-4 text-left text-gray-800 font-semibold">Descripción de Rol</th>
                     <th className="px-6 py-4 text-left text-gray-800 font-semibold">Empresa</th>
+                    <th className="px-6 py-4 text-left text-gray-800 font-semibold">Matches</th>
                     <th className="px-6 py-4 text-left text-gray-800 font-semibold">Recomendaciones</th>
                   </tr>
                 </thead>
@@ -272,6 +274,24 @@ export default function MisSolicitudesPage() {
                           <Building className="h-4 w-4" />
                           <span>{job.company_name}</span>
                         </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <Button
+                          variant="outline"
+                          disabled={job.potential_candidates_count === 0}
+                          onClick={() => {
+                            if (job.potential_candidates_count > 0) {
+                              router.push(`/solicitante/solicitudes/${job.id}/candidatos-potenciales`);
+                            }
+                          }}
+                          className={`rounded-xl ${
+                            job.potential_candidates_count === 0
+                              ? "bg-gray-300 text-gray-500 border-gray-300 cursor-not-allowed"
+                              : "bg-blue-500 hover:bg-blue-600 text-white border-blue-500"
+                          }`}
+                        >
+                          Ver {job.potential_candidates_count}
+                        </Button>
                       </td>
                       <td className="px-6 py-4">
                         <Button
@@ -345,6 +365,22 @@ export default function MisSolicitudesPage() {
                     <Eye className="h-3 w-3" />
                     Ver detalles
                   </button>
+                  <Button
+                    variant="outline"
+                    disabled={job.potential_candidates_count === 0}
+                    onClick={() => {
+                      if (job.potential_candidates_count > 0) {
+                        router.push(`/solicitante/solicitudes/${job.id}/candidatos-potenciales`);
+                      }
+                    }}
+                    className={`w-full rounded-xl mb-3 ${
+                      job.potential_candidates_count === 0
+                        ? "bg-gray-300 text-gray-500 border-gray-300 cursor-not-allowed"
+                        : "bg-blue-500 hover:bg-blue-600 text-white border-blue-500"
+                    }`}
+                  >
+                    Ver {job.potential_candidates_count} Candidatos Potenciales
+                  </Button>
                   <Button
                     variant="outline"
                     disabled={job.recommendations_count === 0}

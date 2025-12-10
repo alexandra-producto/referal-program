@@ -86,19 +86,42 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 # MODELOS PYDANTIC (Structured Outputs)
 # ============================================================================
 
-class Dimension(BaseModel):
-    """Dimensión de evaluación con score y razonamiento"""
-    score: float = Field(..., ge=0.0, le=100.0, description="Score de 0.0 a 100.0 (puede incluir decimales)")
-    reasoning: str = Field(..., description="Razonamiento breve y directo sobre la evidencia")
+class SeniorityMatch(BaseModel):
+    """Evaluación de match de seniority usando Career Matrix"""
+    job_level: str = Field(..., description="Nivel del job en Career Matrix (ej: PM3, SE2)")
+    candidate_level: str = Field(..., description="Nivel del candidato en Career Matrix (ej: PM3, SE2)")
+    score: float = Field(..., ge=0.0, le=100.0, description="Score de 0.0 a 100.0")
+    reason: str = Field(..., description="Razón del score, especialmente si levels no coinciden")
+
+
+class RoleFit(BaseModel):
+    """Evaluación de fit del rol"""
+    job_role: str = Field(..., description="Rol requerido en el job")
+    candidate_role: str = Field(..., description="Rol actual del candidato")
+    score: float = Field(..., ge=0.0, le=100.0, description="Score de 0.0 a 100.0")
+    reason: str = Field(..., description="Razón del score, especialmente si hay mismatch")
+
+
+class Industry(BaseModel):
+    """Evaluación de industria"""
+    job_industries: List[str] = Field(..., description="Industrias requeridas por el job")
+    candidate_industries: List[str] = Field(..., description="Industrias donde ha trabajado el candidato")
+    score: float = Field(..., ge=0.0, le=100.0, description="Score de 0.0 a 100.0")
+    reason: str = Field(..., description="Razón del score basada en alineación de industrias")
+
+
+class Stability(BaseModel):
+    """Evaluación de estabilidad laboral"""
+    score: float = Field(..., ge=0.0, le=100.0, description="Score de 0.0 a 100.0")
+    reason: str = Field(..., description="Razón del score basada en historial de empleo")
 
 
 class MatchAnalysis(BaseModel):
     """Análisis completo de match entre job y candidato"""
-    trajectory: Dimension = Field(..., description="Evaluación de trayectoria e industria")
-    role_fit: Dimension = Field(..., description="Evaluación de fit del rol y seniority")
-    hard_skills: Dimension = Field(..., description="Evaluación de hard skills y non-negotiables")
-    stability: Dimension = Field(..., description="Evaluación de estabilidad laboral")
-    key_gap: str = Field(..., description="Brecha principal detectada entre candidato y vacante")
+    seniority_match: SeniorityMatch = Field(..., description="Evaluación de match de seniority (40%)")
+    role_fit: RoleFit = Field(..., description="Evaluación de fit del rol (20%)")
+    industry: Industry = Field(..., description="Evaluación de industria (30%)")
+    stability: Stability = Field(..., description="Evaluación de estabilidad laboral (10%)")
 
 
 # ============================================================================
@@ -158,14 +181,32 @@ def generate_candidate_resume(candidate_experiences: List[Dict[str, Any]]) -> st
     if not candidate_experiences:
         return "Sin experiencia laboral registrada."
     
+    # Función helper para parsear fecha de inicio de forma segura
+    def parse_start_date(exp: Dict[str, Any]) -> date:
+        """Parsea start_date de forma segura, retornando date.today() si es None"""
+        start_date_str = exp.get('start_date')
+        
+        if start_date_str is None:
+            return date.today()  # Fallback si no hay fecha
+        
+        if isinstance(start_date_str, str):
+            try:
+                return datetime.fromisoformat(start_date_str.replace('Z', '+00:00')).date()
+            except:
+                try:
+                    return datetime.strptime(start_date_str.split('T')[0], '%Y-%m-%d').date()
+                except:
+                    return date.today()  # Fallback si el parsing falla
+        elif isinstance(start_date_str, date):
+            return start_date_str
+        else:
+            return date.today()  # Fallback para cualquier otro caso
+    
     # Ordenar por fecha de inicio (más reciente primero)
+    # Usar una fecha muy antigua como fallback para None, para que aparezcan al final
     sorted_experiences = sorted(
         candidate_experiences,
-        key=lambda x: (
-            datetime.fromisoformat(x['start_date'].replace('Z', '+00:00')) if isinstance(x['start_date'], str)
-            else x['start_date']
-        ).date() if isinstance(x['start_date'], str) or hasattr(x['start_date'], 'date')
-        else x['start_date'],
+        key=lambda x: parse_start_date(x),
         reverse=True
     )
     
@@ -177,23 +218,39 @@ def generate_candidate_resume(candidate_experiences: List[Dict[str, Any]]) -> st
         end_date_str = exp.get('end_date')
         
         # Convertir strings a date objects si es necesario
-        if isinstance(start_date_str, str):
+        # Asegurar que start_date nunca sea None
+        if start_date_str is None:
+            start_date = date.today()  # Fallback si no hay fecha
+        elif isinstance(start_date_str, str):
             try:
                 start_date = datetime.fromisoformat(start_date_str.replace('Z', '+00:00')).date()
             except:
-                start_date = datetime.strptime(start_date_str.split('T')[0], '%Y-%m-%d').date()
+                try:
+                    start_date = datetime.strptime(start_date_str.split('T')[0], '%Y-%m-%d').date()
+                except:
+                    start_date = date.today()  # Fallback si el parsing falla
+        elif isinstance(start_date_str, date):
+            start_date = start_date_str
         else:
-            start_date = start_date_str if isinstance(start_date_str, date) else date.today()
+            start_date = date.today()  # Fallback para cualquier otro caso
         
+        # Parsear end_date (puede ser None)
         end_date = None
         if end_date_str:
             if isinstance(end_date_str, str):
                 try:
                     end_date = datetime.fromisoformat(end_date_str.replace('Z', '+00:00')).date()
                 except:
-                    end_date = datetime.strptime(end_date_str.split('T')[0], '%Y-%m-%d').date()
-            else:
-                end_date = end_date_str if isinstance(end_date_str, date) else None
+                    try:
+                        end_date = datetime.strptime(end_date_str.split('T')[0], '%Y-%m-%d').date()
+                    except:
+                        end_date = None  # Si falla el parsing, dejar como None
+            elif isinstance(end_date_str, date):
+                end_date = end_date_str
+        
+        # Validar que start_date no sea None antes de calcular duración
+        if start_date is None:
+            start_date = date.today()  # Último fallback
         
         # Calcular duración
         years, months = calculate_duration_months(start_date, end_date)
@@ -260,7 +317,9 @@ def parse_job_requirements(requirements_json_data: Any) -> Dict[str, Any]:
     return {
         "non_negotiables_text": requirements.get("non_negotiables_text", ""),
         "desired_trajectory_text": requirements.get("desired_trajectory_text", ""),
-        "needs_technical_background": requirements.get("needs_technical_background", False)
+        "needs_technical_background": requirements.get("needs_technical_background", False),
+        "seniority": requirements.get("seniority", ""),
+        "industries": requirements.get("industries", [])
     }
 
 
@@ -268,38 +327,134 @@ def parse_job_requirements(requirements_json_data: Any) -> Dict[str, Any]:
 # SYSTEM PROMPT
 # ============================================================================
 
-SYSTEM_PROMPT = """Eres un Senior Technical Recruiter experto en evaluar talento. Tu misión es analizar el encaje (match) entre un Candidato y una Vacante basándote estrictamente en la evidencia provista.
+SYSTEM_PROMPT = """You are an expert matching engine for job–candidate fit.
 
-Evalúa estas 4 dimensiones (0-100 pts, puedes usar decimales para mayor precisión):
+Your task: read a job object and a candidate object (with candidate_experience) and compute a match_score (0–100) plus a detailed JSON breakdown following the exact rules below.
 
-1. TRAYECTORIA (Peso crítico): ¿El candidato viene de la industria correcta (ej: Supply Chain, Fintech)? ¿Viene de empresas relevantes (Startups, Big 3, Tech Giants)? Evalúa la relevancia de su trayectoria profesional.
+==========================
+MATCHING RULES (STRICT)
+==========================
 
-2. ROLE FIT (CRÍTICO - Verifica el rol actual): 
-   - PRIMERO: Verifica el rol actual del candidato (current_job_title) y compáralo con el rol requerido en la vacante.
-   - Si el rol actual NO hace match con el rol requerido (ej: Product Manager vs Engineer, Data Scientist vs Frontend Developer), DEBES penalizar fuertemente esta dimensión (score 0-30).
-   - Si el rol actual hace match parcial (ej: Product Manager vs Senior Product Manager), evalúa la diferencia de seniority.
-   - Si el rol actual hace match exacto o muy cercano, puntúa alto (70-100).
-   - ¿Ha tenido el título exacto antes en su experiencia? ¿Tiene la antigüedad (seniority) requerida?
-   - EJEMPLOS DE NO MATCH que deben puntuar bajo:
-     * Product Manager → Engineer/Developer: 0-20
-     * Data Scientist → Frontend Developer: 0-25
-     * Marketing Manager → Software Engineer: 0-20
-     * Sales Manager → Product Manager: 0-30
+DIMENSIONS & WEIGHTS:
+1. Seniority Match – 40%
+2. Role Fit – 20%
+3. Industria – 30%
+4. Estabilidad – 10%
 
-3. HARD SKILLS: Verifica los "Non Negotiables" del Job. Si piden skills técnicos (SQL, Python) y no están explícitos en la experiencia del candidato, puntúa bajo. Evalúa la presencia de las habilidades críticas requeridas.
+-----------------------------------
+1. SENIORITY MATCH (40%) — CRITICAL
+-----------------------------------
 
-4. ESTABILIDAD: Penaliza saltos de trabajo < 1 año sin justificación. Premia estancias > 2 años. Evalúa la estabilidad laboral del candidato.
+Use the Career Matrix for PM and Software Engineering.
 
-IMPORTANTE: 
-- Sé preciso y variado en tus evaluaciones. No uses siempre el mismo score.
-- VERIFICA SIEMPRE el rol actual del candidato vs el rol requerido. Si no hay match de rol, el score total debe ser bajo (0-40).
-- Un candidato con evidencia sólida Y match de rol debe tener 70-85.
-- Un candidato perfecto (match de rol + skills + trayectoria) debe tener 90-100.
-- Un candidato con gaps significativos pero match de rol debe tener 40-69.
-- Un candidato SIN match de rol debe tener 0-39, independientemente de otras dimensiones.
-- Usa decimales para mayor precisión (ej: 72.5, 68.3, 85.7).
+CAREER MATRIX:
 
-En 'reasoning', sé breve y directo sobre la evidencia encontrada o faltante, especialmente menciona si hay o no match de rol."""
+PRODUCT MANAGEMENT:
+- PM1: Associate / Junior PM — 0–1 años
+- PM2: Product Manager — 1–3 años
+- PM3: Senior PM — 3–6 años
+- PM4: Lead/Staff PM — 6–8 años
+- PM5: Principal PM — 8–10+ años
+- PM6: Director/Head of Product — 10+ años
+
+SOFTWARE ENGINEERING:
+- SE1: Junior Engineer — 0–1 años
+- SE2: Mid-Level Engineer — 1–3 años
+- SE3: Senior Engineer — 3–6 años
+- SE4: Staff Engineer — 6–8 años
+- SE5: Principal Engineer — 8–10+ años
+- SE6: Director/Head of Engineering — 10+ años
+
+SCORING RULES (BASED ON LEVEL DISTANCE):
+- Perfect match (same level): Score = 100%
+- Calculate distance between job_level and candidate_level in the Career Matrix
+- Distance = |job_level_number - candidate_level_number|
+  - Example: PM3 (job) vs PM2 (candidate) = distance of 1
+  - Example: PM3 (job) vs PM5 (candidate) = distance of 2
+  - Example: PM3 (job) vs PM1 (candidate) = distance of 2
+
+SCORE CALCULATION:
+- Distance 0 (perfect match): 100%
+- Distance 1: 60-80% (closer to job level)
+- Distance 2: 30-50% (moderate distance)
+- Distance 3: 10-30% (far from job level)
+- Distance 4+: 0-10% (very far from job level)
+
+CRITICAL RULES:
+- If job and candidate belong to different tracks (PM vs SE): Score = 0
+- Score decreases proportionally as distance increases
+- Closer to job level = higher score, farther = lower score
+- Use decimals for precision (e.g., 75.5, 42.3, 18.7)
+
+You MUST determine the candidate's level from their current_job_title and experience history. Infer from:
+- Job titles (Junior, Mid, Senior, Lead, Principal, Director, Head)
+- Years of experience
+- Company type and progression
+
+-----------------------------------
+2. ROLE FIT (20%) — CRITICAL
+-----------------------------------
+
+Compare job.title vs candidate.current_job_title.
+
+Hard mismatches → score MUST be 0:
+- PM vs Engineer
+- Engineer vs Product
+- Marketing vs Engineering
+- Sales vs Product
+- Data Scientist vs Frontend
+
+Partial matches → 30–60
+Exact/near match → 80–100
+
+If the candidate had the exact role in past experience → +10 points bonus (but don't exceed range).
+
+-----------------------------------
+3. INDUSTRIA (30%)
+-----------------------------------
+
+Score based on:
+- Industry alignment (fintech, mobility, logistics, supply chain)
+- Company relevance (Big Tech, YC companies, unicorns, startups tier A)
+
+Strong industry alignment → high score (70-100)
+Partial alignment → medium score (40-69)
+No alignment → low score (0-39)
+
+Focus on:
+- Direct industry match between job_industries and candidate_industries
+- Company type and relevance (Big Tech, unicorns, tier A startups)
+- Industry experience depth and recency
+
+-----------------------------------
+4. STABILITY (10%)
+-----------------------------------
+
+Analyze employment history:
+- Roles < 1 year without justification → penalize
+- Roles > 2 years → reward
+- Many jumps → low score
+- Consistent tenure → high score
+
+-----------------------------------
+OUTPUT FORMAT
+-----------------------------------
+
+Return structured data with:
+- seniority_match: {job_level, candidate_level, score, reason}
+- role_fit: {job_role, candidate_role, score, reason}
+- industry: {job_industries, candidate_industries, score, reason}
+- stability: {score, reason}
+
+-----------------------------------
+IMPORTANT
+-----------------------------------
+
+- NEVER inflate scores.
+- CRITICAL mismatches must drop dimensions to 0.
+- Be extremely strict with seniority and role fit.
+- Use decimals for precision (e.g., 72.5, 68.3, 85.7).
+- Be precise and varied in your evaluations."""
 
 
 # ============================================================================
@@ -334,9 +489,21 @@ def calculate_and_save_match(job_id: str, candidate_id: str) -> Dict[str, Any]:
     # Parsear requirements_json
     requirements = parse_job_requirements(job.get('requirements_json', ''))
     
+    # Obtener seniority level del job (puede estar en job_level o requirements_json.seniority)
+    job_seniority = job.get('job_level') or requirements.get('seniority', '')
+    
+    # Obtener industrias del job (puede estar en requirements_json.industries)
+    job_industries = requirements.get('industries', [])
+    if isinstance(job_industries, str):
+        job_industries = [job_industries] if job_industries else []
+    elif not isinstance(job_industries, list):
+        job_industries = []
+    
     # Construir contexto del job
     job_context = f"""
 TÍTULO DE LA VACANTE: {job.get('job_title', 'Sin título')}
+NIVEL REQUERIDO (Career Matrix): {job_seniority if job_seniority else 'No especificado - inferir del título y descripción'}
+INDUSTRIAS: {', '.join(job_industries) if job_industries else 'No especificadas'}
 
 DESCRIPCIÓN:
 {job.get('description', 'Sin descripción')}
@@ -370,10 +537,14 @@ REQUIERE BACKGROUND TÉCNICO: {'Sí' if requirements.get('needs_technical_backgr
     # Generar resume del candidato
     candidate_resume = generate_candidate_resume(experiences)
     
+    # Obtener seniority del candidato
+    candidate_seniority = candidate.get('seniority', '')
+    
     # Construir contexto del candidato
     candidate_context = f"""
 NOMBRE: {candidate.get('full_name', 'Sin nombre')}
 TÍTULO ACTUAL: {candidate.get('current_job_title', 'Sin título')}
+NIVEL (Career Matrix): {candidate_seniority if candidate_seniority else 'No especificado - inferir del título actual y experiencia'}
 INDUSTRIA: {candidate.get('industry', 'No especificada')}
 
 EXPERIENCIA LABORAL (Cronológica):
@@ -392,15 +563,22 @@ EXPERIENCIA LABORAL (Cronológica):
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {
                     "role": "user",
-                    "content": f"""Analiza el match entre esta vacante y este candidato:
+                    "content": f"""Analyze the match between this job and this candidate:
 
-=== VACANTE ===
+=== JOB ===
 {job_context}
 
-=== CANDIDATO ===
+=== CANDIDATE ===
 {candidate_context}
 
-Evalúa las 4 dimensiones y proporciona un análisis estructurado."""
+Evaluate all dimensions following the Career Matrix rules:
+1. Determine the seniority level for both job and candidate (PM1-PM6 or SE1-SE6)
+   - Calculate distance between levels and assign score based on proximity (perfect match = 100%, farther = lower)
+2. Compare role fit (job title vs candidate current title)
+3. Evaluate industry alignment (job industries vs candidate industries, company relevance)
+4. Analyze stability (employment history)
+
+Provide a structured analysis with scores and detailed reasoning."""
                 }
             ],
             response_format=MatchAnalysis,
@@ -419,18 +597,19 @@ Evalúa las 4 dimensiones y proporciona un análisis estructurado."""
     # ========================================================================
     print("📊 [AI MATCHING] Calculando score final ponderado...")
     
-    # Pesos según especificación
+    # Pesos según nueva especificación
     weights = {
-        "trajectory": 0.40,
-        "role_fit": 0.30,
-        "hard_skills": 0.20,
+        "seniority_match": 0.40,
+        "role_fit": 0.20,
+        "industry": 0.30,
         "stability": 0.10
     }
     
+    # Calcular score final ponderado
     final_score = (
-        match_analysis.trajectory.score * weights["trajectory"] +
+        match_analysis.seniority_match.score * weights["seniority_match"] +
         match_analysis.role_fit.score * weights["role_fit"] +
-        match_analysis.hard_skills.score * weights["hard_skills"] +
+        match_analysis.industry.score * weights["industry"] +
         match_analysis.stability.score * weights["stability"]
     )
     
@@ -438,32 +617,38 @@ Evalúa las 4 dimensiones y proporciona un análisis estructurado."""
     final_score = round(final_score, 2)
     
     print(f"   ✅ Score final calculado: {final_score}")
-    print(f"      - Trayectoria: {match_analysis.trajectory.score} (40%)")
-    print(f"      - Role Fit: {match_analysis.role_fit.score} (30%)")
-    print(f"      - Hard Skills: {match_analysis.hard_skills.score} (20%)")
+    print(f"      - Seniority Match: {match_analysis.seniority_match.score} (40%)")
+    print(f"      - Role Fit: {match_analysis.role_fit.score} (20%)")
+    print(f"      - Industria: {match_analysis.industry.score} (30%)")
     print(f"      - Estabilidad: {match_analysis.stability.score} (10%)")
     
     # ========================================================================
     # Paso 5: Preparar match_detail (JSON completo)
     # ========================================================================
     match_detail = {
-        "trajectory": {
-            "score": match_analysis.trajectory.score,
-            "reasoning": match_analysis.trajectory.reasoning
+        "seniority_match": {
+            "job_level": match_analysis.seniority_match.job_level,
+            "candidate_level": match_analysis.seniority_match.candidate_level,
+            "score": match_analysis.seniority_match.score,
+            "reason": match_analysis.seniority_match.reason
         },
         "role_fit": {
+            "job_role": match_analysis.role_fit.job_role,
+            "candidate_role": match_analysis.role_fit.candidate_role,
             "score": match_analysis.role_fit.score,
-            "reasoning": match_analysis.role_fit.reasoning
+            "reason": match_analysis.role_fit.reason
         },
-        "hard_skills": {
-            "score": match_analysis.hard_skills.score,
-            "reasoning": match_analysis.hard_skills.reasoning
+        "industry": {
+            "job_industries": match_analysis.industry.job_industries,
+            "candidate_industries": match_analysis.industry.candidate_industries,
+            "score": match_analysis.industry.score,
+            "reason": match_analysis.industry.reason
         },
         "stability": {
             "score": match_analysis.stability.score,
-            "reasoning": match_analysis.stability.reasoning
+            "reason": match_analysis.stability.reason
         },
-        "key_gap": match_analysis.key_gap,
+        "final_score": final_score,
         "weights": weights,
         "calculated_at": datetime.now().isoformat()
     }
@@ -507,7 +692,8 @@ Evalúa las 4 dimensiones y proporciona un análisis estructurado."""
     
     print(f"\n✅ [AI MATCHING] Matching completado exitosamente!")
     print(f"   Score final: {final_score}")
-    print(f"   Key Gap: {match_analysis.key_gap}")
+    print(f"   Seniority: {match_analysis.seniority_match.job_level} vs {match_analysis.seniority_match.candidate_level}")
+    print(f"   Role Fit: {match_analysis.role_fit.job_role} vs {match_analysis.role_fit.candidate_role}")
     
     return {
         "status": "success",

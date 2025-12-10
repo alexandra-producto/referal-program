@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Building, LogOut, List, Grid, Plus, Users, Zap, MoreVertical, Eye } from "lucide-react";
+import { Building, LogOut, List, Grid, Plus, Zap, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ProductLatamLogo } from "@/components/ProductLatamLogo";
@@ -27,6 +27,7 @@ interface Job {
   owner_role_title: string | null;
   created_at: string;
   recommendations_count: number;
+  potential_candidates_count: number;
   ownerCandidate: OwnerCandidate | null;
 }
 
@@ -101,6 +102,11 @@ export default function AdminSolicitudesPage() {
   const handleViewRecommendations = (jobId: string) => {
     setNavigating(`recommendations-${jobId}`);
     router.push(`/admin/solicitudes/${jobId}/recomendaciones`);
+  };
+
+  const handleViewPotentialCandidates = (jobId: string) => {
+    setNavigating(`candidates-${jobId}`);
+    router.push(`/admin/solicitudes/${jobId}/candidatos-potenciales`);
   };
 
   const handleNavigateToCreate = () => {
@@ -238,10 +244,6 @@ export default function AdminSolicitudesPage() {
                   </>
                 )}
               </Button>
-              <Button className="bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white rounded-xl flex items-center gap-2 shadow-lg transition-all duration-200">
-                <Users className="h-4 w-4" />
-                Recomendar
-              </Button>
               <Button
                 onClick={handleNavigateToControlTower}
                 disabled={navigating === "control-tower"}
@@ -287,6 +289,8 @@ export default function AdminSolicitudesPage() {
                     <th className="px-6 py-4 text-left text-gray-800 font-semibold">Quien Solicita</th>
                     <th className="px-6 py-4 text-left text-gray-800 font-semibold">Puesto</th>
                     <th className="px-6 py-4 text-left text-gray-800 font-semibold">Empresa</th>
+                    <th className="px-6 py-4 text-left text-gray-800 font-semibold">Estado</th>
+                    <th className="px-6 py-4 text-left text-gray-800 font-semibold">Matches</th>
                     <th className="px-6 py-4 text-left text-gray-800 font-semibold">Recomendaciones</th>
                   </tr>
                 </thead>
@@ -320,6 +324,33 @@ export default function AdminSolicitudesPage() {
                           <Building className="h-4 w-4" />
                           <span>{job.company_name}</span>
                         </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className={`flex items-center gap-2 px-3 py-2 rounded-xl border ${getStatusColor(job.status)}`}>
+                          <div className={`h-2 w-2 rounded-full ${getStatusDot(job.status)}`} />
+                          <span className="text-sm font-medium">{getStatusText(job.status)}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <Button
+                          onClick={() => handleViewPotentialCandidates(job.id)}
+                          disabled={job.potential_candidates_count === 0 || navigating === `candidates-${job.id}`}
+                          variant="outline"
+                          className={`rounded-xl transition-all duration-200 ${
+                            job.potential_candidates_count === 0
+                              ? "bg-gray-300 text-gray-500 border-gray-300 cursor-not-allowed"
+                              : "bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white border-blue-500"
+                          }`}
+                        >
+                          {navigating === `candidates-${job.id}` ? (
+                            <>
+                              <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-2"></div>
+                              Cargando...
+                            </>
+                          ) : (
+                            `Ver ${job.potential_candidates_count}`
+                          )}
+                        </Button>
                       </td>
                       <td className="px-6 py-4">
                         <Button
@@ -361,9 +392,6 @@ export default function AdminSolicitudesPage() {
                 <Card className="backdrop-blur-[130px] bg-white/40 border border-white/50 rounded-3xl shadow-xl p-6 h-full flex flex-col">
                   <div className="flex items-start justify-between mb-4">
                     <h3 className="text-gray-800 font-semibold text-xl flex-1">{job.job_title}</h3>
-                    <button className="text-gray-400 hover:text-gray-600">
-                      <MoreVertical className="h-5 w-5" />
-                    </button>
                   </div>
 
                   <p className="text-gray-600 text-sm mb-4 flex-1">
@@ -385,6 +413,24 @@ export default function AdminSolicitudesPage() {
                     </div>
                   </div>
 
+                  <Button
+                    onClick={() => handleViewPotentialCandidates(job.id)}
+                    disabled={job.potential_candidates_count === 0 || navigating === `candidates-${job.id}`}
+                    className={`w-full rounded-xl mb-3 transition-all duration-200 ${
+                      job.potential_candidates_count === 0
+                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                        : "bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white"
+                    }`}
+                  >
+                    {navigating === `candidates-${job.id}` ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        Cargando...
+                      </>
+                    ) : (
+                      `Ver ${job.potential_candidates_count} Candidatos Potenciales`
+                    )}
+                  </Button>
                   <Button
                     onClick={() => handleViewRecommendations(job.id)}
                     disabled={job.recommendations_count === 0 || navigating === `recommendations-${job.id}`}

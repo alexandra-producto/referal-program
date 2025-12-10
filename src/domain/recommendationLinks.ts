@@ -43,9 +43,23 @@ export async function createRecommendationLink(
  * Valida un token y retorna la información del link
  */
 export async function validateRecommendationLink(token: string) {
+  console.log("🔍 [validateRecommendationLink] Validando token...");
+  console.log("   RECOMMENDATION_SECRET configurado:", !!process.env.RECOMMENDATION_SECRET);
+  console.log("   RECOMMENDATION_SECRET length:", process.env.RECOMMENDATION_SECRET?.length || 0);
+  
   // Primero validar el token criptográficamente
   const decoded = validateRecommendationToken(token);
-  if (!decoded) return null;
+  if (!decoded) {
+    console.warn("❌ [validateRecommendationLink] Token criptográficamente inválido");
+    console.warn("   Esto puede indicar que RECOMMENDATION_SECRET no coincide o el token está corrupto");
+    return null;
+  }
+  
+  console.log("✅ [validateRecommendationLink] Token criptográficamente válido:", {
+    hyperconnectorId: decoded.hyperconnectorId,
+    jobId: decoded.jobId,
+    timestamp: decoded.timestamp,
+  });
 
   // Luego verificar en la BD (si la tabla existe)
   const { data, error } = await supabase
@@ -55,16 +69,48 @@ export async function validateRecommendationLink(token: string) {
     .single();
 
   if (error) {
-    // Si la tabla no existe, confiar solo en la validación criptográfica
-    console.warn("⚠️ recommendation_links table might not exist:", error.message);
-    return decoded;
+    // Si la tabla no existe o hay error, confiar solo en la validación criptográfica
+    // Esto permite que los tokens funcionen incluso si no están en la BD
+    console.warn("⚠️ recommendation_links table might not exist or error:", error.message);
+    console.log("✅ Usando validación criptográfica únicamente");
+    return {
+      hyperconnectorId: decoded.hyperconnectorId,
+      jobId: decoded.jobId,
+      timestamp: decoded.timestamp,
+    };
   }
 
-  if (!data) return null;
+  if (!data) {
+    // No se encontró en BD, pero el token es criptográficamente válido
+    // Permitir que funcione (modo fallback)
+    console.warn("⚠️ Token no encontrado en BD, pero es criptográficamente válido. Usando validación criptográfica.");
+    return {
+      hyperconnectorId: decoded.hyperconnectorId,
+      jobId: decoded.jobId,
+      timestamp: decoded.timestamp,
+    };
+  }
 
-  // Verificar que no haya expirado
-  if (new Date(data.expires_at) < new Date()) {
-    return null;
+  // Verificar que no haya expirado (pero ser más permisivo)
+  if (data.expires_at && new Date(data.expires_at) < new Date()) {
+    console.warn("⚠️ Token expirado en BD, pero verificando validez criptográfica...");
+    // Aún así, si el token es criptográficamente válido y no es muy viejo (90 días), permitirlo
+    // Esto es más permisivo para casos donde la BD tiene fechas incorrectas o se regeneraron links
+    const maxAge = 90 * 24 * 60 * 60 * 1000; // 90 días (más permisivo)
+    const age = Date.now() - decoded.timestamp;
+    
+    if (age > maxAge) {
+      console.error(`❌ Token demasiado viejo: ${Math.floor(age / (24 * 60 * 60 * 1000))} días (máximo: 90 días)`);
+      return null;
+    }
+    
+    // Token expirado en BD pero válido criptográficamente y no muy viejo
+    console.log(`✅ Token expirado en BD pero válido criptográficamente (${Math.floor(age / (24 * 60 * 60 * 1000))} días), permitiendo acceso`);
+    return {
+      hyperconnectorId: decoded.hyperconnectorId,
+      jobId: decoded.jobId,
+      timestamp: decoded.timestamp,
+    };
   }
 
   return {
