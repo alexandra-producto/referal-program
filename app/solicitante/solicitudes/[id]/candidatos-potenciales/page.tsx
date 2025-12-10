@@ -46,7 +46,7 @@ export default function PotentialCandidatesPage({
   useEffect(() => {
     async function fetchData() {
       try {
-        const response = await fetch(`/api/jobs/${jobId}/potential-candidates`);
+        const response = await fetch(`/api/jobs/potential-candidates?job_id=${jobId}`);
         if (!response.ok) {
           const errorData = await response.json();
           setError(errorData.error || "Error al cargar los datos");
