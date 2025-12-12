@@ -21,6 +21,7 @@
     "list:lucia-candidates": "tsx src/listLuciaCandidates.ts",
     "resend:whatsapp": "tsx src/resendWhatsappOnly.ts",
     "test:email-notification": "tsx src/testEmailNotification.ts",
+    "test:email-to-address": "tsx src/testEmailToSpecificAddress.ts",
     "test:flodesk-custom-fields": "tsx src/testFlodeskCustomFields.ts",
     "check:flodesk-subscriber": "tsx src/checkFlodeskSubscriber.ts",
     "test:sync-relationships": "tsx src/testSyncRelationships.ts",

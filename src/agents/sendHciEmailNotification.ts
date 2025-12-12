@@ -1,6 +1,6 @@
 import { buildHciEmailMessage } from "../utils/buildHciEmailMessage";
 import { sendEmail } from "../utils/emailClient";
-import { generateRecommendationUrl } from "../utils/recommendationTokens";
+import { createShortRecommendationLink } from "../utils/shortLinks";
 import { getAppUrl } from "../utils/appUrl";
 
 type HciInfo = {
@@ -54,8 +54,9 @@ export async function sendHciEmailNotification(
     throw new Error("Email del hyperconnector es requerido");
   }
 
-  // Generar link autorizado único para este HCI y job
-  const recommendUrl = generateRecommendationUrl(hci.id, job.id, baseUrl);
+  // Generar short link para el email (mejor entregabilidad y UX)
+  // El short link apunta a la URL larga con token
+  const recommendUrl = await createShortRecommendationLink(hci.id, job.id, baseUrl);
   
   // Obtener baseUrl para la imagen del header
   const appUrl = baseUrl || getAppUrl();

@@ -94,23 +94,13 @@ export function buildHciEmailMessage(
     ? "Vimos que conoces a personas que podrían encajar perfecto con este reto:" 
     : "Vimos que conoces a alguien que podría encajar perfecto con este reto:";
 
-  // URL de la imagen del header (usar URL absoluta para compatibilidad con clientes de email)
-  // Prioridad: baseUrl > VERCEL_URL > APP_URL > dominio de producción
-  let headerImageUrl = "";
-  if (baseUrl) {
-    headerImageUrl = `${baseUrl}/images/email-header-banner.png`;
-  } else if (process.env.VERCEL_URL) {
-    headerImageUrl = `https://${process.env.VERCEL_URL}/images/email-header-banner.png`;
-  } else if (process.env.APP_URL) {
-    headerImageUrl = `${process.env.APP_URL}/images/email-header-banner.png`;
-  } else {
-    // Fallback: usar el dominio de producción si está configurado, sino localhost
-    headerImageUrl = process.env.NODE_ENV === 'production' 
-      ? "https://referal-programa.vercel.app/images/email-header-banner.png"
-      : "http://localhost:3000/images/email-header-banner.png";
-  }
+  // URL de la imagen del header desde Google Drive (link directo)
+  // Convertir link de Google Drive a formato directo para mejor compatibilidad
+  // Link original: https://drive.google.com/file/d/1xrDIDndIFDvYWEMM_dZ9seNchOtoByvi/view?usp=sharing
+  // Link directo: https://drive.google.com/uc?export=view&id=FILE_ID
+  const headerImageUrl = "https://drive.google.com/uc?export=view&id=1xrDIDndIFDvYWEMM_dZ9seNchOtoByvi";
 
-  // Construir el HTML con mejores prácticas para evitar spam
+  // Construir el HTML como email personal simple con header y botón
   const html = `
 <!DOCTYPE html>
 <html lang="es">
@@ -120,110 +110,73 @@ export function buildHciEmailMessage(
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta name="format-detection" content="telephone=no">
   <title>Recomendación de Talento</title>
-  <!--[if mso]>
-  <style type="text/css">
-    body, table, td {font-family: Arial, sans-serif !important;}
-  </style>
-  <![endif]-->
 </head>
-<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5;">
-  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f5f5f5;">
-    <tr>
-      <td align="center" style="padding: 20px 0;">
-        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="max-width: 600px; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-          
-          <!-- Header con imagen -->
-          <tr>
-            <td>
-              <img src="${headerImageUrl}" alt="Product Latam - Connecting Top-Tier Talent" style="width: 100%; height: auto; display: block; max-width: 600px; border: 0; outline: none; text-decoration: none;" width="600" />
-            </td>
-          </tr>
-          
-          <!-- Contenido principal -->
-          <tr>
-            <td style="padding: 40px 30px;">
-              
-              <!-- Saludo -->
-              <h1 style="margin: 0 0 20px 0; font-size: 24px; font-weight: 600; color: #1a1a1a; line-height: 1.4;">
-                Hola ${hciFirstName}
-              </h1>
-              
-              <!-- Intro -->
-              <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 1.6; color: #333333;">
-                ${ownerName} está buscando a una persona para su rol de: <strong>${job.role_title}</strong>
-              </p>
-              
-              <p style="margin: 0 0 30px 0; font-size: 16px; line-height: 1.6; color: #333333;">
-                Nada de checklists ni CVs eternos — aquí se trata de quién es la persona, cómo piensa y qué tan bien navega problemas reales.
-              </p>
-              
-              <!-- Skills no negociables -->
-              <div style="margin: 0 0 30px 0; padding: 20px; background-color: #f9f9f9; border-left: 4px solid #fc039f; border-radius: 4px;">
-                <p style="margin: 0 0 10px 0; font-size: 14px; font-weight: 600; color: #1a1a1a; text-transform: uppercase; letter-spacing: 0.5px;">
-                  Los únicos skills que no son negociables:
-                </p>
-                <p style="margin: 0; font-size: 16px; line-height: 1.6; color: #333333;">
-                  ${nonNegotiablesText || "No especificado"}
-                </p>
-              </div>
-              
-              <!-- Texto de conoces -->
-              <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 1.6; color: #333333;">
-                ${textoConoces}
-              </p>
-              
-              <!-- Lista de candidatos -->
-              <div style="margin: 0 0 30px 0;">
-                ${listaCandidatos.map(c => `
-                  <div style="margin: 0 0 12px 0; padding: 12px; background-color: #fafafa; border-radius: 6px;">
-                    <p style="margin: 0; font-size: 15px; line-height: 1.5; color: #333333;">
-                      <strong>${c.name}</strong> – coincidieron en ${c.where}
-                    </p>
-                  </div>
-                `).join('')}
-              </div>
-              
-              <!-- CTA Button -->
-              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
-                <tr>
-                  <td align="center" style="padding: 20px 0;">
-                    <a href="${recommendUrl}" style="display: inline-block; padding: 16px 32px; background-color: #fc039f; color: #ffffff; text-decoration: none; border-radius: 8px; font-size: 16px; font-weight: 600; text-align: center; box-shadow: 0 2px 4px rgba(252, 3, 159, 0.3);">
-                      Recomienda Aquí
-                    </a>
-                  </td>
-                </tr>
-              </table>
-              
-              <!-- Footer -->
-              <p style="margin: 30px 0 0 0; font-size: 14px; line-height: 1.5; color: #666666; text-align: center;">
-                ¿Nos ayudas con una recomendación?
-              </p>
-              
-            </td>
-          </tr>
-          
-          <!-- Footer con logo -->
-          <tr>
-            <td style="padding: 20px 30px; background-color: #f9f9f9; text-align: center; border-top: 1px solid #e5e5e5;">
-              <p style="margin: 0; font-size: 12px; color: #999999;">
-                Product Latam - Connecting Top-Tier Talent
-              </p>
-            </td>
-          </tr>
-          
-        </table>
-      </td>
-    </tr>
-  </table>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #ffffff; color: #000000;">
+  <div style="max-width: 600px; margin: 0 auto; padding: 20px; font-size: 16px; line-height: 1.6;">
+    
+    <!-- Header con imagen -->
+    <div style="margin: 0 0 30px 0; text-align: center;">
+      <img src="${headerImageUrl}" alt="Product Latam - Connecting Top-Tier Talent" style="width: 100%; max-width: 600px; height: auto; display: block; border: 0; outline: none; text-decoration: none;" />
+    </div>
+    
+    <p style="margin: 0 0 20px 0;">
+      Hola ${hciFirstName},
+    </p>
+    
+    <p style="margin: 0 0 20px 0;">
+      Estamos construyendo una red de expertos en tech y queremos que tú seas parte de ella.
+    </p>
+    
+    <p style="margin: 0 0 20px 0;">
+      ${ownerName} de <strong>${job.company_name || "la comunidad"}</strong> está buscando a una persona para su rol de <strong>${job.role_title}</strong>.
+    </p>
+    
+    <p style="margin: 0 0 20px 0;">
+      Nada de checklists ni CVs eternos — aquí se trata de quién es la persona, cómo piensa y qué tan bien navega problemas reales.
+    </p>
+    
+    ${nonNegotiablesText ? `
+    <p style="margin: 0 0 20px 0;">
+      <strong>Skills no negociables:</strong><br>
+      ${nonNegotiablesText}
+    </p>
+    ` : ''}
+    
+    <p style="margin: 0 0 20px 0;">
+      ${textoConoces}
+    </p>
+    
+    <ul style="margin: 0 0 20px 0; padding-left: 20px;">
+      ${listaCandidatos.map(c => `
+        <li style="margin: 0 0 10px 0;">
+          <strong>${c.name}</strong> – coincidieron en ${c.where}
+        </li>
+      `).join('')}
+    </ul>
+    
+    <p style="margin: 0 0 20px 0;">
+      ¿Nos ayudas con una recomendación?
+    </p>
+    
+    <!-- Botón CTA -->
+    <div style="margin: 0 0 20px 0; text-align: center;">
+      <a href="${recommendUrl}" style="display: inline-block; padding: 16px 32px; background-color: #fc039f; color: #ffffff; text-decoration: none; border-radius: 8px; font-size: 16px; font-weight: 600; text-align: center; box-shadow: 0 2px 4px rgba(252, 3, 159, 0.3);">
+        Recomienda Aquí
+      </a>
+    </div>
+    
+    <p style="margin: 20px 0 0 0; font-size: 14px; color: #666666;">
+      Gracias,<br>
+      Equipo Product Latam
+    </p>
+    
+  </div>
 </body>
 </html>
   `.trim();
 
-  // Subject line mejorado: más personal y menos promocional para evitar spam
-  // Usar el nombre del owner para hacerlo más personal
-  const subject = owner?.full_name 
-    ? `${owner.full_name} te necesita: ${job.role_title}`
-    : `Recomendación de talento: ${job.role_title}`;
+  // Subject line: catchy y personal
+  const subject = "Tu criterio pesa. ¿A quién pondrías en esta mesa?";
 
   return { subject, html };
 }
