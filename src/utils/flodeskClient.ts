@@ -175,43 +175,108 @@ export async function createOrUpdateFlodeskSubscriber(
     }
 
     // ========================================================================
-    // PASO 2: Actualizar el suscriptor con segmento y campos personalizados
+    // PASO 2: Actualizar SOLO los campos personalizados (SIN añadir al segmento aún)
+    // IMPORTANTE: Los custom fields deben guardarse ANTES de añadir al segmento
+    // para que el workflow tenga los datos completos cuando se active
     // ========================================================================
     console.log("");
-    console.log("🔹 PASO 2: Actualizando suscriptor con segmento y campos personalizados...");
+    console.log("🔹 PASO 2: Actualizando campos personalizados (ANTES de añadir al segmento)...");
     
-    // Flodesk requiere "segment_ids" (no "segments") como array
-    // IMPORTANTE: Los custom_fields deben existir previamente en Flodesk
-    const updateBody: any = {
+    if (Object.keys(validatedCustomFields).length > 0) {
+      const customFieldsBody: any = {
+        email: email,
+        first_name: defaultFirstName,
+        custom_fields: validatedCustomFields,
+      };
+      
+      if (lastName) {
+        customFieldsBody.last_name = lastName;
+      }
+
+      console.log("   ⚠️  IMPORTANTE: Los custom_fields deben existir previamente en Flodesk");
+      console.log(`   ⚠️  Campos que se intentarán guardar: ${Object.keys(validatedCustomFields).join(", ")}`);
+      console.log(`   POST https://api.flodesk.com/v1/subscribers (actualizar custom fields)`);
+      console.log(`   Body: ${JSON.stringify(customFieldsBody, null, 2)}`);
+
+      const customFieldsResponse = await fetch("https://api.flodesk.com/v1/subscribers", {
+        method: "POST",
+        headers: {
+          "Authorization": `Basic ${auth}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(customFieldsBody),
+      });
+
+      if (!customFieldsResponse.ok) {
+        const errorText = await customFieldsResponse.text();
+        let errorData;
+        try {
+          errorData = JSON.parse(errorText);
+        } catch {
+          errorData = { message: errorText };
+        }
+
+        console.error("❌ Error al actualizar custom fields:", {
+          status: customFieldsResponse.status,
+          statusText: customFieldsResponse.statusText,
+          error: errorData,
+        });
+        // Continuamos de todas formas, pero advertimos
+        console.warn("   ⚠️  Continuando con la adición al segmento, pero los custom fields pueden no haberse guardado");
+      } else {
+        const customFieldsResult = await customFieldsResponse.json();
+        console.log("   ✅ Campos personalizados actualizados");
+        
+        // Verificar que los campos se guardaron
+        if (customFieldsResult.custom_fields) {
+          const savedKeys = Object.keys(customFieldsResult.custom_fields);
+          const sentKeys = Object.keys(validatedCustomFields);
+          const successfullySaved = sentKeys.filter(key => savedKeys.includes(key));
+          
+          if (successfullySaved.length === sentKeys.length) {
+            console.log(`   ✅ Todos los campos personalizados se guardaron correctamente: ${successfullySaved.join(", ")}`);
+          } else {
+            const missing = sentKeys.filter(key => !savedKeys.includes(key));
+            console.warn(`   ⚠️  Algunos campos no se guardaron: ${missing.join(", ")}`);
+            console.warn(`   ⚠️  Verifica que estos campos existan en Flodesk: Audience > Subscriber Data > Custom Fields`);
+          }
+        }
+        
+        // Pausa para asegurar que Flodesk procese los cambios antes de activar el workflow
+        // IMPORTANTE: Los custom fields deben estar guardados antes de añadir al segmento
+        console.log("   ⏳ Esperando 2 segundos para que Flodesk procese los cambios...");
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+    } else {
+      console.log("   ℹ️  No hay campos personalizados para actualizar");
+    }
+
+    // ========================================================================
+    // PASO 3: Añadir el suscriptor al segmento (esto activa el workflow)
+    // ========================================================================
+    console.log("");
+    console.log("🔹 PASO 3: Añadiendo suscriptor al segmento (esto activará el workflow)...");
+    
+    const segmentBody: any = {
       email: email,
       first_name: defaultFirstName,
-      segment_ids: [segmentId], // Array de segment IDs - campo correcto según documentación
+      segment_ids: [segmentId], // Array de segment IDs
     };
     
     if (lastName) {
-      updateBody.last_name = lastName;
+      segmentBody.last_name = lastName;
     }
 
-    // Agregar campos personalizados si existen
-    // NOTA: Estos campos DEBEN existir previamente en Flodesk para que se guarden
-    if (Object.keys(validatedCustomFields).length > 0) {
-      updateBody.custom_fields = validatedCustomFields;
-      console.log("   ⚠️  IMPORTANTE: Los custom_fields deben existir previamente en Flodesk");
-      console.log(`   ⚠️  Campos que se intentarán guardar: ${Object.keys(validatedCustomFields).join(", ")}`);
-    }
+    console.log(`   POST https://api.flodesk.com/v1/subscribers (añadir al segmento)`);
+    console.log(`   Body: ${JSON.stringify(segmentBody, null, 2)}`);
 
-    console.log(`   POST https://api.flodesk.com/v1/subscribers (actualizar existente)`);
-    console.log(`   Body: ${JSON.stringify(updateBody, null, 2)}`);
-
-    // Flodesk permite usar POST para actualizar un suscriptor existente
-    // Si el suscriptor ya existe, POST lo actualiza en lugar de crear uno nuevo
     const updateResponse = await fetch("https://api.flodesk.com/v1/subscribers", {
       method: "POST",
       headers: {
         "Authorization": `Basic ${auth}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(updateBody),
+      body: JSON.stringify(segmentBody),
     });
 
     if (!updateResponse.ok) {
@@ -223,14 +288,14 @@ export async function createOrUpdateFlodeskSubscriber(
         errorData = { message: errorText };
       }
 
-      console.error("❌ Error en respuesta de Flodesk (actualizar suscriptor):", {
+      console.error("❌ Error al añadir suscriptor al segmento:", {
         status: updateResponse.status,
         statusText: updateResponse.statusText,
         error: errorData,
       });
 
       throw new Error(
-        `Flodesk API error al actualizar: ${updateResponse.status} - ${errorData.message || errorText}`
+        `Flodesk API error al añadir al segmento: ${updateResponse.status} - ${errorData.message || errorText}`
       );
     }
 
