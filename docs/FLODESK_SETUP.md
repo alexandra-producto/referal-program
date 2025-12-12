@@ -25,19 +25,59 @@
 
 1. Ve a **Automatizaciones** > **Workflows**
 2. Crea un nuevo workflow que se active cuando se agrega un suscriptor al segmento creado
-3. En el workflow, configura un email que use los campos personalizados:
-   - `first_name` - Primer nombre del hyperconnector
-   - `full_name` - Nombre completo
-   - `job_title` - Título del trabajo
-   - `company_name` - Nombre de la empresa
-   - `recommend_url` - URL del link de recomendación
-   - `candidates_list` - Lista de nombres de candidatos (separados por comas)
-   - `candidates_count` - Número de candidatos
+3. En el workflow, configura un email que use los campos personalizados
+
+### Campos Personalizados Disponibles
+
+Los siguientes campos personalizados se envían automáticamente:
+
+- `first_name` - Primer nombre del hyperconnector
+- `job_info` - Información del trabajo (formato: "Título del trabajo en Nombre de la empresa")
+- `candidates_info` - Información de candidatos (formato: "N persona(s): Nombre1, Nombre2, ...")
+- `recommend_url` - URL del link de recomendación
+- `full_name_solicitante` - Nombre completo del solicitante/hyperconnector
+
+### ⚠️ IMPORTANTE: Sintaxis para Insertar Variables en el Template
+
+En Flodesk, para insertar un campo personalizado en el template del email, debes usar la sintaxis:
+
+```
+{{custom_field.nombre_del_campo}}
+```
+
+**Ejemplos correctos:**
+- `{{custom_field.first_name}}` - Muestra el primer nombre
+- `{{custom_field.job_info}}` - Muestra la información del trabajo
+- `{{custom_field.candidates_info}}` - Muestra la información de candidatos
+- `{{custom_field.recommend_url}}` - Muestra la URL de recomendación
+- `{{custom_field.full_name_solicitante}}` - Muestra el nombre completo
+
+**❌ NO uses:**
+- `job_info` (sin la sintaxis de Flodesk)
+- `{{job_info}}` (sin el prefijo `custom_field.`)
+- `job_info / info job` (texto literal)
+
+### Ejemplo de Template Correcto
+
+```
+Hola {{custom_field.first_name}},
+
+{{custom_field.full_name_solicitante}} está buscando a una persona para su rol de: {{custom_field.job_info}}
+
+Nada de checklists ni CVs eternos — aquí se trata de quién es la persona, cómo piensa y qué tan bien navega problemas reales.
+
+Vimos que conoces a personas que podrían encajar perfecto con este reto: {{custom_field.candidates_info}}
+
+¿Nos ayudas con una recomendación?
+
+Entra aquí para recomendar: {{custom_field.recommend_url}}
+```
 
 **IMPORTANTE**: 
 - Flodesk limita los campos personalizados a 256 caracteres, por lo que NO enviamos el HTML completo
 - El workflow debe construir el email usando estos campos personalizados
-- El workflow debe diseñar el template del email en Flodesk usando estos campos
+- El workflow debe diseñar el template del email en Flodesk usando la sintaxis `{{custom_field.nombre_campo}}`
+- Los nombres de los campos deben coincidir EXACTAMENTE (case-sensitive)
 
 ## Paso 4: Configurar Variables de Entorno
 
