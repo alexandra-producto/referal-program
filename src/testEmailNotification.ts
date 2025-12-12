@@ -22,15 +22,10 @@ async function testEmailNotification(jobId: string, hyperconnectorId: string) {
     console.log("");
 
     // Verificar variables de entorno
-    if (!process.env.FLODESK_API_KEY) {
-      throw new Error("FLODESK_API_KEY no está configurada en .env.local");
+    if (!process.env.RESEND_API_KEY) {
+      throw new Error("RESEND_API_KEY no está configurada en .env.local");
     }
-    console.log("✅ FLODESK_API_KEY encontrada");
-
-    if (!process.env.FLODESK_SEGMENT_ID) {
-      throw new Error("FLODESK_SEGMENT_ID no está configurada en .env.local");
-    }
-    console.log("✅ FLODESK_SEGMENT_ID encontrada");
+    console.log("✅ RESEND_API_KEY encontrada");
     console.log("");
 
     // Usar la función simplificada que hace todo el trabajo
@@ -51,8 +46,8 @@ async function testEmailNotification(jobId: string, hyperconnectorId: string) {
       console.log("");
       console.log("✅ Verifica tu bandeja de entrada (y spam) para ver el email");
       console.log("");
-      console.log("💡 El workflow en Flodesk se activó automáticamente al agregar");
-      console.log("   el suscriptor al segmento configurado.");
+      console.log("💡 El email fue enviado directamente usando Resend desde");
+      console.log("   hola@product-latam.com");
       console.log("");
     } else {
       console.log("❌ ERROR AL ENVIAR EMAIL");

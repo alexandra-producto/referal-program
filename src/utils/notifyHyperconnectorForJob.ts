@@ -5,7 +5,7 @@
  * 1. Obtiene los datos del job y del hyperconnector desde la base de datos
  * 2. Construye el HTML del email usando buildHciEmailMessage()
  * 3. Genera la URL de recomendación
- * 4. Llama a sendFlodeskEmail() para enviar el email
+ * 4. Llama a sendHciEmailNotification() que usa Resend para enviar el email directamente
  * 
  * @param jobId - ID del job
  * @param hyperconnectorId - ID del hyperconnector
