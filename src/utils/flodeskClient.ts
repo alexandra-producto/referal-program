@@ -180,11 +180,12 @@ export async function createOrUpdateFlodeskSubscriber(
     console.log("");
     console.log("🔹 PASO 2: Actualizando suscriptor con segmento y campos personalizados...");
     
-    // Flodesk usa POST para actualizar también, y el campo es "segments" (no "segment_ids")
+    // Flodesk requiere "segment_ids" (no "segments") como array
+    // IMPORTANTE: Los custom_fields deben existir previamente en Flodesk
     const updateBody: any = {
       email: email,
       first_name: defaultFirstName,
-      segments: [segmentId], // Array de segment IDs (campo "segments" según documentación)
+      segment_ids: [segmentId], // Array de segment IDs - campo correcto según documentación
     };
     
     if (lastName) {
@@ -192,8 +193,11 @@ export async function createOrUpdateFlodeskSubscriber(
     }
 
     // Agregar campos personalizados si existen
+    // NOTA: Estos campos DEBEN existir previamente en Flodesk para que se guarden
     if (Object.keys(validatedCustomFields).length > 0) {
       updateBody.custom_fields = validatedCustomFields;
+      console.log("   ⚠️  IMPORTANTE: Los custom_fields deben existir previamente en Flodesk");
+      console.log(`   ⚠️  Campos que se intentarán guardar: ${Object.keys(validatedCustomFields).join(", ")}`);
     }
 
     console.log(`   POST https://api.flodesk.com/v1/subscribers (actualizar existente)`);
@@ -237,17 +241,105 @@ export async function createOrUpdateFlodeskSubscriber(
     console.log(`   Subscriber ID: ${subscriberId}`);
     console.log(`   Email: ${updateResult.email || email}`);
     
-    if (updateResult.segment_ids && updateResult.segment_ids.length > 0) {
-      console.log(`   Segment IDs: ${updateResult.segment_ids.join(", ")}`);
+    // Log completo de la respuesta para debugging
+    console.log("");
+    console.log("📋 Respuesta completa de Flodesk (para debugging):");
+    console.log(JSON.stringify(updateResult, null, 2));
+    console.log("");
+    
+    // Verificar segmentos en la respuesta
+    let segmentsFound = false;
+    let segmentIds: string[] = [];
+    
+    if (updateResult.segment_ids && Array.isArray(updateResult.segment_ids) && updateResult.segment_ids.length > 0) {
+      segmentIds = updateResult.segment_ids;
+      segmentsFound = true;
+    } else if (updateResult.segments) {
+      if (Array.isArray(updateResult.segments)) {
+        // segments puede ser un array de objetos {id, name} o un array de strings
+        if (updateResult.segments.length > 0) {
+          if (typeof updateResult.segments[0] === 'object' && updateResult.segments[0].id) {
+            // Array de objetos con id y name
+            segmentIds = updateResult.segments.map((s: any) => s.id || s);
+            const segmentNames = updateResult.segments.map((s: any) => s.name || 'N/A');
+            console.log(`   ✅ Segments añadidos: ${segmentNames.join(", ")} (IDs: ${segmentIds.join(", ")})`);
+            segmentsFound = true;
+          } else if (typeof updateResult.segments[0] === 'string') {
+            // Array de strings (IDs)
+            segmentIds = updateResult.segments;
+            console.log(`   ✅ Segment IDs en respuesta: ${segmentIds.join(", ")}`);
+            segmentsFound = true;
+          }
+        }
+      } else if (typeof updateResult.segments === 'object') {
+        // Puede ser un objeto con IDs como keys
+        const segmentKeys = Object.keys(updateResult.segments);
+        if (segmentKeys.length > 0) {
+          segmentIds = segmentKeys;
+          console.log(`   ✅ Segments (objeto) en respuesta: ${segmentKeys.join(", ")}`);
+          segmentsFound = true;
+        }
+      }
     }
     
+    // Verificar que el segmento esperado esté en la lista
+    if (segmentsFound) {
+      if (segmentIds.includes(segmentId)) {
+        console.log(`   ✅ El suscriptor está correctamente añadido al segmento ${segmentId}`);
+      } else {
+        console.log(`   ⚠️  ADVERTENCIA: El segmento ${segmentId} no aparece en la respuesta`);
+        console.log(`   ⚠️  Segmentos encontrados: ${segmentIds.join(", ")}`);
+      }
+    } else {
+      console.log(`   ⚠️  ADVERTENCIA: No se encontraron segment_ids en la respuesta`);
+      console.log(`   ⚠️  Verifica que el segment_id ${segmentId} exista en Flodesk`);
+    }
+    
+    // Verificar custom fields en la respuesta
     if (updateResult.custom_fields && Object.keys(updateResult.custom_fields).length > 0) {
-      console.log("   📋 Campos personalizados guardados:");
-      Object.entries(updateResult.custom_fields).forEach(([key, value]) => {
-        const valueStr = String(value);
-        const truncated = valueStr.length > 50 ? valueStr.substring(0, 47) + '...' : valueStr;
-        console.log(`      ✅ ${key}: ${truncated}`);
-      });
+      console.log("   📋 Campos personalizados guardados en Flodesk:");
+      const receivedKeys = Object.keys(updateResult.custom_fields);
+      const sentKeys = Object.keys(validatedCustomFields);
+      
+      // Mostrar campos que SÍ se guardaron (los que enviamos)
+      const successfullySaved = sentKeys.filter(key => receivedKeys.includes(key));
+      if (successfullySaved.length > 0) {
+        console.log("   ✅ Campos enviados y guardados correctamente:");
+        successfullySaved.forEach(key => {
+          const valueStr = String(updateResult.custom_fields[key]);
+          const truncated = valueStr.length > 50 ? valueStr.substring(0, 47) + '...' : valueStr;
+          console.log(`      ✅ ${key}: ${truncated}`);
+        });
+      }
+      
+      // Mostrar campos que NO se guardaron (no existen en Flodesk)
+      const missingKeys = sentKeys.filter(key => !receivedKeys.includes(key));
+      if (missingKeys.length > 0) {
+        console.log("   ⚠️  Campos enviados pero NO guardados (no existen en Flodesk):");
+        missingKeys.forEach(key => {
+          console.log(`      ❌ ${key}: ${validatedCustomFields[key]}`);
+        });
+        console.log("   💡 Crea estos campos en Flodesk: Audience > Subscriber Data > Custom Fields");
+        console.log(`   💡 Nombres exactos requeridos: ${missingKeys.join(", ")}`);
+      }
+      
+      // Mostrar campos adicionales que existen en Flodesk pero no enviamos
+      const extraKeys = receivedKeys.filter(key => !sentKeys.includes(key));
+      if (extraKeys.length > 0) {
+        console.log("   ℹ️  Campos adicionales en Flodesk (no enviados en esta solicitud):");
+        extraKeys.forEach(key => {
+          const valueStr = String(updateResult.custom_fields[key]);
+          const truncated = valueStr.length > 30 ? valueStr.substring(0, 27) + '...' : valueStr;
+          console.log(`      ℹ️  ${key}: ${truncated}`);
+        });
+      }
+    } else {
+      console.log("   ⚠️  ADVERTENCIA: No se recibieron custom_fields en la respuesta");
+      console.log("   ⚠️  Esto puede indicar que:");
+      console.log("      - Los campos no existen en Flodesk (Audience > Subscriber Data > Custom Fields)");
+      console.log("      - Los nombres de los campos no coinciden exactamente");
+      console.log(`   💡 Campos enviados: ${Object.keys(validatedCustomFields).join(", ")}`);
+      console.log("   💡 IMPORTANTE: Los nombres deben coincidir EXACTAMENTE (case-sensitive)");
     }
 
     console.log("");
