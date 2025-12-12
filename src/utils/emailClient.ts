@@ -52,6 +52,22 @@ export async function sendEmail(
       to: options.to,
       subject: options.subject,
       html: options.html,
+      // Headers adicionales para mejorar deliverability y evitar spam
+      headers: {
+        'X-Entity-Ref-ID': `job-notification-${Date.now()}`,
+        'List-Unsubscribe': '<mailto:unsubscribe@product-latam.com>',
+      },
+      // Marcar como transactional para mejor deliverability
+      tags: [
+        {
+          name: 'category',
+          value: 'transactional',
+        },
+        {
+          name: 'type',
+          value: 'job-recommendation',
+        },
+      ],
     });
 
     if (error) {

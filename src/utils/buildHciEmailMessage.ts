@@ -95,21 +95,36 @@ export function buildHciEmailMessage(
     : "Vimos que conoces a alguien que podría encajar perfecto con este reto:";
 
   // URL de la imagen del header (usar URL absoluta para compatibilidad con clientes de email)
-  // En producción, usar URL absoluta completa
-  const headerImageUrl = baseUrl 
-    ? `${baseUrl}/images/email-header-banner.png`
-    : process.env.APP_URL 
-      ? `${process.env.APP_URL}/images/email-header-banner.png`
-      : "https://your-domain.com/images/email-header-banner.png"; // Fallback, debe ser reemplazado en producción
+  // Prioridad: baseUrl > VERCEL_URL > APP_URL > dominio de producción
+  let headerImageUrl = "";
+  if (baseUrl) {
+    headerImageUrl = `${baseUrl}/images/email-header-banner.png`;
+  } else if (process.env.VERCEL_URL) {
+    headerImageUrl = `https://${process.env.VERCEL_URL}/images/email-header-banner.png`;
+  } else if (process.env.APP_URL) {
+    headerImageUrl = `${process.env.APP_URL}/images/email-header-banner.png`;
+  } else {
+    // Fallback: usar el dominio de producción si está configurado, sino localhost
+    headerImageUrl = process.env.NODE_ENV === 'production' 
+      ? "https://referal-programa.vercel.app/images/email-header-banner.png"
+      : "http://localhost:3000/images/email-header-banner.png";
+  }
 
-  // Construir el HTML
+  // Construir el HTML con mejores prácticas para evitar spam
   const html = `
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="format-detection" content="telephone=no">
   <title>Recomendación de Talento</title>
+  <!--[if mso]>
+  <style type="text/css">
+    body, table, td {font-family: Arial, sans-serif !important;}
+  </style>
+  <![endif]-->
 </head>
 <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5;">
   <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f5f5f5;">
@@ -120,7 +135,7 @@ export function buildHciEmailMessage(
           <!-- Header con imagen -->
           <tr>
             <td>
-              <img src="${headerImageUrl}" alt="Product Latam - Connecting Top-Tier Talent" style="width: 100%; height: auto; display: block; max-width: 600px;" />
+              <img src="${headerImageUrl}" alt="Product Latam - Connecting Top-Tier Talent" style="width: 100%; height: auto; display: block; max-width: 600px; border: 0; outline: none; text-decoration: none;" width="600" />
             </td>
           </tr>
           
@@ -204,7 +219,11 @@ export function buildHciEmailMessage(
 </html>
   `.trim();
 
-  const subject = `¿Nos ayudas con una recomendación? - ${job.role_title}`;
+  // Subject line mejorado: más personal y menos promocional para evitar spam
+  // Usar el nombre del owner para hacerlo más personal
+  const subject = owner?.full_name 
+    ? `${owner.full_name} te necesita: ${job.role_title}`
+    : `Recomendación de talento: ${job.role_title}`;
 
   return { subject, html };
 }
