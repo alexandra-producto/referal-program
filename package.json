@@ -21,6 +21,8 @@
     "list:lucia-candidates": "tsx src/listLuciaCandidates.ts",
     "resend:whatsapp": "tsx src/resendWhatsappOnly.ts",
     "test:email-notification": "tsx src/testEmailNotification.ts",
+    "test:flodesk-custom-fields": "tsx src/testFlodeskCustomFields.ts",
+    "check:flodesk-subscriber": "tsx src/checkFlodeskSubscriber.ts",
     "test:sync-relationships": "tsx src/testSyncRelationships.ts",
     "test:create-job": "tsx src/testCreateJobAndNotify.ts",
     "test:create-job-preview": "tsx src/testCreateJobPreview.ts",
@@ -54,6 +56,7 @@
     "next": "^16.0.3",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "resend": "^6.6.0",
     "tailwind-merge": "^3.4.0",
     "twilio": "^5.10.5"
   },
