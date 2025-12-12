@@ -69,15 +69,31 @@ FLODESK_FROM_NAME=Product Latam
 
 2. O configura una URL absoluta en producción para que la imagen se cargue correctamente en los clientes de email
 
-## Cómo Funciona
+## Cómo Funciona (Flujo de Dos Pasos)
 
+La integración sigue un flujo de dos pasos para asegurar que los datos se guarden correctamente:
+
+### Paso 1: Crear el Suscriptor
+1. Se llama a `POST /v1/subscribers` con datos mínimos:
+   - `email`: Email del hyperconnector
+   - `first_name`: Primer nombre (extraído del email si no se proporciona)
+
+### Paso 2: Actualizar el Suscriptor
+2. Inmediatamente después, se llama nuevamente a `POST /v1/subscribers` (Flodesk actualiza si el suscriptor ya existe):
+   - `email`: Mismo email del paso 1
+   - `segments`: Array con el `segment_id` configurado
+   - `custom_fields`: Objeto con las variables dinámicas (máx 256 caracteres cada campo)
+
+### Flujo Completo
 1. Cuando se ejecuta `notifyHyperconnectorForJob()`, se obtiene el email del hyperconnector
 2. Se obtienen los datos del job, hyperconnector y candidatos
-3. Se llama a `sendFlodeskEmail()` que:
-   - Agrega el suscriptor al segmento configurado
-   - Pasa los datos como campos personalizados (NO el HTML completo, ya que Flodesk limita a 256 caracteres)
-4. El workflow en Flodesk se activa automáticamente
+3. Se llama a `sendFlodeskEmail()` que internamente usa `createOrUpdateFlodeskSubscriber()`:
+   - **Paso 1**: Crea el suscriptor con datos mínimos
+   - **Paso 2**: Actualiza el suscriptor con `segments` y `custom_fields`
+4. El workflow en Flodesk se activa automáticamente cuando el suscriptor se agrega al segmento
 5. El workflow construye y envía el email usando los campos personalizados y el template configurado en Flodesk
+
+**Nota**: El flujo es idempotente - si el suscriptor ya existe, se obtiene su ID y se actualiza sin crear duplicados.
 
 ## Testing
 
