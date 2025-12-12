@@ -1,5 +1,5 @@
 import { buildHciEmailMessage } from "../utils/buildHciEmailMessage";
-import { sendFlodeskEmail } from "../utils/flodeskClient";
+import { sendEmail } from "../utils/emailClient";
 import { generateRecommendationUrl } from "../utils/recommendationTokens";
 import { getAppUrl } from "../utils/appUrl";
 
